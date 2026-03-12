@@ -89,10 +89,10 @@ const PNavbar = ({
           }}
         >
           <PTypography
-            labelText={ title !== "Dashboard" ? `${title} - ${Labels.dashboard.agencyPortal}` : Labels.dashboard.agencyPortal }
-            font={FontWeight.bold}
+            labelText= { title == "" ? "" : title !== "Dashboard" ? `${title} - ${Labels.dashboard.agencyPortal}` : Labels.dashboard.agencyPortal }
             flag={Labels.fontFlags.subHeader}
-            color={CommonColors.red}
+            color={CommonColors.red.main}
+            weight={FontWeight.bold}
             style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
           />
         </Box>

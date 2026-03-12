@@ -96,7 +96,6 @@ function PageLayout() {
         />
 
         <div className="main-content">
-
           <div className="page-content">
             <Outlet />
           </div>
@@ -112,12 +111,8 @@ function PageLayout() {
               labelText={`© ${new Date().getFullYear()} ${Labels.footer.footer}`}
               flag={Labels.fontFlags.smallText}
               font={FontWeight.bold}
-              color={CommonColors.primary}
-            />
-
-          
+            />   
           </div>
-
         </div>
 
       </div>

@@ -4,5 +4,6 @@ export const labelRoutes = {
   dashboard: "/dashboard",
   eqDashboard: "/eqDashboard",
   //PageNotFound: "*"
-  PageNotFound: "/pageNotFound"
+  PageNotFound: "/pageNotFound",
+  clientInfo: "/clientInfo"
 };

@@ -27,6 +27,8 @@ import PTextField from "../../component/PTextField/PTextField";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleIcon from '@mui/icons-material/TaskAlt';
+import { FontFamily, FontWeight } from '../../utils/constants/fonts'
+
 
 const EqDashboard = () => {
   const [date, setDate] = useState("");
@@ -39,28 +41,28 @@ const EqDashboard = () => {
       title: "Active RFQs",
       value: 105,
       subtitle: "Jobs Pending Suppliers",
-      iconColor: Labels.primaryBlue,
+      iconColor: Labels.primary,
       icon: <AssignmentIcon />,
     },
     {
       title: "For Approval",
       value: 2,
       subtitle: "Jobs Pending Client Approval",
-      iconColor: Labels.primaryBlue,
+      iconColor: Labels.primary,
       icon: <PendingActionsIcon />,
     },
     {
       title: "Awarded",
       value: 18,
       subtitle: "Jobs Ready for Production",
-      iconColor: Labels.primaryBlue,
+      iconColor: Labels.primary,
       icon: <EmojiEventsIcon />,
     },
     {
       title: "Completed",
       value: 11,
       subtitle: "Jobs Ready for Production",
-      iconColor: Labels.primaryBlue,
+      iconColor: Labels.primary,
       icon: <TaskAltIcon />,
     },
   ];
@@ -227,19 +229,16 @@ const EqDashboard = () => {
   const selected = chartOptions.find(c => c.value === chartType);
   const SelectedChart = selected?.component;
   return (
-
     <>
       <Box sx={{ px: 3, py: 3 }}>
-
         <PGrid container className={Labels.margin.mb3}>
           <PGrid item xs={12} sm={6} md={7}>
             <PTypography
-              labelText="Wellcome DemoUser"
-              color={CommonColors.primaryLight}
-              flag={Labels.header}
-              sx={{ mb: 3 }}
-              font={Labels.semiBold}
-              fontFamily={Labels.semiBold}
+              labelText="Welcome Back, DemoUser"
+              weight={FontWeight.bold}
+              flag={Labels.fontFlags.subHeader}
+              color={CommonColors.red}
+              style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
             />
           </PGrid>
           <PGrid item xs={12} sm={6} md={5} className="d-flex align-items-center gap-2">
@@ -267,10 +266,11 @@ const EqDashboard = () => {
         <PGrid container className={Labels.margin.mb3}>
           {cardData.map((card, index) => (
             <PGrid key={index} item xs={12} sm={6} md={3} lg={3}>
-              <PDashboardCard {...card} />
+              <PDashboardCard {...{ ...card, bgColor: CommonColors.bg_violet }} />
             </PGrid>
           ))}
         </PGrid>
+
         <PGrid container className={Labels.margin.mb3}>
           <PGrid item xs={12} sm={6} md={8}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end", margin: "6px 0px" }}>
@@ -294,6 +294,7 @@ const EqDashboard = () => {
             </div>
           </PGrid>
         </PGrid>
+
         <PGrid container spacing={2} className={Labels.margin.mb3} style={{ display: "flex", alignItems: "stretch" }}>
 
           {/* Table Card Column */}
@@ -310,6 +311,7 @@ const EqDashboard = () => {
                     onChange={(e) => setCountry(e.target.value)}
                     options={counties}
                     width={Labels.fontSize.xxxxl}
+                    flag={Labels.flag.auto}
                   />
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
@@ -319,6 +321,7 @@ const EqDashboard = () => {
                     onChange={(e) => setUser(e.target.value)}
                     options={userList}
                     width={Labels.fontSize.xxxxl}
+                    flag={Labels.flag.auto}
                   />
                 </PGrid>
               </PGrid>
@@ -333,7 +336,6 @@ const EqDashboard = () => {
           {/* Chart Card Column */}
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex" }}>
             <PCard style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
-              {/* Centering the chart within the remaining card space */}
               <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {SelectedChart && <SelectedChart data={chartData} />}
               </div>
@@ -341,50 +343,6 @@ const EqDashboard = () => {
           </PGrid>
 
         </PGrid>
-
-        {/* <PGrid container className={Labels.margin.mb3}>
-
-          <PGrid item xs={12} sm={6} md={8}>
-            <PCard>
-              <PGrid container className={Labels.margin.mb3}>
-                <PGrid item xs={12} sm={6} md={6}>
-                  <PSearch
-                    width={385}
-                    placeholder={""}
-                  />
-                </PGrid>
-                <PGrid item xs={12} sm={6} md={3}>
-                  <PDropdown
-                    label="Country"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    options={counties}
-                    width={180}
-                  />
-                </PGrid>
-                <PGrid item xs={12} sm={6} md={3}>
-                  <PDropdown
-                    label="CreatedBy"
-                    value={user}
-                    onChange={(e) => setUser(e.target.value)}
-                    options={userList}
-                    width={170}
-                  />
-
-                </PGrid>
-
-              </PGrid>
-
-              <PTable columns={columns} rows={rows} />
-            </PCard>
-          </PGrid>
-          <PGrid item xs={12} sm={6} md={4}>
-            <PCard>
-              {SelectedChart && <SelectedChart data={chartData} />}
-            </PCard>
-
-          </PGrid>
-        </PGrid> */}
       </Box >
     </>
   );

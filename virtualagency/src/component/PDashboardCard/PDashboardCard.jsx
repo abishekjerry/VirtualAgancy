@@ -14,7 +14,8 @@ const PDashboardCard = ({
   titleSize = 14,
   valueSize = 22,
   iconBg = "linear-gradient(135deg, #6a5af9, #9f7aea)",
-  iconColor = "#ffffff"
+  iconColor = "#ffffff",
+  bgColor = "#ffffff",
 }) => {
 
   const navigate = useNavigate();
@@ -29,10 +30,9 @@ const PDashboardCard = ({
     <>
       <style>{`
         .dashboard-card {
-          background: #ffffff;
           border-radius: 18px;
           padding: 14px;
-          box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08);
           transition: 0.3s ease;
           position: relative;
         }
@@ -84,7 +84,7 @@ const PDashboardCard = ({
       <div
         className="dashboard-card"
         onClick={route ? handleClick : undefined}
-        style={{ cursor: route ? "pointer" : "default" }}
+        style={{ cursor: route ? "pointer" : "default", background: bgColor }}
       >
         {showNavIcon && route && (
           <div className="nav-icon">

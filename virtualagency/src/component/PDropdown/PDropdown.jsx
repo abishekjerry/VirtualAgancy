@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, FormHelperText, Autocomplete, TextField } from "@mui/material";
 import { Labels } from "../../utils/constants/labels";
 import { FontFamily, FontSize } from "../../utils/constants/fonts";
 import { CommonColors } from "../../utils/constants/colors";
@@ -15,6 +15,7 @@ const PDropdown = ({
   width = 200,
   mt = 0.4,
   multiple = false,
+  flag = ""
 }) => {
   const baseSx = {
     width: width ? `${width}px` : "100%",
@@ -64,7 +65,7 @@ const PDropdown = ({
       },
 
       "& fieldset": {
-        
+
         borderColor: "1px solid #ccc",
         borderWidth: "1.5px",
       },
@@ -129,6 +130,28 @@ const PDropdown = ({
       },
     },
   };
+  if (flag === Labels.flag.auto) {
+    return (
+      <Autocomplete
+        options={options}
+        getOptionLabel={(option) => option.label || ""}
+        value={options.find((o) => o.value === value) || null}
+        onChange={(e, newValue) =>
+          onChange({ target: { value: newValue?.value || "" } })
+        }
+        sx={baseSx}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={label}
+            required={required}
+            error={error}
+            helperText={helperText}
+          />
+        )}
+      />
+    );
+  }
   return (
     <FormControl
       fullWidth

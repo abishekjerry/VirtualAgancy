@@ -13,6 +13,7 @@ const UserRoute = () => {
 const LoginPage = lazy(() => import("../container/login/login"));
 const Dashboard = lazy(() => import("../container/dashboard/dashboard"));
 const EqDashboard = lazy(() => import("../container/eqDashboard/eqDashboard"));
+const ClientInfo = lazy(() =>import("../container/enquiry/clientInfo"));
 
 
 function AppRoutes() {
@@ -27,6 +28,7 @@ function AppRoutes() {
         <Route element={<PageLayout />}>
           <Route path={labelRoutes.dashboard} element={<Dashboard />} />
           <Route path={labelRoutes.eqDashboard} element={<EqDashboard />} />
+          <Route path={labelRoutes.clientInfo} element={<ClientInfo />} />
         </Route>
 
         {/* Page Not Found */}

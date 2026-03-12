@@ -43,7 +43,7 @@ export default function PTextField({
     onBlur
 }) {
     const isFile = type === "file";
-    const isPassword = flag === "password";
+    const isPassword = flag === Labels.flag.password;
     const [showPassword, setShowPassword] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const internalRef = React.useRef(null);
@@ -181,7 +181,7 @@ export default function PTextField({
             onKeyUp={onKeyUp}
             type={
                 isPassword && !showPassword
-                    ? "password"
+                    ? Labels.flag.password
                     : type
             }
             multiline={multiline}

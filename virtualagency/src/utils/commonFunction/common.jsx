@@ -1,17 +1,10 @@
 import { Labels } from "../constants/labels";
 
-// export const isNotEmpty = (val) => {
-//   if (val !== undefined && val !== "" && val !== null) return true;
-//   return false;
-// };
-// utils/passwordRules.js
-
-export const validateUsername = (username) => {
-  if (!username) return "Username is required";
-  if (username.length < 3) return "Username must be at least 3 characters";
-  if (username.length > 75) return "Username must be less than 75 characters";
+export const validateName = (name) => {
+  if (!name) return "Name is required";
   return "";
-}
+};
+
 export const checkPasswordStrength = (password) => {
   return {
     hasUpperLower: /(?=.*[a-z])(?=.*[A-Z])/.test(password),

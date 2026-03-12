@@ -131,6 +131,7 @@
 /* PAGE CONTENT */
 .page-content{
   padding:20px;   /* removed flex + scroll */
+  flex:1; 
 }
 
 

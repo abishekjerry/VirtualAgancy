@@ -10,15 +10,12 @@ import "./login.css";
 import { CommonColors } from "../../utils/constants/colors";
 import PContainer from "../../component/PContainer/PContainer";
 import PDialog from "../../component/PDialog/PDialog";
-import { validatePassword, validateUsername } from "../../utils/commonFunction/common";
-import {
-  userDetails,
-  clearUserDetails,
-} from "../../redux/actionType/actionType";
+import { allowOnlyAlphabets, validatePassword, validateName } from "../../utils/commonFunction/common";
+import { userDetails, clearUserDetails } from "../../redux/actionType/actionType";
 import { connect } from "react-redux";
 import { AppNavigation } from "../../navigations/appNavigation";
 import { labelRoutes } from "../../navigations/labelRoutes";
-
+import Logo from "../../utils/assets/Navbar/Logo.svg";
 
 class Login extends Component {
   constructor(props) {
@@ -28,10 +25,10 @@ class Login extends Component {
       password: "",
       openRecover: false,
       resetUsername: "",
-      oldPassword: "",
       newPassword: "",
       confirmPassword: "",
-      isForgetPassword: false
+      isForgetPassword: false,
+      errors: {}
     };
   };
   componentDidMount() {
@@ -55,15 +52,15 @@ class Login extends Component {
   };
 
   handleChange = (e) => {
-    console.log(e.target.name, e.target.value);
-    const { name, value, files, type } = e.target;
+    const { name, value } = e.target;
     switch (name) {
       case Labels.loginPage.userName:
+        const name = allowOnlyAlphabets(value);
         this.setState((prev) => ({
-          userName: value,
+          userName: name,
           errors: {
             ...prev.errors,
-            userName: validateUsername(value),
+            userName: name ? validateName(name) : "",
           },
         }));
         break;
@@ -71,35 +68,42 @@ class Login extends Component {
       case Labels.loginPage.password:
         this.setState((prev) => ({
           password: value,
-          errors: { ...prev.errors, password: validatePassword(value) },
-        }));
-        break;
-
-      case Labels.loginPage.oldPassword:
-        this.setState((prev) => ({
-          oldPassword: value,
-          errors: { ...prev.errors, oldPassword: validatePassword(value) },
+          errors: {
+            ...prev.errors,
+            password: value ? validatePassword(value) : "",
+          },
         }));
         break;
 
       case Labels.loginPage.newPassword:
         this.setState((prev) => ({
           newPassword: value,
-          errors: { ...prev.errors, newPassword: validatePassword(value) },
+          errors: {
+            ...prev.errors,
+            newPassword: value ? validatePassword(value) : "",
+            confirmPassword:
+              prev.confirmPassword && value !== prev.confirmPassword
+                ? Labels.loginPage.passwordDoNotMatch
+                : "",
+          },
         }));
         break;
 
       case Labels.loginPage.confirmPassword:
         this.setState((prev) => ({
           confirmPassword: value,
-          errors: { ...prev.errors, confirmPassword: validatePassword(value) },
+          errors: {
+            ...prev.errors,
+            confirmPassword:
+              value !== prev.newPassword ? Labels.loginPage.passwordDoNotMatch : "",
+          },
         }));
         break;
 
       default:
         break;
     }
-  }
+  };
   handleSubmit = async (e, isLogin) => {
     e.preventDefault();
     if (isLogin) {
@@ -132,20 +136,6 @@ class Login extends Component {
 
     // }
   }
-  loginValidation = () => {
-    const { userName, password } = this.state;
-    const usernameError = validateUsername(userName);
-    const passwordError = validatePassword(password);
-    this.setState((prev) => ({
-      errors: {
-        ...prev.errors,
-        userName: usernameError,
-
-        password: passwordError,
-      },
-    }));
-    return !usernameError && !passwordError;
-  }
   async componentDidUpdate(prevProps, prevState) {
     if (this.state.isLogin !== prevState.isLogin) {
       this.props.history.push("/");
@@ -154,7 +144,8 @@ class Login extends Component {
 
   render() {
     const { errors, onChange, onSubmit } = this.props;
-    const { resetUsername, isForgetPassword } = this.state;
+    const { resetUsername, isForgetPassword, newPassword, confirmPassword, showPassword } = this.state;
+
     return (
       <>
         <div className="login-container">
@@ -172,38 +163,31 @@ class Login extends Component {
             <div className="login-left">
               <div className="login-box">
 
-                {/* <PTextField
-                  name={Labels.loginPage.oldPassword}
-                  label={Labels.loginPage.oldPassword}
-                  value={this.state.oldPassword}
-                  helperText={errors?.oldPassword}
-                  startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                  flag="password"
-                  onChange={this.handleChange}
-                /> */}
+                <img src={Logo} alt="Logo" style={{ height: 60, margin: 10 }} />
 
                 <PTextField
                   name={Labels.loginPage.newPassword}
                   label={Labels.loginPage.newPassword}
-                  value={this.state.newPassword}
-                  helperText={errors?.newPassword}
+                  value={newPassword}
+                  helperText={this.state.errors?.newPassword}
                   startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                  flag="password"
+                  flag= {Labels.flag.password}
                   onChange={this.handleChange}
                 />
+
                 <PTextField
                   name={Labels.loginPage.confirmPassword}
                   label={Labels.loginPage.confirmPassword}
-                  value={this.state.confirmPassword}
-                  helperText={errors?.confirmPassword}
+                  value={confirmPassword}
+                  helperText={this.state.errors?.confirmPassword}
                   startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                  flag="password"
+                  flag= {Labels.flag.password}
                   onChange={this.handleChange}
                 />
 
                 <PButton
                   type="submit"
-                  label={Labels.buttonLabel.submit}
+                  label={Labels.buttonLabel.changePassword}
                   fullWidth
                   onClick={(e) => this.handleSubmit(e, true)}
                 />
@@ -214,12 +198,12 @@ class Login extends Component {
 
             <div className="login-left">
               <div className="login-box">
-
+                <img src={Logo} alt="Logo" style={{ height: 60, margin: 10 }} />
                 <PTextField
                   name={Labels.loginPage.userName}
                   label={Labels.loginPage.userName}
                   value={this.state.userName}
-                  helperText={errors?.userName}
+                  helperText={this.state.errors?.userName}
                   startIcon={<PersonIcon sx={{ color: "#9CA3AF" }} />}
                   onChange={this.handleChange}
                 />
@@ -228,9 +212,9 @@ class Login extends Component {
                   name={Labels.loginPage.password}
                   label={Labels.loginPage.password}
                   value={this.state.password}
-                  helperText={errors?.password}
+                  helperText={this.state.errors?.password}
                   startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                  flag="password"
+                  flag= {Labels.flag.password}
                   onChange={this.handleChange}
                 />
 

@@ -13,9 +13,15 @@ export const Labels = {
     forgotPassword: "Forgot Password ?",
     signInToVirtualAgency: "Sign in to Virtual Agency",
     recoverPasswordByYourUserName: "Recover password by your user name",
-    oldPassword : "Old Password",
     newPassword : "New Password",
-    confirmPassword : "Confirm Password"
+    confirmPassword : "Confirm Password",
+    passwordDoNotMatch : "Password do not match"
+  },
+
+  clientInfo :{
+    clientInformation : "Client Information",
+    divisionTitle : "Select your clients 'Division' to auto populate all non-editable information .",
+    summary: "Summary",
   },
 
   commonLabel: {
@@ -27,12 +33,18 @@ export const Labels = {
     submit: "Submit",
     backToLogin: "Back to Login",
     login: "Login",
+    changePassword : "Change Password"
   },
 
   footer: {
     footer: "PMG ASIA PACIFIC PTE LTD. All Rights Reserved"
   },
 
+  flag :{
+    auto : "Auto",
+    password : "Password",
+    readonly :"ReadOnly",
+  },
 
   hex: {
     fff7e6: "#fff7e6",
@@ -75,16 +87,6 @@ export const Labels = {
     xxxxl: "100%"
   },
 
-  // xxxxs: "10px",
-  // xxs: "12px",
-  // xs: "14px",
-  // sm: "16px",
-  // lg: "18px",
-  // xl: "20px",
-  // xxl: "35px",
-  // xxxl: "50px",
-  // fullWidth: "100%",
-
   // Font size flags
   fontFlags: {
     mainHeader: "MAIN_HEADER",
@@ -95,7 +97,6 @@ export const Labels = {
     veryVerySmallText: "TINY",
   },
   
-
   maxWidth: {
     sm: "sm",
     md: "md",
@@ -112,12 +113,6 @@ export const Labels = {
     lg: "20px",
   },
 
-  color: {
-    primary: "primary",
-    error: "error",
-    success: "success",
-    textSecondary: "text.secondary",
-  },
   cursor: {
     pointer: "pointer",
   },

@@ -1,70 +1,4 @@
-// import React, { Component } from "react";
-// import { Box, Grid, Button, Typography, Container, Paper } from "@mui/material";
-// import "./dashboard.css";
-// import { Person, Language, Logout } from "@mui/icons-material";
-// import logo from "../../utils/assets/Navbar/logo.png";
-// import DescriptionIcon from "@mui/icons-material/Description";
-// import AccessTimeIcon from "@mui/icons-material/AccessTime";
-// import MenuBookIcon from "@mui/icons-material/MenuBook";
-// import BarChartIcon from "@mui/icons-material/BarChart";
-// import { AppNavigation } from "../../navigations/appNavigation";
-// import { labelRoutes } from "../../navigations/labelRoutes";
 
-// class Dashboard extends Component {
-//   constructor(props) {
-//     super(props);
-
-//     this.state = {
-//       apps: [
-//         { title: "ENQUIRIES", color: "#e30613", icon: DescriptionIcon },
-//         { title: "EBIDDING", color: "#9ca3af", icon: AccessTimeIcon },
-//         { title: "ECATALOGUE", color: "#c4c4c4", icon: MenuBookIcon },
-//         { title: "REPORTS", color: "#000000", icon: BarChartIcon },
-//       ],
-//     };
-//   }
-
-//   render() {
-//     return (
-//       <>
-//         <Box sx={{ px: 3, py: 3 }}>
-//           <div className="home-container">
-//             <div className="logo-section">
-//               <h3>WELCOME TO VIRTUAL AGENCY</h3>
-//               <h2>Agency Portal</h2>
-//               <p>To begin, please choose an application</p>
-//             </div>
-//             <div className="card-container">
-//               {this.state.apps.map((app, index) => (
-//                 <div
-//                   className="card"
-//                   key={index}
-//                   onClick={() => {
-//                     if (index === 0) {
-//                       this.props.navigate(labelRoutes.eqDashboard);
-//                     }
-//                   }}
-//                   style={{ cursor: "pointer" }}
-//                 >
-//                   <div
-//                     className="card-top"
-//                     style={{ backgroundColor: app.color }}
-//                   >
-//                     <app.icon sx={{ fontSize: 60, color: "#ffffff" }} />
-//                   </div>
-
-//                   <div className="card-bottom">{app.title}</div>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-
-//         </Box>
-//       </>
-//     );
-//   }
-// }
-// export default AppNavigation(Dashboard);
 
 import React from "react";
 import {
@@ -86,34 +20,6 @@ import { FontWeight } from "../../utils/constants/fonts";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-  // const apps = [
-  //   {
-  //     title: "ENQUIRIES",
-  //     color: "#6366f1", // Soft Indigo from your screenshot
-  //     icon: <DescriptionIcon />,
-  //     route: labelRoutes.eqDashboard
-  //   },
-  //   {
-  //     title: "EBIDDING",
-  //     color: "#8b5cf6", // Purple tone
-  //     icon: <AccessTimeIcon />,
-  //     route: null
-  //   },
-  //   {
-  //     title: "ECATALOGUE",
-  //     color: "#6366f1",
-  //     icon: <MenuBookIcon />,
-  //     route: null
-  //   },
-  //   {
-  //     title: "REPORTS",
-  //     color: "#4f46e5",
-  //     icon: <BarChartIcon />,
-  //     route: null
-  //   },
-  // ];
-
   const apps = [
     {
       title: "ENQUIRIES",
@@ -155,11 +61,12 @@ const Dashboard = () => {
         <Container>
           <PGrid container className="text-center mt-5">
             {/* Header */}
-            <PGrid item className="mb-3">
+            <PGrid item className={Labels.margin.mb3}>
               <PTypography
-                labelText={Labels.dashboard.welcomeToVirtualAgency}
-                font={FontWeight.upnormal}
+                labelText={Labels.dashboard.welcomeToVirtualAgency}                
                 flag={Labels.fontFlags.header}
+                style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+                weight={FontWeight.bold}
               />
             </PGrid>
             {/* <PGrid item className="mb-3">
@@ -196,7 +103,6 @@ const Dashboard = () => {
             ))}
           </PGrid>
         </Container>
-        <br/><br/><br/><br/>
         
     </>
     

@@ -2,84 +2,117 @@ import React from "react";
 import Button from "@mui/material/Button";
 import { useTheme } from "@mui/material/styles";
 import { FontFamily } from "../../utils/constants/fonts";
-import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
 export default function PButton({
-    label,
-    onClick,
-    width,
-    children,
-    color = "primary",
-    font = FontFamily.medium,
-    size = "medium",
-    variant = "contained",
-    disabled = false,
-    startIcon = null,
-    endIcon = null,
-    disableRipple = false,
-    fullWidth = false,
-    gradient = false,
-    type = "button",
-    rounded = "md",
-    shadow = true,
-    sx = {},
+  label,
+  onClick,
+  width,
+  children,
+  color = "primary",
+  font = FontFamily.medium,
+  size = "medium",
+  variant = "contained",
+  disabled = false,
+  startIcon = null,
+  endIcon = null,
+  disableRipple = false,
+  fullWidth = false,
+  gradient = false,
+  type = "button",
+  rounded = "md",
+  shadow = true,
+  sx = {},
 }) {
-    const theme = useTheme();
 
-    const gradientBackground =
-    CommonColors.gradientBackgrounds?.[color] || "linear-gradient(to right, #4e54c8, #8f94fb)";
-    const solidColor = theme.palette[color]?.main || CommonColors.primary;
+  const theme = useTheme();
 
-    const radiusMap = {
-        sm: "8px",
-        md: "12px",
-        lg: "20px",
-        xl: "30px",
-    };
+  const gradientBackground =
+    CommonColors.gradientBackgrounds?.[color] ||
+    "linear-gradient(to right, #4e54c8, #8f94fb)";
 
-    return (
-        <Button
-            type={type}
-            onClick={onClick}
-            disableRipple={disableRipple}
-            variant={variant}
-            size={size}
-            startIcon={startIcon}
-            endIcon={endIcon}
-            disabled={disabled}
-            fullWidth={fullWidth}
+//   const solidColor =
+//     theme.palette[color]?.main || CommonColors.primary;
+    const solidColor = color === "primary" ? CommonColors.primary : color;
 
-            sx={{
-                width : {width},
-                cursor: "pointer",
-                textTransform: "none",
-                fontFamily: font,
-                fontWeight: 600,
-                fontSize: size === "small" ? "0.8rem" : size === "large" ? "1rem" : "0.9rem",
-                borderRadius: radiusMap[rounded],
-                color:
-                    variant === "contained" || gradient
-                        ? theme.palette.common.white
-                        : "#23A9F2",
-                background: gradient
-                    ? gradientBackground
-                    : variant === "contained"
-                        ? "#23A9F2"
-                        : "transparent",
-                borderColor: variant === "outlined" ? "#23A9F2" : "transparent",
-                boxShadow: shadow && variant === "contained" ? "0px 4px 12px rgba(0, 0, 0, 0.15)" : "none",
-                transition: "all 0.3s ease",
-                "&:disabled": {
-                    background: theme.palette.action.disabledBackground,
-                    color: theme.palette.text.disabled,
-                    boxShadow: "none",
-                    cursor: "not-allowed",
-                },
-                ...sx,
-            }}
-        >
-            {label || children}
-        </Button>
-    );
+  const radiusMap = {
+    sm: "8px",
+    md: "12px",
+    lg: "20px",
+    xl: "30px",
+  };
+
+  return (
+    <Button
+      type={type}
+      onClick={onClick}
+      disableRipple={disableRipple}
+      variant={variant}
+      size={size}
+      startIcon={startIcon}
+      endIcon={endIcon}
+      disabled={disabled}
+      fullWidth={fullWidth}
+      sx={{
+        width: width,
+
+        cursor: "pointer",
+        textTransform: "none",
+        fontFamily: font,
+        fontWeight: 600,
+
+        fontSize:
+          size === "small"
+            ? "0.8rem"
+            : size === "large"
+            ? "1rem"
+            : "0.9rem",
+
+        borderRadius: radiusMap[rounded],
+
+        color:
+          variant === "contained" || gradient
+            ? theme.palette.common.white
+            : solidColor,
+
+        background: gradient
+          ? gradientBackground
+          : variant === "contained"
+          ? solidColor
+          : "transparent",
+
+        border: variant === "outlined" ? `1px solid ${solidColor}` : "none",
+
+        boxShadow:
+          shadow && variant === "contained"
+            ? "0px 4px 12px rgba(0,0,0,0.15)"
+            : "none",
+
+        transition: "all 0.3s ease",
+
+        "&:hover": {
+          background: gradient
+            ? gradientBackground
+            : variant === "contained"
+            ? solidColor
+            : "rgba(0,0,0,0.04)",
+          boxShadow:
+            shadow && variant === "contained"
+              ? "0px 6px 16px rgba(0,0,0,0.2)"
+              : "none",
+        },
+
+        "&:disabled": {
+          background: theme.palette.action.disabledBackground,
+          color: theme.palette.text.disabled,
+          boxShadow: "none",
+          cursor: "not-allowed",
+        },
+
+        ...sx,
+      }}
+    >
+      {label || children}
+    </Button>
+  );
 }
