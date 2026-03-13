@@ -14,6 +14,7 @@ import {
 } from "@mui/icons-material";
 import { Labels } from "../../utils/constants/labels";
 import { FontFamily, FontSize } from "../../utils/constants/fonts";
+import { FormControlBaseStyle } from "../../utils/constants/styles";
 
 export default function PTextField({
     inputRef,
@@ -40,7 +41,8 @@ export default function PTextField({
     maxLength,
     multiple = false,
     defaultFileUrl = "",
-    onBlur
+    onBlur,
+    mt = 0.4
 }) {
     const isFile = type === "file";
     const isPassword = flag === Labels.flag.password;
@@ -83,11 +85,11 @@ export default function PTextField({
         };
         onChange?.(fakeEvent);
     };
-
+    //const baseSx = FormControlBaseStyle(width, mt);
     const baseSx = {
-        width: width || Labels.fullWidth,
+        width: width || Labels.fontSize.xxxxl,
         mt: 0.4,
-        mt: 1,
+        //mt: 1,
         "& .MuiOutlinedInput-root": {
             borderRadius: "" || "12px",
             backgroundColor: "#ffffff",
@@ -104,10 +106,10 @@ export default function PTextField({
             },
         },
         "& .MuiInputBase-input": {
-            fontSize: Labels.xs,
+            fontSize: FontSize.textField.label,
         },
         "& .MuiFormHelperText-root": {
-            fontSize: Labels.xxs,
+            fontSize: Labels.fontSize.xxs,
             marginLeft: 0,
         },
     };
@@ -203,7 +205,7 @@ export default function PTextField({
                                 p: 0, m: 0, borderRadius: 0,
                                 backgroundColor: "transparent", "&:hover": { backgroundColor: "transparent" }
                                 , "&:focus": { backgroundColor: "transparent", outline: "none", }
-                                , "&.Mui-focusVisible": { outline: "none", backgroundColor: "transparent"}
+                                , "&.Mui-focusVisible": { outline: "none", backgroundColor: "transparent" }
                             }}>
                             {showPassword ? <VisibilityOff sx={{ fontSize: eyeIcon || 23, }} /> : <Visibility sx={{ fontSize: eyeIcon || 23 }} />}
                         </IconButton>

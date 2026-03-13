@@ -221,7 +221,7 @@ class Login extends Component {
                 <div className="forgot-password">
                   <PTypography
                     labelText={Labels.loginPage.forgotPassword}
-                    color={CommonColors.primaryBlue}
+                    color={CommonColors.primary}
                     flag={Labels.xs}
                     onClick={this.handleOpenRecover}
                   />

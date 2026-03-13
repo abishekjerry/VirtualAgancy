@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Tooltip, IconButton } from "@mui/material";
 import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
@@ -9,7 +9,8 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-
+import { enquirySteps } from "../../utils/commonFunction/common"
+import AddIcon from "@mui/icons-material/Add"
 const ClientInfo = () => {
     const [division, setDivision] = useState("");
     const [brand, setBrand] = useState("");
@@ -75,18 +76,12 @@ const ClientInfo = () => {
                 break;
         }
     };
-    const enquirySteps = [
-        { text: "Client Info", url: "/clientInfo" },
-        { text: "Enquiry Details", url: "/clientInfo" },
-        { text: "Line Items", url: "/clientInfo" },
-        { text: "Suppliers", url: "/clientInfo" },
-        { text: "Review", url: "/clientInfo" }
-    ];
+
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PStepper steps={enquirySteps}></PStepper>
+                    <PStepper steps={enquirySteps} activeStep={0}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
                     <PGrid item xs={12} sm={12} md={8}>
@@ -94,8 +89,8 @@ const ClientInfo = () => {
                             <PGrid container className={Labels.margin.mb3}>
                                 <PTypography
                                     labelText={Labels.clientInfo.clientInformation}
-                                    flag={Labels.fontFlags.mainHeader}
-                                    color={CommonColors.primary}
+                                    flag={Labels.fontFlags.subHeader}
+                                    color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
                                 //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                                 />
@@ -189,31 +184,40 @@ const ClientInfo = () => {
 
                             {/* Row 3 */}
                             <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={6}>
+                                <PGrid
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={6}
+                                    style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                                >
                                     <PDropdown
                                         name="brand"
                                         label="Brands *"
                                         value={brand}
                                         onChange={handleChange}
                                         options={brandList}
-                                        width={350}
+                                        width={300}
                                     />
+                                    <Tooltip title="Add New Brand" arrow>
+                                        <IconButton
+                                            sx={{
+                                                backgroundColor: "#d5d5d5",
+                                                color: "#fff",
+                                                width: 36,
+                                                height: 36,
+                                                marginTop: "11px",
+                                                "&:hover": {
+                                                    backgroundColor: "#1976d2",
+                                                },
+                                            }}
+                                        //onClick={handleExitDraft}
+                                        >
+                                            <AddIcon />
+                                        </IconButton>
+                                    </Tooltip>
                                 </PGrid>
 
-                                <PGrid item xs={12} sm={6} md={6}>
-                                    <PDropdown
-                                        name="clientContact"
-                                        label="Client Contact *"
-                                        value={clientContact}
-                                        onChange={handleChange}
-                                        options={clientContactList}
-                                        width={350}
-                                    />
-                                </PGrid>
-                            </PGrid >
-
-                            {/* Row 4 */}
-                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
                                         name="deliveryCountry"
@@ -223,6 +227,38 @@ const ClientInfo = () => {
                                         options={countryList}
                                         width={350}
                                     />
+
+                                </PGrid>
+                            </PGrid >
+
+                            {/* Row 4 */}
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                    <PDropdown
+                                        name="clientContact"
+                                        label="Client Contact *"
+                                        value={clientContact}
+                                        onChange={handleChange}
+                                        options={clientContactList}
+                                        width={300}
+                                    />
+                                    <Tooltip title="Add New Contant" arrow>
+                                        <IconButton
+                                            sx={{
+                                                backgroundColor: "#d5d5d5",
+                                                color: "#fff",
+                                                width: 36,
+                                                height: 36,
+                                                marginTop: "11px",
+                                                "&:hover": {
+                                                    backgroundColor: "#1976d2",
+                                                },
+                                            }}
+                                        //onClick={handleExitDraft}
+                                        >
+                                            <AddIcon />
+                                        </IconButton>
+                                    </Tooltip>
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
@@ -279,14 +315,13 @@ const ClientInfo = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={4}>
-                        <PCard>
+                        {/* <PCard>
                             <PGrid container>
                                 <PTypography
                                     labelText={Labels.clientInfo.summary}
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.grey.main}
                                     weight={FontWeight.bold}
-                                //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                                 />
                                 <hr className="my-4" />
                             </PGrid>
@@ -297,10 +332,10 @@ const ClientInfo = () => {
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.grey.main}
                                     weight={FontWeight.bold}
-                                //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+                                
                                 />
                             </PGrid>
-                        </PCard>
+                        </PCard> */}
                     </PGrid>
                 </PGrid>
             </Box>

@@ -16,7 +16,7 @@ const root = createRoot(container);
 
 root.render(
    <BrowserRouter>
- {/* <BrowserRouter basename="/iweb/virtualagency/vatest"> */}
+  {/* </BrowserRouter><BrowserRouter basename="/iweb/virtualagency/vatest"> */}
     <Provider store={store}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <App />

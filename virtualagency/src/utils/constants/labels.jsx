@@ -20,8 +20,14 @@ export const Labels = {
 
   clientInfo :{
     clientInformation : "Client Information",
-    divisionTitle : "Select your clients 'Division' to auto populate all non-editable information .",
+    divisionTitle : "Select your clients 'Division' to auto populate all non-editable information.",
     summary: "Summary",
+  },
+
+  enquiryDetails :{
+    enquiryDetails : "Enquiry Details",
+    enquiryTitle : "Enter all necessary job details required to set up the event.",
+    statusInformation : "Status Information",
   },
 
   commonLabel: {

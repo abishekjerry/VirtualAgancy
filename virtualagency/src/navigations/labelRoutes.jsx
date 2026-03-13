@@ -3,7 +3,9 @@ export const labelRoutes = {
   Login: "/login",
   dashboard: "/dashboard",
   eqDashboard: "/eqDashboard",
-  //PageNotFound: "*"
+  clientInfo: "/clientInfo",
+  enquiryDetails : "/enquiryDetails",
+    //PageNotFound: "*"
   PageNotFound: "/pageNotFound",
-  clientInfo: "/clientInfo"
+
 };

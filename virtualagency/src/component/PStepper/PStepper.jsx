@@ -1,106 +1,289 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import PGrid from "../PGrid/PGrid";
+import PTypography from "../PTypography/PTypography";
+import { Labels } from "../../utils/constants/labels";
+import { CommonColors } from "../../utils/constants/colors";
+import { FontWeight } from "../../utils/constants/fonts";
 
-export default function PStepper({ steps = [] }) {
-
+export default function PStepper({ steps = [], activeStep = 0 }) {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const activeIndex = steps.findIndex(
-    (step) => step.url === location.pathname
-  );
+  const handleRedirect = (step) => {
+    if (step.url) {
+      navigate(step.url);
+    }
+  };
 
   return (
     <>
-        
+      <PGrid container className="text-center">
+        <PTypography
+          labelText={"Create Enquiry"}
+          flag={Labels.fontFlags.mainHeader}
+          color={CommonColors.grey.main}
+          weight={FontWeight.bold}
+        />
+      </PGrid>
+
+      <hr className="mt-3" />
+
       <div className="p-stepper">
-        
         {steps.map((step, index) => (
           <React.Fragment key={index}>
 
             <div
               className="p-step"
-              onClick={() => navigate(step.url)}
+              onClick={() => handleRedirect(step)}
             >
               <div
-                className={`p-circle ${
-                  index === activeIndex ? "active" : ""
-                }`}
+                className={`p-circle ${index < activeStep
+                  ? "completed"
+                  : index === activeStep
+                    ? "active"
+                    : ""
+                  }`}
               >
                 {index + 1}
               </div>
 
               <div
-                className={`p-label ${
-                  index === activeIndex ? "active" : ""
-                }`}
+                className={`p-label ${index <= activeStep ? "active" : ""
+                  }`}
               >
                 {step.text}
               </div>
             </div>
 
             {index !== steps.length - 1 && (
-              <div className="p-line"></div>
+              <div
+                className={`p-line ${index < activeStep ? "completed" : ""
+                  }`}
+              ></div>
             )}
 
           </React.Fragment>
         ))}
-
       </div>
-
-      {/* CSS inside component */}
       <style>{`
 
-        .p-stepper{
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          max-width:700px;
-          margin:auto;
-          padding:20px 0;
-        }
+.p-stepper{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  max-width:700px;
+  margin:auto;
+  padding:10px 0;
+}
 
-        .p-step{
-          text-align:center;
-          cursor:pointer;
-        }
+.p-step{
+  text-align:center;
+  cursor:pointer;
+}
 
-        .p-circle{
-          width:36px;
-          height:36px;
-          border-radius:50%;
-          border:2px solid #9CA3AF;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-weight:600;
-          color:#6B7280;
-          margin:auto;
-        }
+.p-circle{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:2px solid #9CA3AF;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+  color:#6B7280;
+  margin:auto;
+  transition:.3s;
+}
 
-        .p-circle.active{
-          border-color:#EF4444;
-          color:#EF4444;
-        }
+.p-circle.completed{
+  background:#EF4444;
+  border-color:#EF4444;
+  color:#fff;
+}
 
-        .p-label{
-          margin-top:8px;
-          font-size:14px;
-          color:#6B7280;
-        }
+.p-circle.active{
+  border-color:#EF4444;
+  color:#EF4444;
+}
 
-        .p-label.active{
-          color:#EF4444;
-        }
+.p-label{
+  margin-top:8px;
+  font-size:14px;
+  color:#6B7280;
+}
 
-        .p-line{
-          flex:1;
-          height:2px;
-          background:#9CA3AF;
-          margin:0 10px 25px;
-        }
+.p-label.active{
+  color:#EF4444;
+  font-weight:600;
+}
 
-      `}</style>
+.p-line{
+  flex:1;
+  height:3px;
+  background:#E5E7EB;
+  margin:0 10px 25px;
+  position:relative;
+}
+
+.p-line::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  height:100%;
+  width:0%;
+  background:#EF4444;
+  transition:width .4s ease;
+}
+
+.p-line.completed::after{
+  width:100%;
+}
+
+`}</style>
     </>
   );
 }
+
+// import React, { useState } from "react";
+// import PGrid from "../PGrid/PGrid";
+// import PTypography from "../PTypography/PTypography";
+// import { Labels } from "../../utils/constants/labels";
+// import { CommonColors } from "../../utils/constants/colors";
+// import { FontWeight } from "../../utils/constants/fonts";
+
+// export default function PStepper({ steps = [] }) {
+
+//   const [activeIndex, setActiveIndex] = useState(0);
+
+//   return (
+//     <>
+//       <PGrid container className="text-center">
+//         <PTypography
+//           labelText={"Create Enquiry"}
+//           flag={Labels.fontFlags.mainHeader}
+//           color={CommonColors.grey.main}
+//           weight={FontWeight.bold}
+//         />
+//       </PGrid>
+
+//       <hr className="mt-3" />
+
+//       <div className="p-stepper">
+//         {steps.map((step, index) => (
+//           <React.Fragment key={index}>
+
+//             <div
+//               className="p-step"
+//               onClick={() => setActiveIndex(index)}
+//             >
+//               {/* Circle */}
+//               <div
+//                 className={`p-circle ${index < activeIndex
+//                   ? "completed"
+//                   : index === activeIndex
+//                     ? "active"
+//                     : ""
+//                   }`}
+//               >
+//                 {index + 1}
+//               </div>
+
+//               {/* Label */}
+//               <div
+//                 className={`p-label ${index <= activeIndex ? "active" : ""
+//                   }`}
+//               >
+//                 {step.text}
+//               </div>
+//             </div>
+
+//             {/* Line */}
+//             {index !== steps.length - 1 && (
+//               <div
+//                 className={`p-line ${index < activeIndex ? "completed" : ""
+//                   }`}
+//               ></div>
+//             )}
+//           </React.Fragment>
+//         ))}
+//       </div>
+
+//       <style>{`
+
+// .p-stepper{
+//   display:flex;
+//   align-items:center;
+//   justify-content:space-between;
+//   max-width:700px;
+//   margin:auto;
+//   padding:10px 0;
+// }
+
+// .p-step{
+//   text-align:center;
+//   cursor:pointer;
+// }
+
+// .p-circle{
+//   width:36px;
+//   height:36px;
+//   border-radius:50%;
+//   border:2px solid #9CA3AF;
+//   display:flex;
+//   align-items:center;
+//   justify-content:center;
+//   font-weight:600;
+//   color:#6B7280;
+//   margin:auto;
+//   transition:.3s;
+// }
+
+// .p-circle.completed{
+//   background:#EF4444;
+//   border-color:#EF4444;
+//   color:#fff;
+// }
+
+// .p-circle.active{
+//   border-color:#EF4444;
+//   color:#EF4444;
+// }
+
+// .p-label{
+//   margin-top:8px;
+//   font-size:14px;
+//   color:#6B7280;
+// }
+
+// .p-label.active{
+//   color:#EF4444;
+//   font-weight:600;
+// }
+
+// .p-line{
+//   flex:1;
+//   height:3px;
+//   background:#E5E7EB;
+//   margin:0 10px 25px;
+//   position:relative;
+// }
+
+// .p-line::after{
+//   content:"";
+//   position:absolute;
+//   left:0;
+//   top:0;
+//   height:100%;
+//   width:0%;
+//   background:#EF4444;
+//   transition:width .4s ease;
+// }
+
+// .p-line.completed::after{
+//   width:100%;
+// }
+
+// `}</style>
+//     </>
+//   );
+// }

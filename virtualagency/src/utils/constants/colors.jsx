@@ -35,7 +35,12 @@ export const CommonColors = {
     main: "#FF6384",
     dark: "#c2185b",
   },
-
+  
+  blue: {
+    light: "#90CAF9",
+    main: "#2196F3",
+    dark: "#1565C0",
+  },
   black: "rgba(0,0,0,0.8)",
 
   //background colors

@@ -3,27 +3,48 @@ import { TextField, InputAdornment, IconButton } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-import { Labels } from "../../utils/constants/labels";
-const PDatepicker = ({ value, onChange, width = 100 }) => {
-  const inputRef = useRef(null);
+import { FormControlBaseStyle } from "../../utils/constants/styles";
+
+export default function PDatepicker({
+  label = "",
+  value = "",
+  onChange,
+  width,
+  helperText = "",
+  disabled = false,
+  name = "",
+  inputRef,
+  placeholder = "DD-MM-YYYY",
+  mt = 0.4,
+}) {
+  const internalRef = useRef(null);
+  const textFieldRef = inputRef || internalRef;
   const flatpickrRef = useRef(null);
 
+  // Initialize flatpickr
   useEffect(() => {
-    flatpickrRef.current = flatpickr(inputRef.current, {
+    if (!textFieldRef.current) return;
+
+    flatpickrRef.current = flatpickr(textFieldRef.current, {
       dateFormat: "d-m-Y",
-      defaultDate: value || "today",
+      defaultDate: value || null,
       allowInput: true,
       maxDate: "today",
       clickOpens: true,
       onChange: function (selectedDates, dateStr) {
-        if (onChange) onChange(dateStr);
-      }
+        if (onChange) {
+          onChange({
+            target: {
+              name: name,
+              value: dateStr,
+            },
+          });
+        }
+      },
     });
 
     return () => {
-      if (flatpickrRef.current) {
-        flatpickrRef.current.destroy();
-      }
+      flatpickrRef.current?.destroy();
     };
   }, []);
 
@@ -31,52 +52,76 @@ const PDatepicker = ({ value, onChange, width = 100 }) => {
     flatpickrRef.current?.open();
   };
 
+  const baseSx = FormControlBaseStyle(width, mt);
+  // Same styling as PTextField
+  // const baseSx = {
+  //   width: width || Labels.fontSize.xxxxl,
+  //   mt: 1,
+  //   "& .MuiOutlinedInput-root": {
+  //     borderRadius: "12px",
+  //     backgroundColor: "#ffffff",
+  //     transition: "all 0.3s ease",
+  //     "& fieldset": {
+  //       borderColor: helperText ? "#d32f2f" : "#62BCD8",
+  //     },
+  //     "&:hover fieldset": {
+  //       borderColor: "#62BCD8",
+  //     },
+  //     "&.Mui-focused fieldset": {
+  //       borderColor: "#62BCD8",
+  //       boxShadow: "0 0 0 3px rgba(98, 188, 216, 0.25)",
+  //     },
+  //   },
+  //   "& .MuiInputBase-input": {
+  //     fontSize: Labels.fontSize.xs,
+  //     fontFamily: FontFamily.regular,
+  //   },
+  //   "& .MuiFormHelperText-root": {
+  //     fontSize: Labels.fontSize.xxs,
+  //     marginLeft: 0,
+  //   },
+  // };
+
   return (
     <TextField
-      size= {Labels.size.small}
-      inputRef={inputRef}
+      name={name}
+      label={label}
+      inputRef={textFieldRef}
       defaultValue={value}
-      placeholder="DD-MM-YYYY"
-      sx={{
-        width,
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "8px", // Bootstrap style
-          paddingRight: "0px",
-        },
-        "& .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#ced4da",
-        },
-        "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#86b7fe",
-        },
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#0d6efd",
-          borderWidth: "1px",
-        },
-      }}
+      disabled={disabled}
+      placeholder={placeholder}
+      helperText={helperText || " "}
+      error={!!helperText}
+      variant="outlined"
+      sx={baseSx}
       InputProps={{
         endAdornment: (
-          <InputAdornment position="end">
+          <InputAdornment
+            position="end"
+            sx={{
+              marginRight: 0,   // remove default spacing
+            }}
+          >
             <IconButton
               onClick={handleIconClick}
+              disabled={disabled}
               sx={{
                 backgroundColor: "#0d6efd",
                 color: "#fff",
-                borderRadius: "0 8px 8px 0", // Only right side rounded
-                height: "100%",
-                padding: "8px",
-                "&:hover": {
-                  backgroundColor: "#0b5ed7",
-                },
+                borderRadius: "0 12px 12px 0",
+                height: "49px",
+                width: "40px",
+                padding: 0,
+                marginRight: "-14px", // push icon to edge
+                marginTop:"4px",
+                "&:hover": { backgroundColor: "#0b5ed7" },
               }}
             >
-              <CalendarTodayIcon fontSize= {Labels.size.small}/>
+              <CalendarTodayIcon fontSize="small" />
             </IconButton>
           </InputAdornment>
         ),
       }}
     />
   );
-};
-
-export default PDatepicker;
+}

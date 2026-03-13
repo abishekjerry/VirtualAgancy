@@ -1,3 +1,4 @@
+import { labelRoutes } from "../../navigations/labelRoutes";
 import { Labels } from "../constants/labels";
 
 export const validateName = (name) => {
@@ -157,3 +158,11 @@ export function isNotEmpty(value) {
     return false;
   return true;
 }
+
+ export const enquirySteps = [
+      { text: "Client Info", url: labelRoutes.clientInfo },
+      { text: "Enquiry Details", url: labelRoutes.enquiryDetails },
+      { text: "Line Items", url: "/clientInfo" },
+      { text: "Suppliers", url: "/clientInfo" },
+      { text: "Review", url: "/clientInfo" }
+  ];
