@@ -5,7 +5,9 @@ export const labelRoutes = {
   eqDashboard: "/eqDashboard",
   clientInfo: "/clientInfo",
   enquiryDetails : "/enquiryDetails",
-    //PageNotFound: "*"
+  lineItems : "/lineItems",
+  suppliers : "/suppliers",
   PageNotFound: "/pageNotFound",
+  //PageNotFound: "*"
 
 };

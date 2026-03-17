@@ -1,56 +1,82 @@
 export const Labels = {
 
-  dashboard: {
-    welcomeToVirtualAgency: "WELCOME TO VIRTUAL AGENCY",
-    agencyPortal: "Agency Portal",
-    toBeginPleaseChooseAnApplication: "To begin, please choose an application",
-    wellcomeBack: "Wellcome Back"
-  },
-
   loginPage: {
     userName: "UserName",
     password: "Password",
     forgotPassword: "Forgot Password ?",
     signInToVirtualAgency: "Sign in to Virtual Agency",
     recoverPasswordByYourUserName: "Recover password by your user name",
-    newPassword : "New Password",
-    confirmPassword : "Confirm Password",
-    passwordDoNotMatch : "Password do not match"
+    newPassword: "New Password",
+    confirmPassword: "Confirm Password",
+    passwordDoNotMatch: "Password do not match"
   },
 
-  clientInfo :{
-    clientInformation : "Client Information",
-    divisionTitle : "Select your clients 'Division' to auto populate all non-editable information.",
-    summary: "Summary",
-  },
+  // dashboard: {
+  //   welcomeToVirtualAgency: "WELCOME TO VIRTUAL AGENCY",
+  //   agencyPortal: "Agency Portal",
+  //   toBeginPleaseChooseAnApplication: "To begin, please choose an application",
+  //   wellcomeBack: "Wellcome Back"
+  // },
 
-  enquiryDetails :{
-    enquiryDetails : "Enquiry Details",
-    enquiryTitle : "Enter all necessary job details required to set up the event.",
-    statusInformation : "Status Information",
-  },
+  // clientInfo :{
+  //   clientInformation : "Client Information",
+  //   divisionTitle : "Select your clients 'Division' to auto populate all non-editable information.",
+  //   summary: "Summary",
+  // },
+
+  // enquiryDetails :{
+  //   enquiryDetails : "Enquiry Details",
+  //   enquiryTitle : "Enter all necessary job details required to set up the event.",
+  //   statusInformation : "Status Information",
+  // },
+
+  // lineItems :{
+  //   lineItems : "Line Items",
+  //   lineItemTitle : "Enter all project deliverables required by your client.",
+  //   sustainabilityInformation : "Sustainability Information",
+  //   sustainabilityInformationTitle : "Enter all sustainability details related to this product as required by your client",
+  //   specifications : "Specifications",
+  //   specificationsTitle : "Enter item specifications below, or populate from an existing item.",
+  //   quantity : "Quantity",
+  //   quantityTitle :  "Choose the project quote type and quantity.",
+  // },
 
   commonLabel: {
     dashboard: "Dashboard",
     logo: "logo",
+    required: "Required",
+  },
+
+  language: {
+    en: "English",
+    jp: "Japanese",
+    kr: "Korea",
+    id: "Indonesia",
+    ch: "Chinese"
+  },
+  symbols: {
+    required: "*",
+    optional: "?"
   },
 
   buttonLabel: {
     submit: "Submit",
     backToLogin: "Back to Login",
     login: "Login",
-    changePassword : "Change Password"
+    changePassword: "Change Password"
   },
 
   footer: {
     footer: "PMG ASIA PACIFIC PTE LTD. All Rights Reserved"
   },
 
-  flag :{
-    auto : "Auto",
-    password : "Password",
-    readonly :"ReadOnly",
+  flag: {
+    auto: "Auto",
+    password: "Password",
+    readonly: "ReadOnly",
+    status: true,
   },
+
 
   hex: {
     fff7e6: "#fff7e6",
@@ -102,7 +128,7 @@ export const Labels = {
     smallText: "SMALL",
     veryVerySmallText: "TINY",
   },
-  
+
   maxWidth: {
     sm: "sm",
     md: "md",
@@ -127,9 +153,7 @@ export const Labels = {
     nowrap: "nowrap",
   },
 
-  border: {
-    fivepxSolidf5f5f5: "0.5px solid #f5f5f5",
-  },
+
 
   margin: {
     mb1: "mb-1",

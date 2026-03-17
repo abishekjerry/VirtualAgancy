@@ -11,9 +11,11 @@ import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
-import { enquirySteps } from  "../../utils/commonFunction/common";
-
+import { getEnquirySteps } from "../../utils/commonFunction/common";
+import { useLanguage } from "../../utils/constants/language";
 const EnquiryDetails = () => {
+    const { getLabel } = useLanguage();
+    const enquirySteps = getEnquirySteps(getLabel);
     const [projectNo, setprojectNo] = useState("");
     const [date, setDate] = useState("");
     const [year, setYear] = useState("");
@@ -74,13 +76,13 @@ const EnquiryDetails = () => {
                 break;
         }
     };
-   
+
     const phases = [
-        { name: "Quote", days: 5 },
-        { name: "Proof", days: 5 },
-        { name: "Production", days: 20 },
-        { name: "File Copies", days: 5 },
-        { name: "Invoicing", days: 10 }
+        { name: getLabel("lbl54"), days: 5 },
+        { name: getLabel("lbl55"), days: 5 },
+        { name: getLabel("lbl56"), days: 20 },
+        { name: getLabel("lbl57"), days: 5 },
+        { name: getLabel("lbl58"), days: 10 }
     ];
     return (
         <>
@@ -89,86 +91,114 @@ const EnquiryDetails = () => {
                     <PStepper steps={enquirySteps} activeStep={1}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PGrid item xs={12} sm={12} md={8}>
+                    <PGrid item xs={12} sm={12} md={9}>
                         <PCard>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PTypography
-                                    labelText={Labels.enquiryDetails.enquiryDetails}
+                                    labelText={getLabel("lbl21")}
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
                                 />
                                 <PTypography
-                                    labelText={Labels.enquiryDetails.enquiryTitle}
+                                    labelText={getLabel("lbl41")}
                                     flag={Labels.fontFlags.smallText}
-                                    color={CommonColors.grey.light}
-                                    weight={FontWeight.regular}
+                                    color={CommonColors.grey.main}
+                                    weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+                            <PGrid container>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
                                         name={"Project No"}
-                                        label={"Project No *"}
+                                        label={`${getLabel("lbl42")} ${Labels.symbols.required}`}
                                         value={projectNo}
-                                        width={250}
-                                        //onChange={this.handleChange}
+                                        //width={100}
+                                    //onChange={this.handleChange}
                                     />
                                     <PDatepicker
                                         name={"Est. delivery"}
-                                        label={"Est. delivery *"}
+                                        label={`${getLabel("lbl43")} ${Labels.symbols.required}`}
                                         value={date}
                                         onChange={(e) => setDate(e.target.value)}
-                                        width={250}
+                                        width={100}
                                     />
                                     <PDatepicker
                                         name={"Date of brief received"}
-                                        label={"Date of brief received *"}
+                                        label={`${getLabel("lbl44")} ${Labels.symbols.required}`}
                                         value={date}
                                         onChange={(e) => setDate(e.target.value)}
-                                        width={250}
+                                        width={100}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTextField
                                         name="description"
-                                        label="Project Description *"
+                                        label={`${getLabel("lbl45")} ${Labels.symbols.required}`}
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         multiline={true}
-                                        rows={8}
-                                        width={500}
+                                        rows={4.5}
+                                        width={100}
                                     // helperText={errors?.description}
                                     />
-                                </PGrid>
-                            </PGrid>
-                            <PGrid container>
-                                <PGrid item xs={12} sm={6} md={6}>
-                                    <PDropdown
-                                        name="Year"
-                                        label="Year *"
-                                        value={year}
-                                        onChange={handleChange}
-                                        options={yearList}
-                                        width={350}
-                                    />
-                                </PGrid>
-                                <PGrid item xs={12} sm={6} md={6}>
-                                    <PDropdown
-                                        name="ProjectQuoteType"
-                                        label="Project Quote Type *"
-                                        value={quoteType}
-                                        onChange={handleChange}
-                                        options={quoteTypeList}
-                                        width={350}
-                                    />
-                                </PGrid>
-                            </PGrid>
+                                    <Box style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                        <PDropdown
+                                            name="ProjectQuoteType"
+                                            label={`${getLabel("lbl46")} ${Labels.symbols.required}`}
+                                            value={quoteType}
+                                            onChange={handleChange}
+                                            options={quoteTypeList}
+                                            width={100}
+                                        />
+                                        <PDropdown
+                                            name="Year"
+                                            label={`${getLabel("lbl47")} ${Labels.symbols.required}`}
+                                            value={year}
+                                            onChange={handleChange}
+                                            options={yearList}
+                                            width={100}
+                                        />
+                                    </Box>
 
+                                </PGrid>
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name="Management Fee Type"
+                                        label={`${getLabel("lbl93")} ${Labels.symbols.required}`}
+                                        value={slaTemplate}
+                                        onChange={handleChange}
+                                        options={templateList}
+                                        width={100}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name="Hybrid"
+                                        label={`${getLabel("lbl94")} ${Labels.symbols.required}`}
+                                        value={slaTemplate}
+                                        onChange={handleChange}
+                                        options={templateList}
+                                        width={100}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name="Project Attribute"
+                                        label={`${getLabel("lbl95")} ${Labels.symbols.required}`}
+                                        value={slaTemplate}
+                                        onChange={handleChange}
+                                        options={templateList}
+                                        width={100}
+                                    />
+                                </PGrid>
+                            </PGrid>
                             <hr className="my-4" />
                             <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
-                                    labelText={Labels.enquiryDetails.statusInformation}
+                                    labelText={getLabel("lbl48")}
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
@@ -178,21 +208,21 @@ const EnquiryDetails = () => {
                                 <PGrid item xs={12} sm={12} md={8}>
                                     <PDropdown
                                         name="SLA Template"
-                                        label="SLA Template *"
+                                        label={`${getLabel("lbl49")} ${Labels.symbols.required}`}
                                         value={slaTemplate}
                                         onChange={handleChange}
                                         options={templateList}
-                                        width={500}
+                                        width={100}
                                     />
                                 </PGrid>
 
                             </PGrid>
 
                             <PGrid container className="fw-semibold mb-4">
-                                <PGrid item md={2} >Phases</PGrid>
-                                <PGrid item md={2} className="text-nowrap">Period (w/days)</PGrid>
-                                <PGrid item md={4} >Start Date</PGrid>
-                                <PGrid item md={4} >End Date</PGrid>
+                                <PGrid item md={2} >{getLabel("lbl50")}</PGrid>
+                                <PGrid item md={2} className="text-nowrap">{getLabel("lbl51")}</PGrid>
+                                <PGrid item md={4} >{getLabel("lbl52")}</PGrid>
+                                <PGrid item md={4} >{getLabel("lbl53")}</PGrid>
                             </PGrid>
 
 
@@ -211,13 +241,13 @@ const EnquiryDetails = () => {
                                         {index === 0 ? (
                                             <PDatepicker
                                                 name={`${phase.name}_start`}
-                                                width={250}
+                                                width={100}
                                             />
                                         ) : (
                                             <PTextField
                                                 name={`${phase.name}_start`}
                                                 placeholder="Start Date"
-                                                width={250}
+                                                //width={100}
                                             />
                                         )}
                                     </PGrid>
@@ -226,7 +256,7 @@ const EnquiryDetails = () => {
                                         <PTextField
                                             name={`${phase.name}_end`}
                                             placeholder="End Date"
-                                            width={230}
+                                            //width={100}
                                         />
                                     </PGrid>
 
@@ -237,7 +267,7 @@ const EnquiryDetails = () => {
                             <PGrid container className="d-flex align-items-center justify-content-between">
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PButton
-                                        label="Exit & Save Draft"
+                                        label={getLabel("lbl37")}
                                         variant="outlined"
                                         onClick={(e) => handleExitDraft(e)}
                                         width={180}
@@ -251,7 +281,7 @@ const EnquiryDetails = () => {
                                     className="d-flex justify-content-end gap-2"
                                 >
                                     <PButton
-                                        label="Back"
+                                        label={getLabel("lbl38")}
                                         variant="contained"
                                         color={CommonColors.grey.main}
                                         onClick={(e) => handleBack(e)}
@@ -259,7 +289,7 @@ const EnquiryDetails = () => {
                                     />
 
                                     <PButton
-                                        label="Next"
+                                        label={getLabel("lbl39")}
                                         variant="contained"
                                         color={CommonColors.green.main}
                                         onClick={(e) => handleSubmit(e, true)}
@@ -270,7 +300,7 @@ const EnquiryDetails = () => {
                             </PGrid>
                         </PCard>
                     </PGrid>
-                    <PGrid item xs={12} sm={12} md={4}>
+                    <PGrid item xs={12} sm={12} md={3}>
                     </PGrid>
                 </PGrid>
             </Box>

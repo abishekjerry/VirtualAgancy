@@ -17,31 +17,34 @@ import { Labels } from "../../utils/constants/labels";
 import PDashboardCard from "../../component/PDashboardCard/PDashboardCard";
 import PTypography from "../../component/PTypography/PTypography";
 import { FontWeight } from "../../utils/constants/fonts";
+import { useLanguage } from "../../utils/constants/language";
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { getLabel } = useLanguage();
   const apps = [
     {
-      title: "ENQUIRIES",
+      title: getLabel("lbl03"),
       icon: <DescriptionIcon />,
       iconBg: "#6366f1",
       route: labelRoutes.eqDashboard,
       showNavIcon: true // override default
     },
     {
-      title: "EBIDDING",
+      title: getLabel("lbl04"),
       icon: <AccessTimeIcon />,
       iconBg: "#8b5cf6",
       route: null
     },
     {
-      title: "ECATALOGUE",
+      title: getLabel("lbl05"),
       icon: <MenuBookIcon />,
       iconBg: "#6366f1",
       route: null
     },
     {
-      title: "REPORTS",
+      title: getLabel("lbl06"),
       icon: <BarChartIcon />,
       iconBg: "#4f46e5",
       route: null
@@ -63,7 +66,7 @@ const Dashboard = () => {
             {/* Header */}
             <PGrid item className={Labels.margin.mb3}>
               <PTypography
-                labelText={Labels.dashboard.welcomeToVirtualAgency}                
+                labelText= {getLabel("lbl02")}              
                 flag={Labels.fontFlags.header}
                 style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                 weight={FontWeight.bold}

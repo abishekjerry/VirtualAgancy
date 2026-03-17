@@ -47,7 +47,7 @@ const PSearch = ({ value, onChange ,width , placeholder}) => {
             <IconWrapper>
                 <SearchIcon />
             </IconWrapper>
-            <StyledInput placeholder= { "Search…" || placeholder} value={value} onChange={onChange} fullWidth />
+            <StyledInput placeholder={placeholder || "Search…"} value={value} onChange={onChange} fullWidth />
         </SearchContainer>
     );
 };

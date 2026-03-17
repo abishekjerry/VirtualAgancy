@@ -10,17 +10,19 @@ import './index.css'
 import store, { persistor } from "./redux/store/store"; // Import both store and persistor
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
+import { LanguageProvider } from "./utils/constants/language";
 const container = document.getElementById("root");
 const root = createRoot(container);
 
 root.render(
-   <BrowserRouter>
-  {/* </BrowserRouter><BrowserRouter basename="/iweb/virtualagency/vatest"> */}
+  <BrowserRouter>
+    {/* </BrowserRouter><BrowserRouter basename="/iweb/virtualagency/vatest"> */}
     <Provider store={store}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <App />
-      </LocalizationProvider>
+      <LanguageProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <App />
+        </LocalizationProvider>
+      </LanguageProvider>
     </Provider>
   </BrowserRouter>
 );

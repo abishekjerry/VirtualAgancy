@@ -12,13 +12,13 @@ const PDropdown = ({
   required = false,
   error = false,
   helperText = "",
-  width = 200,
+  width = "",
   mt = 0.4,
   multiple = false,
   flag = ""
 }) => {
   const baseSx = {
-    width: width ? `${width}px` : "100%",
+    width: width ? `${width}%` : Labels.fontSize.xxxxl,
     mt,
 
     // ── Label ──────────────────────────────────────────
@@ -168,7 +168,7 @@ const PDropdown = ({
         </MenuItem>
 
         {options.map((option, index) => (
-          <MenuItem key={index} value={option.value}>
+          <MenuItem key={index} value={option.value} >
             {option.label}
           </MenuItem>
         ))}

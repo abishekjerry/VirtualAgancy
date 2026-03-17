@@ -9,9 +9,14 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { enquirySteps } from "../../utils/commonFunction/common"
+import { getEnquirySteps } from "../../utils/commonFunction/common"
 import AddIcon from "@mui/icons-material/Add"
+import { useLanguage } from "../../utils/constants/language";
+
+
 const ClientInfo = () => {
+    const { getLabel } = useLanguage();
+    const enquirySteps = getEnquirySteps(getLabel);
     const [division, setDivision] = useState("");
     const [brand, setBrand] = useState("");
     const [clientContact, setClientContact] = useState("");
@@ -84,21 +89,21 @@ const ClientInfo = () => {
                     <PStepper steps={enquirySteps} activeStep={0}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PGrid item xs={12} sm={12} md={8}>
+                    <PGrid item xs={12} sm={12} md={9}>
                         <PCard>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PTypography
-                                    labelText={Labels.clientInfo.clientInformation}
+                                    labelText={getLabel("lbl25")}
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
                                 //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                                 />
                                 <PTypography
-                                    labelText={Labels.clientInfo.divisionTitle}
+                                    labelText={getLabel("lbl26")}
                                     flag={Labels.fontFlags.smallText}
-                                    color={CommonColors.grey.light}
-                                    weight={FontWeight.regular}
+                                    color={CommonColors.grey.main}
+                                    weight={FontWeight.bold}
                                 //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                                 />
                             </PGrid>
@@ -107,11 +112,11 @@ const ClientInfo = () => {
                                 <PGrid item xs={12} sm={12} md={12}>
                                     <PDropdown
                                         name="division"
-                                        label="Division *"
+                                        label={`${getLabel("lbl27")} ${Labels.symbols.required}`}
                                         value={division}
                                         onChange={handleChange}
                                         options={divisionList}
-                                        width={750}
+                                        width={100}
                                     />
                                 </PGrid>
 
@@ -121,7 +126,7 @@ const ClientInfo = () => {
 
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText="Client Name"
+                                        labelText={getLabel("lbl28")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
@@ -131,7 +136,7 @@ const ClientInfo = () => {
 
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText="Country"
+                                        labelText={getLabel("lbl29")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
@@ -141,7 +146,7 @@ const ClientInfo = () => {
 
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText="Entity Name"
+                                        labelText={getLabel("lbl30")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
@@ -154,7 +159,7 @@ const ClientInfo = () => {
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText="Business Unit"
+                                        labelText={getLabel("lbl31")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
@@ -163,7 +168,7 @@ const ClientInfo = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText="Channel"
+                                        labelText={getLabel("lbl09")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
@@ -172,7 +177,7 @@ const ClientInfo = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText="Client Code"
+                                        labelText={getLabel("lbl32")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
@@ -180,6 +185,17 @@ const ClientInfo = () => {
                                     />
                                 </PGrid>
 
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PTypography
+                                        labelText={getLabel("lbl91")}
+                                        weight={FontWeight.bold}
+                                    />
+                                    <PTypography
+                                        labelText={"Powder & Liquid Beverage"}
+                                    />
+                                </PGrid>
                             </PGrid>
 
                             {/* Row 3 */}
@@ -193,20 +209,20 @@ const ClientInfo = () => {
                                 >
                                     <PDropdown
                                         name="brand"
-                                        label="Brands *"
+                                        label={`${getLabel("lbl33")} ${Labels.symbols.required}`}
                                         value={brand}
                                         onChange={handleChange}
                                         options={brandList}
-                                        width={300}
+                                        width={100}
                                     />
                                     <Tooltip title="Add New Brand" arrow>
                                         <IconButton
                                             sx={{
                                                 backgroundColor: "#d5d5d5",
                                                 color: "#fff",
-                                                width: 36,
-                                                height: 36,
-                                                marginTop: "11px",
+                                                width: 30,
+                                                height: 30,
+                                                marginTop: "9px",
                                                 "&:hover": {
                                                     backgroundColor: "#1976d2",
                                                 },
@@ -221,11 +237,11 @@ const ClientInfo = () => {
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
                                         name="deliveryCountry"
-                                        label="Delivery Country *"
+                                        label={`${getLabel("lbl34")} ${Labels.symbols.required}`}
                                         value={deliveryCountry}
                                         onChange={handleChange}
                                         options={countryList}
-                                        width={350}
+                                        width={100}
                                     />
 
                                 </PGrid>
@@ -236,20 +252,20 @@ const ClientInfo = () => {
                                 <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                     <PDropdown
                                         name="clientContact"
-                                        label="Client Contact *"
+                                        label={`${getLabel("lbl35")} ${Labels.symbols.required}`}
                                         value={clientContact}
                                         onChange={handleChange}
                                         options={clientContactList}
-                                        width={300}
+                                        width={100}
                                     />
                                     <Tooltip title="Add New Contant" arrow>
                                         <IconButton
                                             sx={{
                                                 backgroundColor: "#d5d5d5",
                                                 color: "#fff",
-                                                width: 36,
-                                                height: 36,
-                                                marginTop: "11px",
+                                                width: 30,
+                                                height: 30,
+                                                marginTop: "9px",
                                                 "&:hover": {
                                                     backgroundColor: "#1976d2",
                                                 },
@@ -263,15 +279,26 @@ const ClientInfo = () => {
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
                                         name="pmgEntity"
-                                        label="PMG Entity *"
+                                        label={`${getLabel("lbl36")} ${Labels.symbols.required}`}
                                         value={pmgEntity}
                                         onChange={handleChange}
                                         options={pmgEntityList}
-                                        width={350}
+                                        width={100}
                                     />
                                 </PGrid>
                             </PGrid >
-
+                            <PGrid container className={Labels.margin.mb4}>                             
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PDropdown
+                                        name="Above / At Market"
+                                        label={`${getLabel("lbl92")} ${Labels.symbols.required}`}
+                                        value={pmgEntity}
+                                        onChange={handleChange}
+                                        options={pmgEntityList}
+                                        width={100}
+                                    />
+                                </PGrid>
+                            </PGrid >
                             <hr className="my-4" />
 
                             <PGrid container className="d-flex align-items-center justify-content-between">
@@ -279,7 +306,7 @@ const ClientInfo = () => {
                                 {/* Left Button */}
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PButton
-                                        label="Exit & Save Draft"
+                                        label={getLabel("lbl37")}
                                         variant="outlined"
                                         onClick={(e) => handleExitDraft(e)}
                                         width={180}
@@ -295,7 +322,7 @@ const ClientInfo = () => {
                                     className="d-flex justify-content-end gap-2"
                                 >
                                     <PButton
-                                        label="Back"
+                                        label={getLabel("lbl38")}
                                         variant="contained"
                                         color={CommonColors.grey.main}
                                         onClick={(e) => handleBack(e)}
@@ -303,7 +330,7 @@ const ClientInfo = () => {
                                     />
 
                                     <PButton
-                                        label="Next"
+                                        label={getLabel("lbl39")}
                                         variant="contained"
                                         color={CommonColors.green.main}
                                         onClick={(e) => handleSubmit(e, true)}
@@ -314,7 +341,7 @@ const ClientInfo = () => {
                             </PGrid>
                         </PCard>
                     </PGrid>
-                    <PGrid item xs={12} sm={12} md={4}>
+                    <PGrid item xs={12} sm={12} md={3}>
                         {/* <PCard>
                             <PGrid container>
                                 <PTypography

@@ -15,8 +15,10 @@ import PSidebar from "../../component/PSidebar/PSidebar";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { FontWeight } from "../../utils/constants/fonts";
 import { useLocation } from "react-router-dom";
+import { useLanguage } from "../../utils/constants/language";
 function PageLayout() {
   const navigate = useNavigate();
+  const { getLabel } = useLanguage();
   const [openMenu, setOpenMenu] = useState(null);
   const [isDashborad, setIsDashborad] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -25,7 +27,7 @@ function PageLayout() {
     setSidebarOpen(!sidebarOpen);
   };
 
-   const menuItems = [
+  const menuItems = [
     {
       icon: <FaHome size={20} />,
       name: "Dashboard",
@@ -64,11 +66,10 @@ function PageLayout() {
   };
 
   const title = findTitle(menuItems, location.pathname);
- 
   const user = {
-    name: "demouser.sg",
+    name: localStorage.getItem("user"),
     avatar: "",
-    email: "",
+    email: "", //localStorage.getItem("email"),
   };
 
   return (
@@ -78,7 +79,7 @@ function PageLayout() {
         name={user.name}
         email={user.email}
         avatar={user.avatar}
-        title ={title}
+        title={title}
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
       />
@@ -101,17 +102,17 @@ function PageLayout() {
           </div>
 
           <div className="footer">
-              <img
+            <img
               src={FooterLogo}
               alt={Labels.footerLogo}
               className="footer-logo"
             />
-            <br/>
+            <br />
             <PTypography
-              labelText={`© ${new Date().getFullYear()} ${Labels.footer.footer}`}
+              labelText={`© ${new Date().getFullYear()} ${getLabel("lbl07")}`}
               flag={Labels.fontFlags.smallText}
               font={FontWeight.bold}
-            />   
+            />
           </div>
         </div>
 

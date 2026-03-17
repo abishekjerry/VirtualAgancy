@@ -1,4 +1,5 @@
 import { labelRoutes } from "../../navigations/labelRoutes";
+import { API_HEADERS } from "../commonFunction/common";
 
 export const PostApi = (url, data = "", isDashboard = false) => {
   const isFormData = data instanceof FormData;
@@ -8,23 +9,24 @@ export const PostApi = (url, data = "", isDashboard = false) => {
     method: "POST",
     headers: {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...API_HEADERS
     },
     body: isFormData ? data : JSON.stringify(data),
   })
     .then(async (response) => {
       if (response.status === 401) {
         localStorage.removeItem("token");
-        localStorage.setItem("unAuthorized", true)
-        if (isDashboard) return
-        window.location.href = labelRoutes.userDashboard;
+        localStorage.setItem("unAuthorized", true);
+
+        if (isDashboard) return;
+        window.location.href = labelRoutes.dashboard;
         return;
       }
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         return response.json();
@@ -33,7 +35,6 @@ export const PostApi = (url, data = "", isDashboard = false) => {
       }
     })
     .catch((error) => {
-      console.error("POST request failed:", error);
       return {
         status: "F",
         message: error.message || "No response from server",
@@ -51,6 +52,7 @@ export const GetApi = (url, headers = {}, isDashboard = false) => {
       "Content-Type": "application/json",
       ...headers,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...API_HEADERS
     },
   })
     .then(async (response) => {
@@ -67,12 +69,10 @@ export const GetApi = (url, headers = {}, isDashboard = false) => {
       try {
         return { status: "S", data: JSON.parse(raw) };
       } catch (err) {
-        console.error("❌ Invalid JSON:", raw);
         return { status: "F", message: "Invalid JSON from server" };
       }
     })
     .catch((error) => {
-      console.error("GET request failed:", error);
       return {
         status: "F",
         message: error.message || "Network request failed",

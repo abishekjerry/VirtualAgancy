@@ -2,7 +2,7 @@ import { FontFamily, FontSize } from "../constants/fonts";
 import { CommonColors } from "../constants/colors";
 
 export const FormControlBaseStyle = (width = "100%", mt = 0.4) => ({
-  width: width ? `${width}px` : "100%",
+  width: width ? `${width}%` : "100%",
   mt,
 
   // ───── Label ─────────────────────────────

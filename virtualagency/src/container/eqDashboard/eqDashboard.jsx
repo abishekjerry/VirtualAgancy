@@ -28,40 +28,41 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleIcon from '@mui/icons-material/TaskAlt';
 import { FontFamily, FontWeight } from '../../utils/constants/fonts'
-
+import { useLanguage } from "../../utils/constants/language";
 
 const EqDashboard = () => {
   const [date, setDate] = useState("");
   const [chartType, setChartType] = useState("pie");
   const [country, setCountry] = useState("");
   const [user, setUser] = useState("");
+  const { getLabel } = useLanguage();
 
   const cardData = [
     {
-      title: "Active RFQs",
+      title: getLabel("lbl12"),
       value: 105,
-      subtitle: "Jobs Pending Suppliers",
+      subtitle: getLabel("lbl16"),
       iconColor: Labels.primary,
       icon: <AssignmentIcon />,
     },
     {
-      title: "For Approval",
+      title: getLabel("lbl13"),
       value: 2,
-      subtitle: "Jobs Pending Client Approval",
+      subtitle: getLabel("lbl17"),
       iconColor: Labels.primary,
       icon: <PendingActionsIcon />,
     },
     {
-      title: "Awarded",
+      title: getLabel("lbl14"),
       value: 18,
-      subtitle: "Jobs Ready for Production",
+      subtitle: getLabel("lbl18"),
       iconColor: Labels.primary,
       icon: <EmojiEventsIcon />,
     },
     {
-      title: "Completed",
+      title: getLabel("lbl15"),
       value: 11,
-      subtitle: "Jobs Ready for Production",
+      subtitle: getLabel("lbl18"),
       iconColor: Labels.primary,
       icon: <TaskAltIcon />,
     },
@@ -234,7 +235,7 @@ const EqDashboard = () => {
         <PGrid container className={Labels.margin.mb3}>
           <PGrid item xs={12} sm={6} md={7}>
             <PTypography
-              labelText="Welcome Back, DemoUser"
+              labelText={`${getLabel("lbl08")}, ${localStorage.getItem("user")}`}
               weight={FontWeight.bold}
               flag={Labels.fontFlags.subHeader}
               color={CommonColors.red}
@@ -253,10 +254,10 @@ const EqDashboard = () => {
               width={250}
             />
             <PButton
-              label="Submit"
+              label={getLabel("lbl40")}
               onClick={(e) => handleSubmit(e, true)}
               fullWidth
-              width={150}
+              width={200}
 
             />
           </PGrid>
@@ -306,7 +307,7 @@ const EqDashboard = () => {
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
-                    label="Country"
+                    label = {getLabel("lbl09")}
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     options={counties}
@@ -316,7 +317,7 @@ const EqDashboard = () => {
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
-                    label="CreatedBy"
+                    label= {getLabel("lbl10")}
                     value={user}
                     onChange={(e) => setUser(e.target.value)}
                     options={userList}

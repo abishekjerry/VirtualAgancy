@@ -37,7 +37,7 @@ export default function PTextField({
     variant = "outlined",
     inputProps = {},
     startIcon,
-    width,
+    width = "",
     maxLength,
     multiple = false,
     defaultFileUrl = "",
@@ -87,15 +87,15 @@ export default function PTextField({
     };
     //const baseSx = FormControlBaseStyle(width, mt);
     const baseSx = {
-        width: width || Labels.fontSize.xxxxl,
+        width:  width ? `${width}%` : Labels.fontSize.xxxxl,
         mt: 0.4,
         //mt: 1,
         "& .MuiOutlinedInput-root": {
-            borderRadius: "" || "12px",
+            borderRadius: "12px",
             backgroundColor: "#ffffff",
             transition: "all 0.3s ease",
             "& fieldset": {
-                borderColor: helperText ? "#d32f2f" : "#62BCD8",
+                borderColor: helperText ? "#d32f2f" : "#ccc",
             },
             "&:hover fieldset": {
                 borderColor: "#62BCD8",
@@ -104,6 +104,15 @@ export default function PTextField({
                 borderColor: "#62BCD8",
                 boxShadow: "0 0 0 3px rgba(98, 188, 216, 0.25)",
             },
+        },
+        "& .MuiInputLabel-root": {
+            fontFamily: FontFamily.bold,
+            fontSize: FontSize.textField.label,
+            color: "#9e9e9e",
+            top: "0px",
+            "&.Mui-focused": { color: "#62BCD8" },
+            "&.Mui-error": { color: "#d32f2f" },
+            "&.Mui-disabled": { color: "#bdbdbd" },
         },
         "& .MuiInputBase-input": {
             fontSize: FontSize.textField.label,

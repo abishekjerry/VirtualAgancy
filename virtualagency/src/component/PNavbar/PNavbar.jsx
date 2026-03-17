@@ -23,6 +23,7 @@ import PTypography from "../PTypography/PTypography";
 import { FaBars } from "react-icons/fa";
 import { FontWeight } from "../../utils/constants/fonts";
 import { CommonColors } from "../../utils/constants/colors";
+import { useLanguage } from "../../utils/constants/language";
 const PNavbar = ({
   name = "User",
   email = "",
@@ -32,24 +33,45 @@ const PNavbar = ({
   toggleSidebar
 }) => {
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-
   const navigate = useNavigate();
+  const { getLabel, changeLanguage, language } = useLanguage();
 
-  const handleOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  const [menuState, setMenuState] = useState({
+    anchorEl: null,
+    type: null
+  });
+
+  const open = Boolean(menuState.anchorEl);
+
+  const handleOpenMenu = (event, type) => {
+    setMenuState({
+      anchorEl: event.currentTarget,
+      type
+    });
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleCloseMenu = () => {
+    setMenuState({
+      anchorEl: null,
+      type: null
+    });
   };
 
   const handleLogout = () => {
-    handleClose();
-    navigate(labelRoutes.home, { replace: true }); // redirect login page
+    handleCloseMenu();
+    localStorage.clear();
+    navigate(labelRoutes.home, { replace: true });
   };
 
+  const selectedStyle = {
+    "&.Mui-selected": {
+      backgroundColor: "#1976d2",
+      color: "#fff"
+    },
+    "&.Mui-selected:hover": {
+      backgroundColor: "#1565c0"
+    }
+  };
   return (
     <AppBar
       position="sticky"
@@ -66,52 +88,49 @@ const PNavbar = ({
           minHeight: 50
         }}
       >
-        {/* Left Section */}
+
+        {/* LEFT SECTION */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton onClick={toggleSidebar}>
             <FaBars size={20} />
           </IconButton>
 
           <Box className="mt-1">
-            <img src={Logo} alt="Logo" style={{ height: 35 }} />
+            <img src={Logo} alt="Logo" style={{ height: 55,width: 60 }} />
           </Box>
         </Box>
 
-        {/* Center Section */}
-
+        {/* CENTER SECTION */}
         <Box
           sx={{
             position: "absolute",
             left: "50%",
             transform: "translateX(-50%)",
             textAlign: "center",
-            margin:"3px"
+            margin: "3px"
           }}
         >
           <PTypography
-            labelText= { title == "" ? "" : title !== "Dashboard" ? `${title} - ${Labels.dashboard.agencyPortal}` : Labels.dashboard.agencyPortal }
+            labelText={
+              title == ""
+                ? ""
+                : title !== "Dashboard"
+                  ? `${title} - ${getLabel("lbl01")}`
+                  : getLabel("lbl01")
+            }
             flag={Labels.fontFlags.subHeader}
             color={CommonColors.red.main}
             weight={FontWeight.bold}
-            style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+            style={{
+              fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            }}
           />
         </Box>
 
-
-        {/* Right Section */}
+        {/* RIGHT SECTION */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* Language */}
-          <IconButton
-            sx={{
-              border: "1px solid #e2e8f0",
-              color: "#64748b",
-              "&:hover": { bgcolor: "#f8fafc" }
-            }}
-          >
-            <Language fontSize="small" />
-          </IconButton>
 
-          {/* Notification */}
+          {/* NOTIFICATION */}
           <IconButton
             sx={{
               border: "1px solid #e2e8f0",
@@ -132,10 +151,24 @@ const PNavbar = ({
             </Badge>
           </IconButton>
 
-          {/* Profile */}
+          {/* LANGUAGE */}
+          <IconButton
+            onMouseEnter={(e) => handleOpenMenu(e, "language")}
+            sx={{
+              border: "1px solid #e2e8f0",
+              color: "#64748b",
+              "&:hover": { bgcolor: "#f8fafc" }
+            }}
+          >
+            <Language fontSize="small" />
+          </IconButton>
+
+
+
+          {/* PROFILE */}
           <Paper
-            onClick={handleOpen}
-            onMouseEnter={handleOpen}
+            onClick={(e) => handleOpenMenu(e, "profile")}
+            onMouseEnter={(e) => handleOpenMenu(e, "profile")}
             elevation={0}
             sx={{
               display: "flex",
@@ -171,11 +204,11 @@ const PNavbar = ({
         </Box>
       </Toolbar>
 
-      {/* Popup Menu */}
+      {/* PROFILE MENU */}
       <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
+        anchorEl={menuState.anchorEl}
+        open={open && menuState.type === "profile"}
+        onClose={handleCloseMenu}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "right"
@@ -184,11 +217,7 @@ const PNavbar = ({
           vertical: "top",
           horizontal: "right"
         }}
-        PaperProps={{
-          sx: {
-            mt: 1.5
-          }
-        }}
+        PaperProps={{ onMouseLeave: handleCloseMenu, sx: { mt: 1.5 } }}
       >
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
@@ -197,13 +226,33 @@ const PNavbar = ({
           Logout
         </MenuItem>
       </Menu>
+
+      {/* LANGUAGE MENU */}
+      <Menu
+        anchorEl={menuState.anchorEl}
+        open={open && menuState.type === "language"}
+        onClose={handleCloseMenu}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left"
+        }}
+        PaperProps={{
+          onMouseLeave: handleCloseMenu,
+          sx: { width: 140, mt: 1.5 }
+        }}
+      >
+        <MenuItem selected={language === Labels.language.en} sx={selectedStyle} onClick={() => { changeLanguage(Labels.language.en) }}>EN</MenuItem>
+        <MenuItem selected={language === Labels.language.id} sx={selectedStyle} onClick={() => { changeLanguage(Labels.language.id) }}>ID</MenuItem>
+        <MenuItem selected={language === Labels.language.kr} sx={selectedStyle} onClick={() => { changeLanguage(Labels.language.kr) }}>KR</MenuItem>
+        <MenuItem selected={language === Labels.language.jp} sx={selectedStyle} onClick={() => { changeLanguage(Labels.language.jp) }}>JP</MenuItem>
+        <MenuItem selected={language === Labels.language.cn} sx={selectedStyle} onClick={() => { changeLanguage(Labels.language.ch) }}>CH (Traditional)</MenuItem>
+      </Menu>
     </AppBar>
-
-
   );
 };
 
 export default PNavbar;
-
-
-

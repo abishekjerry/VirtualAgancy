@@ -5,9 +5,11 @@ import PTypography from "../PTypography/PTypography";
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 import { FontWeight } from "../../utils/constants/fonts";
+import { useLanguage } from "../../utils/constants/language";
 
 export default function PStepper({ steps = [], activeStep = 0 }) {
   const navigate = useNavigate();
+  const { getLabel } = useLanguage();
   const handleRedirect = (step) => {
     if (step.url) {
       navigate(step.url);
@@ -18,7 +20,7 @@ export default function PStepper({ steps = [], activeStep = 0 }) {
     <>
       <PGrid container className="text-center">
         <PTypography
-          labelText={"Create Enquiry"}
+          labelText={getLabel("lbl19")}
           flag={Labels.fontFlags.mainHeader}
           color={CommonColors.grey.main}
           weight={FontWeight.bold}

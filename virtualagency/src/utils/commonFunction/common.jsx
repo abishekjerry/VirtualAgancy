@@ -63,7 +63,7 @@ export const getfield = (fieldName) => {
   return fieldName;
 };
 
-export const isSuccess = (a) => a?.status === Labels.res.status;
+export const isSuccess = (a) => a?.Status === Labels.flag.status;
 
 export function getErrorKey(name = "") {
   return name.replace(/^(txt_|dd_|ddl_|cb_)/, "");
@@ -159,10 +159,17 @@ export function isNotEmpty(value) {
   return true;
 }
 
- export const enquirySteps = [
-      { text: "Client Info", url: labelRoutes.clientInfo },
-      { text: "Enquiry Details", url: labelRoutes.enquiryDetails },
-      { text: "Line Items", url: "/clientInfo" },
-      { text: "Suppliers", url: "/clientInfo" },
-      { text: "Review", url: "/clientInfo" }
-  ];
+ export const getEnquirySteps = (getLabel) => [
+  { text: getLabel("lbl20"), url: labelRoutes.clientInfo },
+  { text: getLabel("lbl21"), url: labelRoutes.enquiryDetails },
+  { text: getLabel("lbl22"), url: labelRoutes.lineItems },
+  { text: getLabel("lbl23"), url: labelRoutes.suppliers },
+  { text: getLabel("lbl24"), url: "/clientInfo" }
+];
+
+export const API_HEADERS = {
+  "PMG-Secret-KEY": "dslgjhfg087DFFh50821571gi",
+  "PMG-Account": "Nestle",
+  "PMG-API-KEY": "sdjfhgdf9847348dfdHJKD97888JDU99"
+};
+  
