@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Box, Grid, Button, Typography, Container, Paper, IconButton, Tooltip } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Grid, Button, Typography, Container, Paper, IconButton, Tooltip, Skeleton } from "@mui/material";
 import PNavbar from "../../component/PNavbar/PNavbar";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
@@ -29,39 +29,102 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleIcon from '@mui/icons-material/TaskAlt';
 import { FontFamily, FontWeight } from '../../utils/constants/fonts'
 import { useLanguage } from "../../utils/constants/language";
+import { Dashboard_API } from "../../utils/api/apiUrl";
+import { PostApi } from "../../utils/api/networking";
+import { isSuccess } from "../../utils/commonFunction/common";
+import { useNavigate } from "react-router-dom";
+import { labelRoutes } from "../../navigations/labelRoutes";
 
 const EqDashboard = () => {
+  const navigate = useNavigate();
   const [date, setDate] = useState("");
   const [chartType, setChartType] = useState("pie");
   const [country, setCountry] = useState("");
   const [user, setUser] = useState("");
   const { getLabel } = useLanguage();
+  const [rows, setRows] = useState([]);
+  const [summary, setSummary] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const res = await PostApi(Dashboard_API.Dashboard, {
+          userCountryId: 12,
+          createdName: 0,
+          enqUId: "",
+          projectNo: "",
+          startDate: "",
+          endDate: "",
+          statusId: "",
+          role: "Admin",
+          jobposition: "",
+          client: "",
+          username: "demouser.sg"
+        });
+
+        const data = res?.data;
+
+        if (isSuccess(res)) {
+          setSummary(data.summary || {});
+
+          const formattedRows = (data.detailed || []).map((item) => ({
+            enquiryId: item.enqUId,
+            projectNumber: item.projectNo,
+            projectName: item.projectDesc,
+            requestedDate: item.serverTime,
+            status: item.statusName,
+            surveyStatus: item.surveyStatusName
+          }));
+
+          setRows(formattedRows);
+        }
+      } catch (error) {
+        console.error("API Error", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const columns = [
+    { field: "enquiryId", header: "Enquiry ID" },
+    { field: "projectNumber", header: "Project Number" },
+    { field: "projectName", header: "Project Name" },
+    { field: "requestedDate", header: "Requested Date" },
+    { field: "status", header: "Status" },
+    { field: "surveyStatus", header: "Survey Status" },
+  ];
 
   const cardData = [
     {
       title: getLabel("lbl12"),
-      value: 105,
+      value: summary.active || 0,
       subtitle: getLabel("lbl16"),
       iconColor: Labels.primary,
       icon: <AssignmentIcon />,
     },
     {
       title: getLabel("lbl13"),
-      value: 2,
+      value: summary.approval || 0,
       subtitle: getLabel("lbl17"),
       iconColor: Labels.primary,
       icon: <PendingActionsIcon />,
     },
     {
       title: getLabel("lbl14"),
-      value: 18,
+      value: summary.awarded || 0,
       subtitle: getLabel("lbl18"),
       iconColor: Labels.primary,
       icon: <EmojiEventsIcon />,
     },
     {
       title: getLabel("lbl15"),
-      value: 11,
+      value: summary.completed || 0,
       subtitle: getLabel("lbl18"),
       iconColor: Labels.primary,
       icon: <TaskAltIcon />,
@@ -80,97 +143,8 @@ const EqDashboard = () => {
   ];
 
 
-  const columns = [
-    { field: "enquiryId", header: "Enquiry ID" },
-    { field: "projectNumber", header: "Project Number" },
-    { field: "projectName", header: "Project Name" },
-    { field: "requestedDate", header: "Requested Date" },
-    { field: "status", header: "Status" },
-    { field: "surveyStatus", header: "Survey Status" },
 
-  ];
-  const rows = [
-    {
-      enquiryId: "ENQ000445",
-      projectNumber: "",
-      projectName: "",
-      requestedDate: "06/01/2026",
-      status: "Draft",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000428",
-      projectNumber: "PH23454",
-      projectName: "PH23454",
-      requestedDate: "12/08/2025",
-      status: "RFQ Sent To Supplier",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000403",
-      projectNumber: "TestEnqRepeatItem_PH",
-      projectName: "TestEnqRepeatItem_PH",
-      requestedDate: "17/07/2025",
-      status: "Quotes Received From Suppliers",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000402",
-      projectNumber: "TestingIssue_PH",
-      projectName: "TestingIssue_PH",
-      requestedDate: "03/07/2025",
-      status: "Draft",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000401",
-      projectNumber: "TestEnquiryNew_PH",
-      projectName: "TestEnquiryNew_PH",
-      requestedDate: "20/06/2025",
-      status: "Quotes Received From Suppliers",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000400",
-      projectNumber: "test proj",
-      projectName: "test proj",
-      requestedDate: "10/06/2025",
-      status: "Quotes Received From Suppliers",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000399",
-      projectNumber: "TestClientPage_PH",
-      projectName: "TestClientPage_PH",
-      requestedDate: "04/06/2025",
-      status: "Quote Sent To Customer",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000398",
-      projectNumber: "test proj",
-      projectName: "Test Proj",
-      requestedDate: "15/05/2025",
-      status: "Quotes Received From Suppliers",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000397",
-      projectNumber: "test proj",
-      projectName: "test proj",
-      requestedDate: "15/05/2025",
-      status: "Quotes Received From Suppliers",
-      surveyStatus: ""
-    },
-    {
-      enquiryId: "ENQ000396",
-      projectNumber: "Test proj",
-      projectName: "test proj",
-      requestedDate: "14/05/2025",
-      status: "Draft",
-      surveyStatus: ""
-    }
-  ]
+
   const chartOptions = [
     {
       label: "Line",
@@ -225,6 +199,7 @@ const EqDashboard = () => {
     { icon: <FileDownloadIcon fontSize="small" />, tooltip: "Export", action: handleExport },
     { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleChoose }
   ];
+
 
 
   const selected = chartOptions.find(c => c.value === chartType);
@@ -285,7 +260,7 @@ const EqDashboard = () => {
             </Box>
           </PGrid>
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "6px 0px", }}>
-            <div style={{ display: "flex", justifyContent: "flex-end", }} >
+            <div style={{ display: "flex", justifyContent: "flex-end", }} >         
               <PToggle
                 options={chartOptions}
                 value={chartType}
@@ -307,7 +282,7 @@ const EqDashboard = () => {
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
-                    label = {getLabel("lbl09")}
+                    label={getLabel("lbl09")}
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     options={counties}
@@ -317,7 +292,7 @@ const EqDashboard = () => {
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
-                    label= {getLabel("lbl10")}
+                    label={getLabel("lbl10")}
                     value={user}
                     onChange={(e) => setUser(e.target.value)}
                     options={userList}
@@ -329,7 +304,10 @@ const EqDashboard = () => {
 
               {/* flexGrow ensures the table area fills the card height */}
               <div style={{ flexGrow: 1 }}>
-                <PTable columns={columns} rows={rows} />
+                {loading ? (
+                  <Skeleton variant="rectangular" height={300} />
+                ) : (
+                  <PTable columns={columns} rows={rows} onClick={(row) => navigate(labelRoutes.clientInfo)} />)}
               </div>
             </PCard>
           </PGrid>

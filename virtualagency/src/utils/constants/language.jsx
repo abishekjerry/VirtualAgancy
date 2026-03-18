@@ -15,7 +15,7 @@ export const LanguageProvider = ({ children }) => {
         Lang: lang
       });
       if (isSuccess(response)) {
-        setLabels(response.Data);
+        setLabels(response.data);
         localStorage.setItem("lang", lang);
       } else {
         setLabels({});

@@ -63,7 +63,7 @@ export const getfield = (fieldName) => {
   return fieldName;
 };
 
-export const isSuccess = (a) => a?.Status === Labels.flag.status;
+export const isSuccess = (a) => a?.status === Labels.flag.status;
 
 export function getErrorKey(name = "") {
   return name.replace(/^(txt_|dd_|ddl_|cb_)/, "");

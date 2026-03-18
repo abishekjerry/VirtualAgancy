@@ -66,27 +66,6 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Type of Job "}
-                                        label={`${getLabel("lbl60")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
-                                        onChange={handleChange}
-                                        options={typeofJobOptions}
-                                    //width={230}
-                                    />
-                                </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PDropdown
-                                        name={"Item Category "}
-                                        label={`${getLabel("lbl61")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
-                                        onChange={handleChange}
-                                        options={typeofJobOptions}
-                                    //width={230}
-                                    />
-
-                                </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PDropdown
                                         name={"Urgent / Non-Urgent "}
                                         label={`${getLabel("lbl62")} ${Labels.symbols.required}`}
                                         value={typeofJob}
@@ -95,28 +74,18 @@ const LineItems = () => {
                                     //width={230}
                                     />
 
-                                </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PDropdown
-                                        name={"Dictated Job  "}
-                                        label={`${getLabel("lbl63")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
-                                        onChange={handleChange}
-                                        options={yesNoOptions}
-                                    //width={230}
-                                    />
+
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Item Type  "}
-                                        label={`${getLabel("lbl64")} ${Labels.symbols.required}`}
+                                        name={"Type of Job "}
+                                        label={`${getLabel("lbl60")} ${Labels.symbols.required}`}
                                         value={typeofJob}
                                         onChange={handleChange}
                                         options={typeofJobOptions}
                                     //width={230}
                                     />
+
 
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -131,8 +100,6 @@ const LineItems = () => {
 
                                 </PGrid>
                             </PGrid>
-
-                            {/* Extra Field only for nestle */}
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
@@ -180,6 +147,18 @@ const LineItems = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
+                                        name={"Item Category "}
+                                        label={`${getLabel("lbl61")} ${Labels.symbols.required}`}
+                                        value={typeofJob}
+                                        onChange={handleChange}
+                                        options={typeofJobOptions}
+                                    //width={230}
+                                    />
+
+
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
                                         name={"Item Type  "}
                                         label={`${getLabel("lbl100")} ${Labels.symbols.required}`}
                                         value={typeofJob}
@@ -189,6 +168,8 @@ const LineItems = () => {
                                     />
 
                                 </PGrid>
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         name={"Rate Card "}
@@ -199,8 +180,6 @@ const LineItems = () => {
                                     //width={230}
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         name={"Dictated Job  "}
@@ -215,6 +194,32 @@ const LineItems = () => {
                                     <PDropdown
                                         name={"Item Type  "}
                                         label={`${getLabel("lbl103")} ${Labels.symbols.required}`}
+                                        value={typeofJob}
+                                        onChange={handleChange}
+                                        options={typeofJobOptions}
+                                    //width={230}
+                                    />
+                                </PGrid>
+                            </PGrid>
+
+                            {/* Extra Field only for nestle */}
+
+
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name={"Dictated Job  "}
+                                        label={`${getLabel("lbl63")} ${Labels.symbols.required}`}
+                                        value={typeofJob}
+                                        onChange={handleChange}
+                                        options={yesNoOptions}
+                                    //width={230}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name={"Item Type  "}
+                                        label={`${getLabel("lbl64")} ${Labels.symbols.required}`}
                                         value={typeofJob}
                                         onChange={handleChange}
                                         options={typeofJobOptions}
@@ -252,7 +257,7 @@ const LineItems = () => {
                                         onChange={(e) => setDescription(e.target.value)}
                                         multiline={true}
                                         rows={4.5}
-                                        //width={500}
+                                    //width={500}
                                     // helperText={errors?.description}
                                     />
                                 </PGrid>

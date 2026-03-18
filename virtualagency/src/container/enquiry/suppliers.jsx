@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Checkbox } from "@mui/material";
 import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
@@ -13,11 +13,14 @@ import PTextField from "../../component/PTextField/PTextField";
 import { getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import PSearch from "../../component/PSearch/PSearch";
+import PTable from "../../component/PTable/PTable";
 const LineItems = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
     const [country, setCountry] = useState("");
     const [print, setPrint] = useState("");
+    const [showSelected, setShowSelected] = useState(false);
+
     const printList = [
         { value: 1, label: "All" },
         { value: 2, label: "Print" },
@@ -32,7 +35,43 @@ const LineItems = () => {
         { value: 2, label: "Janpen" },
         { value: 3, label: "India" }
     ]
-
+    const tableData = [
+        {
+            supplierName: "A & D Printhub Pte Ltd",
+            country: "Singapore",
+            supplierCode: ""
+        },
+        {
+            supplierName: "Advance Printing",
+            country: "Singapore",
+            supplierCode: ""
+        },
+        {
+            supplierName: "ARC Glassware (China) Co., Ltd.",
+            country: "China",
+            supplierCode: ""
+        },
+        {
+            supplierName: "Beijing Xinrui Yucheng Technology and Culture Co.,Ltd",
+            country: "China",
+            supplierCode: ""
+        },
+        {
+            supplierName: "BusAds Pte Ltd",
+            country: "Singapore",
+            supplierCode: ""
+        },
+        {
+            supplierName: "Chin Long Printing",
+            country: "Singapore",
+            supplierCode: "1002297"
+        }
+    ]
+    const tableHeader = [
+        { field: "supplierName", header: "Supplier's Name" },
+        { field: "country", header: "Country" },
+        { field: "supplierCode", header: "Supplier Code" },
+    ];
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -87,8 +126,29 @@ const LineItems = () => {
                                     />
                                 </PGrid>
                             </PGrid>
+                            <PGrid container>
+                                <PGrid item xs={12} sm={6} md={12} className="d-flex align-items-center gap-2">
+                                    <Checkbox
+                                        checked={showSelected}
+                                        onChange={(e) => setShowSelected(e.target.checked)}
+                                        size="small"
+                                        className="p-1"
+                                    />
 
+                                    <PTypography
+                                        labelText="Show selected suppliers only"
+                                        flag={Labels.fontFlags.smallText}
+                                        color={CommonColors.grey.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
+                            </PGrid>
 
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={12}>
+                                    <PTable columns={tableHeader} rows={tableData} showCheckbox={true} isChecked={showSelected} />
+                                </PGrid>
+                            </PGrid>
                             <PGrid container className="d-flex align-items-center justify-content-between">
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PButton
@@ -125,6 +185,7 @@ const LineItems = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
+
                     </PGrid>
                 </PGrid>
             </Box>

@@ -17,11 +17,25 @@ import { useLanguage } from "../../utils/constants/language";
 const ClientInfo = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
-    const [division, setDivision] = useState("");
-    const [brand, setBrand] = useState("");
-    const [clientContact, setClientContact] = useState("");
-    const [deliveryCountry, setDeliveryCountry] = useState("");
-    const [pmgEntity, setPmgEntity] = useState("");
+    const [formData, setFormData] = useState({
+        division: "",
+        brand: "",
+        clientContact: "",
+        deliveryCountry: "",
+        pmgEntity: "",
+        aboveAtMarket: ""
+    });
+
+    // Single state for all errors
+    const [errors, setErrors] = useState({
+        division: "",
+        brand: "",
+        clientContact: "",
+        deliveryCountry: "",
+        pmgEntity: "",
+        aboveAtMarket: ""
+    });
+
     const divisionList = [
         { label: "Coca-Cola > Singapore > Pacific Refreshments Pte. Ltd > Marketing > General", value: 1 },
         { label: "Pepsi > India > Varun Beverages > Sales > Retail", value: 2 }
@@ -51,6 +65,11 @@ const ClientInfo = () => {
         { label: "PMG India", value: 2 },
         { label: "PMG Malaysia", value: 3 }
     ];
+    const aboveAtMarketList = [
+        { label: "Above", value: 1 },
+        { label: "At Market", value: 2 },
+
+    ];
     const [clientName, setClientName] = useState("Coca-Cola");
     const [country, setCountry] = useState("Singapore");
     const [entityName, setEntityName] = useState("Pacific Refreshments Pte. Ltd");
@@ -58,28 +77,20 @@ const ClientInfo = () => {
     const [channel, setChannel] = useState("Coca-Cola");
     const [clientCode, setClientCode] = useState("-");
 
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        switch (name) {
-            case "division":
-                setDivision(value);
-                break;
-            case "brand":
-                setBrand(value);
-                break;
-            case "clientContact":
-                setClientContact(value);
-                break;
-            case "deliveryCountry":
-                setDeliveryCountry(value);
-                break;
-            case "pmgEntity":
-                setPmgEntity(value);
-                break;
-            default:
-                break;
-        }
+        // Update field dynamically
+        console.log(name,value, e ,"response handle change")
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+        // Simple validation: empty check
+        setErrors((prev) => ({
+            ...prev,
+            [name]: value ? "" : `${name} is required`
+        }));
     };
 
     return (
@@ -97,33 +108,29 @@ const ClientInfo = () => {
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
-                                //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                                 />
                                 <PTypography
                                     labelText={getLabel("lbl26")}
                                     flag={Labels.fontFlags.smallText}
                                     color={CommonColors.grey.main}
                                     weight={FontWeight.bold}
-                                //style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                                 />
                             </PGrid>
 
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={12} md={12}>
                                     <PDropdown
-                                        name="division"
+                                        name={Labels.clientInfo.division}
                                         label={`${getLabel("lbl27")} ${Labels.symbols.required}`}
-                                        value={division}
+                                        value={formData.division}
                                         onChange={handleChange}
                                         options={divisionList}
                                         width={100}
+                                        helperText={errors?.division}
                                     />
                                 </PGrid>
-
                             </PGrid>
-
                             <PGrid container className={Labels.margin.mb4}>
-
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
                                         labelText={getLabel("lbl28")}
@@ -200,35 +207,18 @@ const ClientInfo = () => {
 
                             {/* Row 3 */}
                             <PGrid container className={Labels.margin.mb4}>
-                                <PGrid
-                                    item
-                                    xs={12}
-                                    sm={6}
-                                    md={6}
-                                    style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                                >
+                                <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "center", gap: "8px" }} >
                                     <PDropdown
-                                        name="brand"
+                                        name={Labels.clientInfo.brand}
                                         label={`${getLabel("lbl33")} ${Labels.symbols.required}`}
-                                        value={brand}
+                                        value={formData.brand}
                                         onChange={handleChange}
                                         options={brandList}
                                         width={100}
+                                        helperText={errors?.brand}
                                     />
                                     <Tooltip title="Add New Brand" arrow>
-                                        <IconButton
-                                            sx={{
-                                                backgroundColor: "#d5d5d5",
-                                                color: "#fff",
-                                                width: 30,
-                                                height: 30,
-                                                marginTop: "9px",
-                                                "&:hover": {
-                                                    backgroundColor: "#1976d2",
-                                                },
-                                            }}
-                                        //onClick={handleExitDraft}
-                                        >
+                                        <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, marginTop: "9px", "&:hover": { backgroundColor: "#1976d2" }, }} >
                                             <AddIcon />
                                         </IconButton>
                                     </Tooltip>
@@ -236,12 +226,13 @@ const ClientInfo = () => {
 
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
-                                        name="deliveryCountry"
+                                        name={Labels.clientInfo.deliveryCountry}
                                         label={`${getLabel("lbl34")} ${Labels.symbols.required}`}
-                                        value={deliveryCountry}
+                                        value={formData.deliveryCountry}
                                         onChange={handleChange}
                                         options={countryList}
                                         width={100}
+                                        helperText={errors?.deliveryCountry}
                                     />
 
                                 </PGrid>
@@ -251,51 +242,42 @@ const ClientInfo = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                     <PDropdown
-                                        name="clientContact"
+                                        name={Labels.clientInfo.clientContact}
                                         label={`${getLabel("lbl35")} ${Labels.symbols.required}`}
-                                        value={clientContact}
+                                        value={formData.clientContact}
                                         onChange={handleChange}
                                         options={clientContactList}
                                         width={100}
+                                        helperText={errors?.clientContact}
                                     />
                                     <Tooltip title="Add New Contant" arrow>
-                                        <IconButton
-                                            sx={{
-                                                backgroundColor: "#d5d5d5",
-                                                color: "#fff",
-                                                width: 30,
-                                                height: 30,
-                                                marginTop: "9px",
-                                                "&:hover": {
-                                                    backgroundColor: "#1976d2",
-                                                },
-                                            }}
-                                        //onClick={handleExitDraft}
-                                        >
+                                        <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, marginTop: "9px", "&:hover": { backgroundColor: "#1976d2" }, }} >
                                             <AddIcon />
                                         </IconButton>
                                     </Tooltip>
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
-                                        name="pmgEntity"
+                                        name={Labels.clientInfo.pmgEntity}
                                         label={`${getLabel("lbl36")} ${Labels.symbols.required}`}
-                                        value={pmgEntity}
+                                        value={formData.pmgEntity}
                                         onChange={handleChange}
                                         options={pmgEntityList}
                                         width={100}
+                                        helperText={errors?.pmgEntity}
                                     />
                                 </PGrid>
                             </PGrid >
-                            <PGrid container className={Labels.margin.mb4}>                             
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
-                                        name="Above / At Market"
+                                        name={Labels.clientInfo.aboveAtMarket}
                                         label={`${getLabel("lbl92")} ${Labels.symbols.required}`}
-                                        value={pmgEntity}
+                                        value={formData.aboveAtMarket}
                                         onChange={handleChange}
-                                        options={pmgEntityList}
+                                        options={aboveAtMarketList}
                                         width={100}
+                                        helperText={errors?.aboveAtMarket}
                                     />
                                 </PGrid>
                             </PGrid >

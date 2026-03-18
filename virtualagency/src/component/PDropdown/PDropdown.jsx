@@ -1,14 +1,24 @@
+import React, { useMemo } from "react";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  Autocomplete,
+  TextField
+} from "@mui/material";
 
-import React from "react";
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText, Autocomplete, TextField } from "@mui/material";
 import { Labels } from "../../utils/constants/labels";
 import { FontFamily, FontSize } from "../../utils/constants/fonts";
 import { CommonColors } from "../../utils/constants/colors";
+
 const PDropdown = ({
+  name = "",
   label,
   value,
   onChange,
-  options,
+  options = [],
   required = false,
   error = false,
   helperText = "",
@@ -17,141 +27,99 @@ const PDropdown = ({
   multiple = false,
   flag = ""
 }) => {
+
+  const selectedOption = useMemo(
+    () => options.find((o) => o.value === value) || null,
+    [options, value]
+  );
+
   const baseSx = {
     width: width ? `${width}%` : Labels.fontSize.xxxxl,
     mt,
 
-    // ── Label ──────────────────────────────────────────
     "& .MuiInputLabel-root": {
       fontFamily: FontFamily.bold,
       fontSize: FontSize.textField.label,
       color: "#9e9e9e",
       top: "0px",
       "&.Mui-focused": { color: "#62BCD8" },
-      "&.Mui-error": { color: "#d32f2f" },
-      "&.Mui-disabled": { color: "#bdbdbd" },
+      "&.Mui-error": { color: "#d32f2f" }
     },
 
     "& .MuiInputLabel-shrink": {
       color: "#62BCD8",
       fontWeight: 600,
       fontSize: "12px",
-      lineHeight: 1.2,
-      transform: "translate(14px, -6px) scale(1)", // ✅ on border, no gap
-      "&.Mui-focused": { color: "#62BCD8" },
-      "&.Mui-error": { color: "#d32f2f" },
+      transform: "translate(14px, -6px) scale(1)"
     },
 
-    // ── Input Root ─────────────────────────────────────
     "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",                        // ✅ matches screenshot
+      borderRadius: "12px",
       backgroundColor: "#fcfbfd",
       boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
       fontFamily: FontFamily.bold,
       fontSize: FontSize.textField.input,
       color: "#424242",
-      minHeight: "52px",                           // ✅ tall like screenshot
-      maxHeight: multiple ? "none" : "52px",
-      height: multiple ? "auto" : "52px",
-
-      "& .MuiSelect-select": {
-        display: "flex",
-        alignItems: multiple ? "flex-start" : "center",
-        flexWrap: multiple ? "wrap" : "nowrap",
-        gap: multiple ? "4px" : 0,
-        padding: multiple ? "8px 14px" : "0 14px",
-        minHeight: "52px",
-        boxSizing: "border-box",
-      },
+      minHeight: "52px",
 
       "& fieldset": {
-
-        borderColor: "1px solid #ccc",
-        borderWidth: "1.5px",
+        borderColor: helperText ? "#d32f2f" : "#ccc",
+        borderWidth: "1.5px"
       },
+
       "&:hover fieldset": {
-        borderColor: "#42A8C8",
+        borderColor: "#42A8C8"
       },
+
       "&.Mui-focused fieldset": {
-        borderColor: "1px solid #ccc",
+        borderColor: "#ccc",
         borderWidth: "1.5px",
-        boxShadow: "0 0 0 3px rgba(98,188,216,0.15)",
+        boxShadow: "0 0 0 3px rgba(98,188,216,0.15)"
       },
+
       "&.Mui-error fieldset": {
-        borderColor: "#d32f2f",
-      },
-      "&.Mui-disabled": {
-        backgroundColor: "#f9f9f9",
-        "& fieldset": { borderColor: "#e0e0e0" },
-      },
+        borderColor: "#d32f2f"
+      }
     },
 
-    // ✅ This is the KEY — makes label sit ON the border like your screenshot
-    "& .MuiOutlinedInput-notchedOutline": {
-      top: 0,
-    },
-    "& .MuiOutlinedInput-notchedOutline legend": {
-      maxWidth: "100%",
-      fontSize: "12px",
-      padding: "0 4px",
-    },
-
-    // ── Helper text ────────────────────────────────────
     "& .MuiFormHelperText-root": {
       fontFamily: FontFamily.bold,
       fontSize: FontSize.textField.error,
       color: CommonColors.textError,
       marginLeft: "2px",
-      marginTop: "4px",
-    },
-
-    // ── Chips (multi) ──────────────────────────────────
-    "& .MuiChip-root": {
-      height: "22px",
-      fontSize: "11px",
-      fontFamily: FontFamily.bold,
-      backgroundColor: "#62BCD8",
-      color: "white",
-      borderRadius: "6px",
-      "& .MuiChip-deleteIcon": {
-        color: "rgba(255,255,255,0.7)",
-        fontSize: "14px",
-        "&:hover": { color: "white" },
-      },
-    },
-
-    // ── Responsive ─────────────────────────────────────
-    "@media (max-width: 600px)": {
-      width: "100% !important",
-      "& .MuiOutlinedInput-root": {
-        minHeight: "46px",
-        maxHeight: multiple ? "none" : "46px",
-        height: multiple ? "auto" : "46px",
-      },
-    },
+      marginTop: "4px"
+    }
   };
+
+  // Shared TextField renderer
+  const renderTextField = (params) => (
+    <TextField
+      {...params}
+      label={label}
+      required={required}
+      error={error}
+      helperText={helperText}
+    />
+  );
+
+  // Autocomplete Mode (Clear icon enabled)
   if (flag === Labels.flag.auto) {
     return (
       <Autocomplete
         options={options}
-        getOptionLabel={(option) => option.label || ""}
-        value={options.find((o) => o.value === value) || null}
+        value={selectedOption}
+        disableClearable={!selectedOption}   // ✅ show clear icon only when value exists
+        getOptionLabel={(option) => option?.label || ""}
         onChange={(e, newValue) =>
-          onChange({ target: { value: newValue?.value || "" } })
+          onChange({ target: { name, value: newValue?.value || "" } })  // ✅ pass name here
         }
         sx={baseSx}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={label}
-            required={required}
-            error={error}
-            helperText={helperText}
-          />
-        )}
+        renderInput={renderTextField}
       />
     );
   }
+
+  // Normal Select Mode (No clear icon)
   return (
     <FormControl
       fullWidth
@@ -162,13 +130,13 @@ const PDropdown = ({
     >
       <InputLabel>{label}</InputLabel>
 
-      <Select value={value} label={label} onChange={onChange}>
+      <Select value={value} label={label} onChange={onChange} name = {name}>
         <MenuItem value="">
           <em>-- Choose --</em>
         </MenuItem>
 
-        {options.map((option, index) => (
-          <MenuItem key={index} value={option.value} >
+        {options.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
         ))}

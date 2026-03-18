@@ -11,10 +11,15 @@ const getBaseUrl = () => {
 
 export const Base_Url = getBaseUrl();
 export const Account_API = {
-  Login : Base_Url + "/VA/USersignon",
+  Login : Base_Url + "/VA/Usersignon",
 }
 
 export const Language_API = {
   Language : Base_Url + "/VA/Language",
 }
 
+export const Dashboard_API ={
+  Dashboard : Base_Url + "/VA/Viewdashboard",
+}
+
+ 

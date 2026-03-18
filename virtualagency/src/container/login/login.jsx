@@ -99,25 +99,23 @@ function Login(props) {
     }
   };
 
-  const handleSubmit = async (e, isLogin) => {
+  const handleLogin = async (e, isLogin) => {
     e.preventDefault();
     if (!loginValidation()) return;
     const res = await PostApi(Account_API.Login, {
       userName: userName,
       password: password,
     });
-    console.log(res.Data, "res");
+    console.log(res.data, "res");
     if (isLogin) {
       if (isSuccess(res)) {
-        // localStorage.setItem("token", res?.data?.token);
-        localStorage.setItem("user", res?.Data?.Username);
-        localStorage.setItem("email", res?.Data?.Email);
-        // setUser(res?.data?.Username);
+        localStorage.setItem("user", res?.data?.username);
+        localStorage.setItem("email", res?.data?.email);
         navigate(labelRoutes.dashboard);
       } else {
         setErrors((prev) => ({
           ...prev,
-          password: res?.Data || "Login failed",
+          password: res?.data || "Login failed",
         }));
       }
     } else {
@@ -126,7 +124,7 @@ function Login(props) {
       } else {
         setErrors((prev) => ({
           ...prev,
-          password: res?.Data || "Login failed",
+          password: res?.data || "Login failed",
         }));
       }
     }
@@ -176,11 +174,12 @@ function Login(props) {
                 type="submit"
                 label={Labels.buttonLabel.changePassword}
                 fullWidth
-                onClick={(e) => handleSubmit(e, true)}
+                onClick={(e) => handleLogin(e, true)}
               />
             </div>
           </div>
         ) : (
+          
           <div className="login-left">
             <div className="login-box">
               <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
@@ -201,7 +200,7 @@ function Login(props) {
                 helperText={errors?.password}
                 startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
                 flag={Labels.flag.password}
-                onChange={handleChange}
+                onChange={handleChange}               
               />
 
               <div className="forgot-password">
@@ -215,9 +214,9 @@ function Login(props) {
 
               <PButton
                 type="submit"
-                label={Labels.loginPage.password}
+                label={Labels.buttonLabel.login}
                 fullWidth
-                onClick={(e) => handleSubmit(e, true)}
+                onClick={(e) => handleLogin(e, true)}
               />
             </div>
           </div>

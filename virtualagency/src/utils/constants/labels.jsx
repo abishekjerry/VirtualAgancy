@@ -18,11 +18,14 @@ export const Labels = {
   //   wellcomeBack: "Wellcome Back"
   // },
 
-  // clientInfo :{
-  //   clientInformation : "Client Information",
-  //   divisionTitle : "Select your clients 'Division' to auto populate all non-editable information.",
-  //   summary: "Summary",
-  // },
+  clientInfo :{
+    division : "Division",
+    brand : "Brand",
+    deliveryCountry : "Delivery Country",
+    clientContact : "Client Contact",
+    pmgEntity : "PMG Entity",
+    aboveAtMarket : "AboveAtMarket"
+  },
 
   // enquiryDetails :{
   //   enquiryDetails : "Enquiry Details",
