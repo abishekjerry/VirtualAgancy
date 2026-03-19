@@ -9,62 +9,79 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import PTextField from "../../component/PTextField/PTextField";
 import { getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import PSearch from "../../component/PSearch/PSearch";
 import PTable from "../../component/PTable/PTable";
-const LineItems = () => {
+import { labelRoutes } from "../../navigations/labelRoutes";
+import { useNavigate } from "react-router-dom";
+const Suppliers = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
+    const navigate = useNavigate();
+    const [allowRedirect, setAllowRedirect] = useState(false);
+    const [showSelected, setShowSelected] = useState(false);
+    const [isValidation, setIsValidation] = useState(false);
     const [country, setCountry] = useState("");
     const [print, setPrint] = useState("");
-    const [showSelected, setShowSelected] = useState(false);
+    const [search, setSearch] = useState("");
 
     const printList = [
-        { value: 1, label: "All" },
-        { value: 2, label: "Print" },
-        { value: 3, label: "POSM" },
-        { value: 4, label: "Promo" },
-        { value: 5, label: "Print and POSM" },
-        { value: 6, label: "Print and Premium" },
-        { value: 7, label: "POSM and Premium" }
+        { value: 0, label: "All" },
+        { value: 1, label: "Print" },
+        { value: 2, label: "POSM" },
+        { value: 3, label: "Promo" },
+        { value: 4, label: "Print and POSM" },
+        { value: 5, label: "Print and Premium" },
+        { value: 6, label: "POSM and Premium" }
     ];
     const counties = [
-        { value: 1, label: "Thailand" },
+        { value: 1, label: "Singapore" },
         { value: 2, label: "Janpen" },
-        { value: 3, label: "India" }
+        { value: 3, label: "China" }
     ]
     const tableData = [
         {
             supplierName: "A & D Printhub Pte Ltd",
             country: "Singapore",
-            supplierCode: ""
+            supplierCode: "",
+            countryID: 1,
+            capabilityID: 1,
         },
         {
             supplierName: "Advance Printing",
             country: "Singapore",
-            supplierCode: ""
+            supplierCode: "",
+            countryID: 1,
+            capabilityID: 1,
         },
         {
             supplierName: "ARC Glassware (China) Co., Ltd.",
             country: "China",
-            supplierCode: ""
+            supplierCode: "",
+            countryID: 3,
+            capabilityID: 1,
         },
         {
             supplierName: "Beijing Xinrui Yucheng Technology and Culture Co.,Ltd",
             country: "China",
-            supplierCode: ""
+            supplierCode: "",
+            countryID: 3,
+            capabilityID: 1,
         },
         {
             supplierName: "BusAds Pte Ltd",
             country: "Singapore",
-            supplierCode: ""
+            supplierCode: "",
+            countryID: 1,
+            capabilityID: 1,
         },
         {
             supplierName: "Chin Long Printing",
             country: "Singapore",
-            supplierCode: "1002297"
+            supplierCode: "1002297",
+            countryID: 1,
+            capabilityID: 2,
         }
     ]
     const tableHeader = [
@@ -73,15 +90,49 @@ const LineItems = () => {
         { field: "supplierCode", header: "Supplier Code" },
     ];
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-    };
+    let filteredData = tableData;
 
+    // Country filter
+    if (country) {
+        filteredData = filteredData.filter(
+            (item) => item.countryID === country
+        );
+    }
+
+    // Print Capability filter
+    if (print) {
+        filteredData = filteredData.filter(
+            (item) => item.capabilityID === print
+        );
+    }
+    // Search filter
+    if (search.trim() !== "") {
+        filteredData = filteredData.filter((item) =>
+            item.supplierName.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+    const data = filteredData;
+
+    const handleValidationChange = (rows) => {
+        setIsValidation(rows.length === 0);
+    };
+    const handleSubmit = () => {
+        if (!isValidation) {
+            console.log("issue")
+            setAllowRedirect(true);
+            setIsValidation(isValidation);
+            navigate(labelRoutes.clientInfo); //review
+        }
+        else {
+            setAllowRedirect(false);
+            setIsValidation(isValidation);
+        }
+    };
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PStepper steps={enquirySteps} activeStep={4}></PStepper>
+                    <PStepper steps={enquirySteps} activeStep={3} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
                     <PGrid item xs={12} sm={12} md={9}>
@@ -103,7 +154,7 @@ const LineItems = () => {
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={6}>
-                                    <PSearch width="100%" placeholder={"Search a Suplier Name"} />
+                                    <PSearch width="100%" placeholder={"Search a Suplier Name"} onChange={(e) => setSearch(e.target.value)} />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
@@ -146,9 +197,21 @@ const LineItems = () => {
 
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={tableHeader} rows={tableData} showCheckbox={true} isChecked={showSelected} />
+                                    <PTable columns={tableHeader} rows={data} showCheckbox={true} isChecked={showSelected} onValidationChange={handleValidationChange} />
                                 </PGrid>
                             </PGrid>
+                            { isValidation && (
+                                <PGrid container className={Labels.margin.mb4}>
+                                    <PGrid item xs={12}>
+                                        <PTypography
+                                            labelText={"Please select at least one supplier to proceed."}
+                                            flag={Labels.fontFlags.smallText}
+                                            color={CommonColors.red.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                    </PGrid>
+                                </PGrid>
+                            )}
                             <PGrid container className="d-flex align-items-center justify-content-between">
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PButton
@@ -194,4 +257,4 @@ const LineItems = () => {
     );
 };
 
-export default LineItems;
+export default Suppliers;

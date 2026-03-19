@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useRef} from "react";
 import {
   Table,
   TableBody,
@@ -14,14 +14,22 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false }) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false , onValidationChange}) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRows, setSelectedRows] = useState([]);
-
+  const isPageLoad = useRef(false); // track first interaction
+  
+  useEffect(() => {
+    if (isPageLoad.current && onValidationChange) {
+      onValidationChange(selectedRows);
+    }
+  }, [selectedRows, onValidationChange]);
+  
   // Parent Select All
   const handleRowSelect = (index) => {
+    isPageLoad.current = true
     setSelectedRows((prev) =>
       prev.includes(index)
         ? prev.filter((i) => i !== index)

@@ -13,15 +13,41 @@ import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import { getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
+import { labelRoutes } from "../../navigations/labelRoutes";
+import { useNavigate } from "react-router-dom";
 const EnquiryDetails = () => {
     const { getLabel } = useLanguage();
+    const navigate = useNavigate();
     const enquirySteps = getEnquirySteps(getLabel);
-    const [projectNo, setprojectNo] = useState("");
+    const [allowRedirect, setAllowRedirect] = useState(false);
     const [date, setDate] = useState("");
-    const [year, setYear] = useState("");
-    const [quoteType, setQuoteType] = useState("");
-    const [description, setDescription] = useState("");
-    const [slaTemplate, setSlaTemplate] = useState("");
+    const [formData, setFormData] = useState({
+        projectNo: "",
+        estdeliveryDate: "",
+        briefReceivedDate: "",
+        projectDescription: "",
+        projectQuoteType: "",
+        year: "",
+        managementFeeType: "",
+        hybrid: "",
+        projectAttribute: "",
+        slaTemplate: ""
+    });
+
+    // Single state for all errors
+    const [errors, setErrors] = useState({
+        projectNo: "",
+        estdeliveryDate: "",
+        briefReceivedDate: "",
+        projectDescription: "",
+        projectQuoteType: "",
+        year: "",
+        managementFeeType: "",
+        hybrid: "",
+        projectAttribute: "",
+        slaTemplate: ""
+    });
+
     const yearList = [
         { label: "Y1", value: 1 },
         { label: "Y2", value: 2 },
@@ -55,26 +81,51 @@ const EnquiryDetails = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
 
-        switch (name) {
-            case "division":
-                setDivision(value);
-                break;
-            case "brand":
-                setBrand(value);
-                break;
-            case "clientContact":
-                setClientContact(value);
-                break;
-            case "deliveryCountry":
-                setDeliveryCountry(value);
-                break;
-            case "pmgEntity":
-                setPmgEntity(value);
-                break;
-            default:
-                break;
+        setErrors({
+            ...errors,
+            [name]: ""
+        });
+    };
+
+    const handleSubmit = () => {
+        const isValid = EnquiryDetailsValidation();
+        if (isValid) {
+            setAllowRedirect(isValid);
+            navigate(labelRoutes.lineItems);
         }
+        else {
+            setAllowRedirect(isValid);
+        }
+    };
+    const EnquiryDetailsValidation = () => {
+        const requiredFields = [
+            Labels.enquiryDetails.projectNo,
+            Labels.enquiryDetails.projectDescription,
+            Labels.enquiryDetails.briefReceivedDate,
+            Labels.enquiryDetails.estdeliveryDate,
+            Labels.enquiryDetails.year,
+            Labels.enquiryDetails.managementFeeType,
+            Labels.enquiryDetails.hybrid,
+            Labels.enquiryDetails.projectAttribute,
+            Labels.enquiryDetails.slaTemplate,
+            Labels.enquiryDetails.projectQuoteType
+        ];
+
+        let newErrors = {};
+
+        requiredFields.forEach((field) => {
+            if (!formData[field]) {
+                newErrors[field] = Labels.commonLabel.required;
+            }
+        });
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const phases = [
@@ -88,7 +139,7 @@ const EnquiryDetails = () => {
         <>
             <Box sx={{ px: 3, py: 3 }}>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PStepper steps={enquirySteps} activeStep={1}></PStepper>
+                    <PStepper steps={enquirySteps} activeStep={1} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
                     <PGrid item xs={12} sm={12} md={9}>
@@ -110,52 +161,56 @@ const EnquiryDetails = () => {
                             <PGrid container>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
-                                        name={"Project No"}
+                                        name={Labels.enquiryDetails.projectNo}
                                         label={`${getLabel("lbl42")} ${Labels.symbols.required}`}
-                                        value={projectNo}
-                                        //width={100}
-                                    //onChange={this.handleChange}
+                                        value={formData.projectNo}
+                                        onChange={handleChange}
+                                        helperText={errors?.projectNo}
                                     />
                                     <PDatepicker
-                                        name={"Est. delivery"}
+                                        name={Labels.enquiryDetails.estdeliveryDate}
                                         label={`${getLabel("lbl43")} ${Labels.symbols.required}`}
-                                        value={date}
-                                        onChange={(e) => setDate(e.target.value)}
+                                        value={formData.estdeliveryDate}
+                                        onChange={handleChange}
+                                        helperText={errors?.estdeliveryDate}
                                         width={100}
                                     />
                                     <PDatepicker
-                                        name={"Date of brief received"}
+                                        name={Labels.enquiryDetails.briefReceivedDate}
                                         label={`${getLabel("lbl44")} ${Labels.symbols.required}`}
-                                        value={date}
-                                        onChange={(e) => setDate(e.target.value)}
+                                        value={formData.briefReceivedDate}
+                                        onChange={handleChange}
+                                        helperText={errors?.briefReceivedDate}
                                         width={100}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTextField
-                                        name="description"
+                                        name={Labels.enquiryDetails.projectDescription}
                                         label={`${getLabel("lbl45")} ${Labels.symbols.required}`}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        value={formData.projectDescription}
+                                        onChange={handleChange}
+                                        helperText={errors?.projectDescription}
                                         multiline={true}
                                         rows={4.5}
                                         width={100}
-                                    // helperText={errors?.description}
                                     />
                                     <Box style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                         <PDropdown
-                                            name="ProjectQuoteType"
+                                            name={Labels.enquiryDetails.projectQuoteType}
                                             label={`${getLabel("lbl46")} ${Labels.symbols.required}`}
-                                            value={quoteType}
+                                            value={formData.projectQuoteType}
                                             onChange={handleChange}
+                                            helperText={errors?.projectQuoteType}
                                             options={quoteTypeList}
                                             width={100}
                                         />
                                         <PDropdown
-                                            name="Year"
+                                            name={Labels.enquiryDetails.year}
                                             label={`${getLabel("lbl47")} ${Labels.symbols.required}`}
-                                            value={year}
+                                            value={formData.year}
                                             onChange={handleChange}
+                                            helperText={errors?.year}
                                             options={yearList}
                                             width={100}
                                         />
@@ -166,30 +221,33 @@ const EnquiryDetails = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name="Management Fee Type"
+                                        name={Labels.enquiryDetails.managementFeeType}
                                         label={`${getLabel("lbl93")} ${Labels.symbols.required}`}
-                                        value={slaTemplate}
+                                        value={formData.managementFeeType}
                                         onChange={handleChange}
+                                        helperText={errors?.managementFeeType}
                                         options={templateList}
                                         width={100}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name="Hybrid"
+                                        name={Labels.enquiryDetails.hybrid}
                                         label={`${getLabel("lbl94")} ${Labels.symbols.required}`}
-                                        value={slaTemplate}
+                                        value={formData.hybrid}
                                         onChange={handleChange}
+                                        helperText={errors?.hybrid}
                                         options={templateList}
                                         width={100}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name="Project Attribute"
+                                        name={Labels.enquiryDetails.projectAttribute}
                                         label={`${getLabel("lbl95")} ${Labels.symbols.required}`}
-                                        value={slaTemplate}
+                                        value={formData.projectAttribute}
                                         onChange={handleChange}
+                                        helperText={errors?.projectAttribute}
                                         options={templateList}
                                         width={100}
                                     />
@@ -207,10 +265,11 @@ const EnquiryDetails = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={12} md={8}>
                                     <PDropdown
-                                        name="SLA Template"
+                                        name={Labels.enquiryDetails.slaTemplate}
                                         label={`${getLabel("lbl49")} ${Labels.symbols.required}`}
-                                        value={slaTemplate}
+                                        value={formData.slaTemplate}
                                         onChange={handleChange}
+                                        helperText={errors?.slaTemplate}
                                         options={templateList}
                                         width={100}
                                     />
@@ -247,7 +306,7 @@ const EnquiryDetails = () => {
                                             <PTextField
                                                 name={`${phase.name}_start`}
                                                 placeholder="Start Date"
-                                                //width={100}
+                                            //width={100}
                                             />
                                         )}
                                     </PGrid>
@@ -256,7 +315,7 @@ const EnquiryDetails = () => {
                                         <PTextField
                                             name={`${phase.name}_end`}
                                             placeholder="End Date"
-                                            //width={100}
+                                        //width={100}
                                         />
                                     </PGrid>
 

@@ -43,7 +43,8 @@ const PDropdown = ({
       color: "#9e9e9e",
       top: "0px",
       "&.Mui-focused": { color: "#62BCD8" },
-      "&.Mui-error": { color: "#d32f2f" }
+      "&.Mui-error": { color: "#d32f2f" },
+      "&.Mui-disabled": { color: "#bdbdbd" },
     },
 
     "& .MuiInputLabel-shrink": {
@@ -77,9 +78,9 @@ const PDropdown = ({
         boxShadow: "0 0 0 3px rgba(98,188,216,0.15)"
       },
 
-      "&.Mui-error fieldset": {
-        borderColor: "#d32f2f"
-      }
+      // "&.Mui-error fieldset": {
+      //   borderColor: "#d32f2f"
+      // }
     },
 
     "& .MuiFormHelperText-root": {
@@ -97,7 +98,7 @@ const PDropdown = ({
       {...params}
       label={label}
       required={required}
-      error={error}
+      error={!!helperText}
       helperText={helperText}
     />
   );
@@ -110,9 +111,7 @@ const PDropdown = ({
         value={selectedOption}
         disableClearable={!selectedOption}   // ✅ show clear icon only when value exists
         getOptionLabel={(option) => option?.label || ""}
-        onChange={(e, newValue) =>
-          onChange({ target: { name, value: newValue?.value || "" } })  // ✅ pass name here
-        }
+        onChange={(e, newValue) =>  onChange({ target: { name, value: newValue?.value ?? "" } })}
         sx={baseSx}
         renderInput={renderTextField}
       />
@@ -125,12 +124,12 @@ const PDropdown = ({
       fullWidth
       size="small"
       required={required}
-      error={error}
+      error={!!helperText}
       sx={baseSx}
     >
       <InputLabel>{label}</InputLabel>
 
-      <Select value={value} label={label} onChange={onChange} name = {name}>
+      <Select value={value} label={label} onChange={onChange} name={name}>
         <MenuItem value="">
           <em>-- Choose --</em>
         </MenuItem>

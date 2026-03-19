@@ -12,16 +12,18 @@ import PStepper from "../../component/PStepper/PStepper";
 import { getEnquirySteps } from "../../utils/commonFunction/common"
 import AddIcon from "@mui/icons-material/Add"
 import { useLanguage } from "../../utils/constants/language";
-
-
+import { labelRoutes } from "../../navigations/labelRoutes";
+import { useNavigate } from "react-router-dom";
 const ClientInfo = () => {
     const { getLabel } = useLanguage();
+    const navigate = useNavigate();
     const enquirySteps = getEnquirySteps(getLabel);
+    const [allowRedirect, setAllowRedirect] = useState(false);
     const [formData, setFormData] = useState({
         division: "",
         brand: "",
-        clientContact: "",
         deliveryCountry: "",
+        clientContact: "",
         pmgEntity: "",
         aboveAtMarket: ""
     });
@@ -30,8 +32,8 @@ const ClientInfo = () => {
     const [errors, setErrors] = useState({
         division: "",
         brand: "",
-        clientContact: "",
         deliveryCountry: "",
+        clientContact: "",
         pmgEntity: "",
         aboveAtMarket: ""
     });
@@ -80,24 +82,55 @@ const ClientInfo = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // Update field dynamically
-        console.log(name,value, e ,"response handle change")
         setFormData((prev) => ({
             ...prev,
             [name]: value
         }));
-        // Simple validation: empty check
-        setErrors((prev) => ({
-            ...prev,
-            [name]: value ? "" : `${name} is required`
-        }));
+
+        setErrors({
+            ...errors,
+            [name]: ""
+        });
+    };
+
+    const handleSubmit = () => {
+        const isValid = ClientInfoValidation();
+        if (isValid) {
+            setAllowRedirect(isValid);
+            navigate(labelRoutes.enquiryDetails);
+        }
+        else {
+            setAllowRedirect(isValid);
+        }
+    };
+
+    const ClientInfoValidation = () => {
+        const requiredFields = [
+            Labels.clientInfo.division,
+            Labels.clientInfo.brand,
+            Labels.clientInfo.deliveryCountry,
+            Labels.clientInfo.clientContact,
+            Labels.clientInfo.pmgEntity,
+            Labels.clientInfo.aboveAtMarket,
+        ];
+
+        let newErrors = {};
+
+        requiredFields.forEach((field) => {
+            if (!formData[field]) {
+                newErrors[field] = Labels.commonLabel.required;
+            }
+        });
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PStepper steps={enquirySteps} activeStep={0}></PStepper>
+                    <PStepper steps={enquirySteps} activeStep={0} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
                     <PGrid item xs={12} sm={12} md={9}>

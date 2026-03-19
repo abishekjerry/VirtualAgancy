@@ -7,11 +7,11 @@ import { CommonColors } from "../../utils/constants/colors";
 import { FontWeight } from "../../utils/constants/fonts";
 import { useLanguage } from "../../utils/constants/language";
 
-export default function PStepper({ steps = [], activeStep = 0 }) {
+export default function PStepper({ steps = [], activeStep = 0 , allowRedirect = false }) {
   const navigate = useNavigate();
   const { getLabel } = useLanguage();
-  const handleRedirect = (step) => {
-    if (step.url) {
+   const handleRedirect = (step) => {
+    if (step.url && allowRedirect) {
       navigate(step.url);
     }
   };

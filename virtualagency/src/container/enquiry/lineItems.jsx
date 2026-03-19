@@ -12,14 +12,13 @@ import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
 import { getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
+import { labelRoutes } from "../../navigations/labelRoutes";
+import { useNavigate } from "react-router-dom";
 const LineItems = () => {
     const { getLabel } = useLanguage();
+    const navigate = useNavigate();
+    const [allowRedirect, setAllowRedirect] = useState(false);
     const enquirySteps = getEnquirySteps(getLabel);
-    const [projectNo, setprojectNo] = useState("");
-    const [quoteType, setQuoteType] = useState("");
-    const [description, setDescription] = useState("");
-    const [typeofJob, setTypeofJob] = useState("");
-
     const yesNoOptions = [
         { label: "Yes", value: 1 },
         { label: "No", value: 2 },
@@ -34,16 +33,206 @@ const LineItems = () => {
         { label: "Quote of Quantity & Size", value: 2 }
     ];
 
+    const [formData, setFormData] = useState({
+        category: "",
+        typeOfJob: "",
+        rateCard: "",
+        competitiveBiddingMandatory: "",
+        competitiveBiddingCompliant: "",
+        competitiveBiddingExceptionFormSigned: "",
+        exceptionsReasonCode: "",
+        itemCategory: "",
+        subCategory: "",
+        simplex: "",
+        tcoApprovalRequired: "",
+        tcoApproved: "",
+        dictatedJob: "",
+        itemType: "",
+        itemName: "",
+        itemNameDescription: "",
 
+        // Sustainability Information
+        fscOrPefcMaterial: "",
+        recyclable: "",
+        sustainabilityOption: "",
+        recycledMaterial: "",
+        designedToBeReused: "",
+        containsPlastic: "",
+        containsRecycledPlastic: "",
+        recycledMaterialWeightKg: "",
+
+        // Catalogue Section
+        ratecardCatalogueItemDeclined: "",
+        globalOrderWindowCatalogueName: "",
+        regionalOrderWindowCatalogue: "",
+        localCatalogueName: "",
+        eAuction: "",
+        printingMethod: "",
+        typeOfItem: "",
+        noOfMaterials: "",
+        digitalInnovation: "",
+        innovation: "",
+        sourcingLocation: "",
+        savingsType: "",
+        savingsReason: "",
+        owWithLink: "",
+
+        // Specifications
+        noOfVersion: "",
+        specifications: "",
+        notesComments: "",
+
+        // Quantity
+        quantityType: "",
+        quantity: ""
+    });
+
+    const [errors, setErrors] = useState({
+        category: "",
+        typeOfJob: "",
+        rateCard: "",
+        competitiveBiddingMandatory: "",
+        competitiveBiddingCompliant: "",
+        competitiveBiddingExceptionFormSigned: "",
+        exceptionsReasonCode: "",
+        itemCategory: "",
+        subCategory: "",
+        simplex: "",
+        tcoApprovalRequired: "",
+        tcoApproved: "",
+        dictatedJob: "",
+        itemType: "",
+        itemName: "",
+        itemNameDescription: "",
+
+        // Sustainability Information
+        fscOrPefcMaterial: "",
+        recyclable: "",
+        sustainabilityOption: "",
+        recycledMaterial: "",
+        designedToBeReused: "",
+        containsPlastic: "",
+        containsRecycledPlastic: "",
+        recycledMaterialWeightKg: "",
+
+        // Catalogue Section
+        ratecardCatalogueItemDeclined: "",
+        globalOrderWindowCatalogueName: "",
+        regionalOrderWindowCatalogue: "",
+        localCatalogueName: "",
+        eAuction: "",
+        printingMethod: "",
+        typeOfItem: "",
+        noOfMaterials: "",
+        digitalInnovation: "",
+        innovation: "",
+        sourcingLocation: "",
+        savingsType: "",
+        savingsReason: "",
+        owWithLink: "",
+
+        // Specifications
+        noOfVersion: "",
+        specifications: "",
+        notesComments: "",
+
+        // Quantity
+        quantityType: "",
+        quantity: ""
+    });
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+
+        setErrors({
+            ...errors,
+            [name]: ""
+        });
     };
 
+    const handleSubmit = () => {
+        const isValid = LineItemsValidation();
+        if (isValid) {
+            setAllowRedirect(isValid);
+            navigate(labelRoutes.suppliers);
+        }
+        else {
+            setAllowRedirect(isValid);
+        }
+    };
+    const LineItemsValidation = () => {
+        const requiredFields = [
+            Labels.lineItems.category,
+            Labels.lineItems.typeOfJob,
+            Labels.lineItems.rateCard,
+            Labels.lineItems.competitiveBiddingMandatory,
+            Labels.lineItems.competitiveBiddingCompliant,
+            Labels.lineItems.competitiveBiddingExceptionFormSigned,
+            Labels.lineItems.exceptionsReasonCode,
+            Labels.lineItems.itemCategory,
+            Labels.lineItems.subCategory,
+            Labels.lineItems.simplex,
+            Labels.lineItems.tcoApprovalRequired,
+            Labels.lineItems.tcoApproved,
+            Labels.lineItems.dictatedJob,
+            Labels.lineItems.itemType,
+            Labels.lineItems.itemName,
+            Labels.lineItems.itemNameDescription,
+
+            // Sustainability Information
+            Labels.lineItems.fscOrPefcMaterial,
+            Labels.lineItems.recyclable,
+            Labels.lineItems.sustainabilityOption,
+            Labels.lineItems.recycledMaterial,
+            Labels.lineItems.designedToBeReused,
+            Labels.lineItems.containsPlastic,
+            Labels.lineItems.containsRecycledPlastic,
+            Labels.lineItems.recycledMaterialWeightKg,
+
+            // Catalogue Section
+            Labels.lineItems.ratecardCatalogueItemDeclined,
+            Labels.lineItems.globalOrderWindowCatalogueName,
+            Labels.lineItems.regionalOrderWindowCatalogue,
+            Labels.lineItems.localCatalogueName,
+            Labels.lineItems.eAuction,
+            Labels.lineItems.printingMethod,
+            Labels.lineItems.typeOfItem,
+            Labels.lineItems.noOfMaterials,
+            Labels.lineItems.digitalInnovation,
+            Labels.lineItems.innovation,
+            Labels.lineItems.sourcingLocation,
+            Labels.lineItems.savingsType,
+            Labels.lineItems.savingsReason,
+            Labels.lineItems.owWithLink,
+
+            // Specifications
+            Labels.lineItems.noOfVersion,
+            Labels.lineItems.specifications,
+
+            // Quantity
+            Labels.lineItems.quantityType,
+            Labels.lineItems.quantity
+        ];
+
+        let newErrors = {};
+
+        requiredFields.forEach((field) => {
+            if (!formData[field]) {
+                newErrors[field] = Labels.commonLabel.required;
+            }
+        });
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PStepper steps={enquirySteps} activeStep={2}></PStepper>
+                    <PStepper steps={enquirySteps} activeStep={2} allowRedirect ={allowRedirect}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
                     <PGrid item xs={12} sm={12} md={9}>
@@ -66,36 +255,36 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Urgent / Non-Urgent "}
                                         label={`${getLabel("lbl62")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.category}
                                         onChange={handleChange}
+                                        helperText={errors?.category}
+                                        name={Labels.lineItems.category}
                                         options={typeofJobOptions}
-                                    //width={230}
                                     />
 
 
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Type of Job "}
                                         label={`${getLabel("lbl60")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.typeOfJob}
                                         onChange={handleChange}
+                                        helperText={errors?.typeOfJob}
+                                        name={Labels.lineItems.typeOfJob}
                                         options={typeofJobOptions}
-                                    //width={230}
                                     />
 
 
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Rate Card "}
                                         label={`${getLabel("lbl65")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.rateCard}
                                         onChange={handleChange}
+                                        helperText={errors?.rateCard}
+                                        name={Labels.lineItems.rateCard}
                                         options={yesNoOptions}
-                                    //width={230}
                                     />
 
                                 </PGrid>
@@ -103,33 +292,35 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Dictated Job  "}
                                         label={`${getLabel("lbl96")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.competitiveBiddingMandatory}
                                         onChange={handleChange}
+                                        helperText={errors?.competitiveBiddingMandatory}
+                                        name={Labels.lineItems.competitiveBiddingMandatory}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Item Type  "}
                                         label={`${getLabel("lbl97")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.competitiveBiddingCompliant}
                                         onChange={handleChange}
+                                        helperText={errors?.competitiveBiddingCompliant}
+                                        name={Labels.lineItems.competitiveBiddingCompliant}
                                         options={typeofJobOptions}
-                                    //width={230}
                                     />
 
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Rate Card "}
                                         label={`${getLabel("lbl98")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.competitiveBiddingExceptionFormSigned}
                                         onChange={handleChange}
+                                        helperText={errors?.competitiveBiddingExceptionFormSigned}
+                                        name={Labels.lineItems.competitiveBiddingExceptionFormSigned}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
 
                                 </PGrid>
@@ -137,34 +328,37 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Dictated Job  "}
                                         label={`${getLabel("lbl99")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.exceptionsReasonCode}
                                         onChange={handleChange}
+                                        helperText={errors?.exceptionsReasonCode}
+                                        name={Labels.lineItems.exceptionsReasonCode}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Item Category "}
                                         label={`${getLabel("lbl61")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.itemCategory}
                                         onChange={handleChange}
+                                        helperText={errors?.itemCategory}
+                                        name={Labels.lineItems.itemCategory}
                                         options={typeofJobOptions}
-                                    //width={230}
+
                                     />
 
 
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Item Type  "}
                                         label={`${getLabel("lbl100")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.subCategory}
                                         onChange={handleChange}
+                                        helperText={errors?.subCategory}
+                                        name={Labels.lineItems.subCategory}
                                         options={typeofJobOptions}
-                                    //width={230}
+
                                     />
 
                                 </PGrid>
@@ -172,32 +366,36 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Rate Card "}
+
                                         label={`${getLabel("lbl101")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.simplex}
                                         onChange={handleChange}
+                                        helperText={errors?.simplex}
+                                        name={Labels.lineItems.simplex}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Dictated Job  "}
+
                                         label={`${getLabel("lbl102")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.tcoApprovalRequired}
                                         onChange={handleChange}
+                                        helperText={errors?.tcoApprovalRequired}
+                                        name={Labels.lineItems.tcoApprovalRequired}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Item Type  "}
                                         label={`${getLabel("lbl103")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.tcoApproved}
                                         onChange={handleChange}
+                                        helperText={errors?.tcoApproved}
+                                        name={Labels.lineItems.tcoApproved}
                                         options={typeofJobOptions}
-                                    //width={230}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -208,22 +406,24 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Dictated Job  "}
                                         label={`${getLabel("lbl63")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.dictatedJob}
                                         onChange={handleChange}
+                                        helperText={errors?.dictatedJob}
+                                        name={Labels.lineItems.dictatedJob}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Item Type  "}
                                         label={`${getLabel("lbl64")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.itemType}
                                         onChange={handleChange}
+                                        helperText={errors?.itemType}
+                                        name={Labels.lineItems.itemType}
                                         options={typeofJobOptions}
-                                    //width={230}
+
                                     />
 
                                 </PGrid>
@@ -234,7 +434,7 @@ const LineItems = () => {
                                         value={typeofJob}
                                         onChange={handleChange}
                                         options={yesNoOptions}
-                                        //width={230}
+                                        
                                     />
                                 </PGrid> */}
                             </PGrid>
@@ -242,23 +442,22 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
-                                        name={"Item Name"}
                                         label={`${getLabel("lbl66")} ${Labels.symbols.required}`}
-                                        value={projectNo}
-                                    //width={250}
-                                    //onChange={this.handleChange}
+                                        value={formData.itemName}
+                                        onChange={handleChange}
+                                        helperText={errors?.itemName}
+                                        name={Labels.lineItems.itemName}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTextField
-                                        name="itemNameDescription"
                                         label={`${getLabel("lbl67")} ${Labels.symbols.required}`}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        value={formData.itemNameDescription}
+                                        onChange={handleChange}
+                                        helperText={errors?.itemNameDescription}
+                                        name={Labels.lineItems.itemNameDescription}
                                         multiline={true}
                                         rows={4.5}
-                                    //width={500}
-                                    // helperText={errors?.description}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -283,32 +482,36 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Produced on FSC or PEFC Material"}
+
                                         label={`${getLabel("lbl70")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.fscOrPefcMaterial}
                                         onChange={handleChange}
+                                        helperText={errors?.fscOrPefcMaterial}
+                                        name={Labels.lineItems.fscOrPefcMaterial}
                                         options={typeofJobOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Is the item recyclable"}
                                         label={`${getLabel("lbl71")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.recyclable}
                                         onChange={handleChange}
+                                        helperText={errors?.recyclable}
+                                        name={Labels.lineItems.recyclable}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Sustainability Option"}
                                         label={`${getLabel("lbl72")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.sustainabilityOption}
                                         onChange={handleChange}
+                                        helperText={errors?.sustainabilityOption}
+                                        name={Labels.lineItems.sustainabilityOption}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
 
@@ -316,32 +519,35 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Contains Recycled Material"}
                                         label={`${getLabel("lbl73")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.recycledMaterial}
                                         onChange={handleChange}
+                                        helperText={errors?.recycledMaterial}
+                                        name={Labels.lineItems.recycledMaterial}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Designed to be Reused"}
                                         label={`${getLabel("lbl74")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.designedToBeReused}
                                         onChange={handleChange}
+                                        helperText={errors?.designedToBeReused}
+                                        name={Labels.lineItems.designedToBeReused}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Contains Plastic? "}
                                         label={`${getLabel("lbl75")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.containsPlastic}
                                         onChange={handleChange}
+                                        helperText={errors?.containsPlastic}
+                                        name={Labels.lineItems.containsPlastic}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
 
@@ -350,19 +556,22 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl76")} ${Labels.symbols.optional}`}
-                                        value={typeofJob}
+                                        value={formData.containsRecycledPlastic}
                                         onChange={handleChange}
+                                        helperText={errors?.containsRecycledPlastic}
+                                        name={Labels.lineItems.containsRecycledPlastic}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
-                                        name={"Weightage of Recycled Material (Kg)"}
                                         label={`${getLabel("lbl79")} ${Labels.symbols.optional}`}
-                                        value={projectNo}
+                                        value={formData.recycledMaterialWeightKg}
+                                        onChange={handleChange}
+                                        helperText={errors?.recycledMaterialWeightKg}
+                                        name={Labels.lineItems.recycledMaterialWeightKg}
                                     //width={250}
                                     //onChange={this.handleChange}
                                     />
@@ -389,32 +598,35 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Produced on FSC or PEFC Material"}
                                         label={`${getLabel("lbl106")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.ratecardCatalogueItemDeclined}
                                         onChange={handleChange}
+                                        helperText={errors?.ratecardCatalogueItemDeclined}
+                                        name={Labels.lineItems.ratecardCatalogueItemDeclined}
                                         options={typeofJobOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Is the item recyclable"}
                                         label={`${getLabel("lbl107")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.globalOrderWindowCatalogueName}
                                         onChange={handleChange}
+                                        helperText={errors?.globalOrderWindowCatalogueName}
+                                        name={Labels.lineItems.globalOrderWindowCatalogueName}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Sustainability Option"}
                                         label={`${getLabel("lbl108")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.regionalOrderWindowCatalogue}
                                         onChange={handleChange}
+                                        helperText={errors?.regionalOrderWindowCatalogue}
+                                        name={Labels.lineItems.regionalOrderWindowCatalogue}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
 
@@ -422,32 +634,34 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Contains Recycled Material"}
                                         label={`${getLabel("lbl109")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.localCatalogueName}
                                         onChange={handleChange}
+                                        helperText={errors?.localCatalogueName}
+                                        name={Labels.lineItems.localCatalogueName}
                                         options={yesNoOptions}
-                                    //width={230}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Designed to be Reused"}
                                         label={`${getLabel("lbl110")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.eAuction}
                                         onChange={handleChange}
+                                        helperText={errors?.eAuction}
+                                        name={Labels.lineItems.eAuction}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={"Contains Plastic? "}
                                         label={`${getLabel("lbl111")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.printingMethod}
                                         onChange={handleChange}
+                                        helperText={errors?.printingMethod}
+                                        name={Labels.lineItems.printingMethod}
                                         options={yesNoOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
 
@@ -456,83 +670,90 @@ const LineItems = () => {
                             <PGrid container>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl112")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.typeOfItem}
                                         onChange={handleChange}
+                                        helperText={errors?.typeOfItem}
+                                        name={Labels.lineItems.typeOfItem}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PTextField
-                                        name={"Weightage of Recycled Material (Kg)"}
                                         label={`${getLabel("lbl113")} ${Labels.symbols.required}`}
-                                        value={projectNo}
-                                    //width={170}
-                                    //onChange={this.handleChange}
+                                        value={formData.noOfMaterials}
+                                        onChange={handleChange}
+                                        helperText={errors?.noOfMaterials}
+                                        name={Labels.lineItems.noOfMaterials}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl114")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.digitalInnovation}
                                         onChange={handleChange}
+                                        helperText={errors?.digitalInnovation}
+                                        name={Labels.lineItems.digitalInnovation}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl115")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.innovation}
                                         onChange={handleChange}
+                                        helperText={errors?.innovation}
+                                        name={Labels.lineItems.innovation}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl116")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.sourcingLocation}
                                         onChange={handleChange}
+                                        helperText={errors?.sourcingLocation}
+                                        name={Labels.lineItems.sourcingLocation}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl117")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.savingsType}
                                         onChange={handleChange}
+                                        helperText={errors?.savingsType}
+                                        name={Labels.lineItems.savingsType}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl118")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.savingsReason}
                                         onChange={handleChange}
+                                        helperText={errors?.savingsReason}
+                                        name={Labels.lineItems.savingsReason}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        name={"Contains Recycled Plastic"}
                                         label={`${getLabel("lbl119")} ${Labels.symbols.required}`}
-                                        value={typeofJob}
+                                        value={formData.owWithLink}
                                         onChange={handleChange}
+                                        helperText={errors?.owWithLink}
+                                        name={Labels.lineItems.owWithLink}
                                         options={yesNoOptions}
-                                    //width={170}
+
                                     />
                                 </PGrid>
                             </PGrid>
@@ -556,11 +777,11 @@ const LineItems = () => {
                             <PGrid container>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTextField
-                                        name={"No. of Version"}
                                         label={`${getLabel("lbl85")} ${Labels.symbols.required}`}
-                                        value={projectNo}
-                                    //width={250}
-                                    //onChange={this.handleChange}
+                                        value={formData.noOfVersion}
+                                        onChange={handleChange}
+                                        helperText={errors?.noOfVersion}
+                                        name={Labels.lineItems.noOfVersion}
                                     />
                                 </PGrid>
 
@@ -568,26 +789,26 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTextField
-                                        name="Specifications"
                                         label={`${getLabel("lbl83")} ${Labels.symbols.required}`}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        value={formData.specifications}
+                                        onChange={handleChange}
+                                        helperText={errors?.specifications}
+                                        name={Labels.lineItems.specifications}
                                         multiline={true}
                                         rows={4.5}
                                         width={100}
-                                    // helperText={errors?.description}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTextField
-                                        name="Notes / Comments "
-                                        label={`${getLabel("lbl86")} ${Labels.symbols.required}`}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        label={`${getLabel("lbl86")}`}
+                                        value={formData.notesComments}
+                                        onChange={handleChange}
+                                        //helperText={errors?.notesComments}
+                                        name={Labels.lineItems.notesComments}
                                         multiline={true}
                                         rows={4.5}
                                         width={100}
-                                    // helperText={errors?.description}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -611,21 +832,22 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={12} md={4}>
                                     <PDropdown
-                                        name="Quote Type"
                                         label={`${getLabel("lbl89")} ${Labels.symbols.required}`}
-                                        value={quoteType}
+                                        value={formData.quantityType}
                                         onChange={handleChange}
+                                        helperText={errors?.quantityType}
+                                        name={Labels.lineItems.quantityType}
                                         options={quoteTypeOptions}
-                                    //width={230}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
-                                        name={"Quantity"}
                                         label={`${getLabel("lbl87")} ${Labels.symbols.required}`}
-                                        value={projectNo}
-                                    //width={250}
-                                    //onChange={this.handleChange}
+                                        value={formData.quantity}
+                                        onChange={handleChange}
+                                        helperText={errors?.quantity}
+                                        name={Labels.lineItems.quantity}
                                     />
                                 </PGrid>
                             </PGrid>

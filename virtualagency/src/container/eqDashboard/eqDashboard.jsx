@@ -37,15 +37,16 @@ import { labelRoutes } from "../../navigations/labelRoutes";
 
 const EqDashboard = () => {
   const navigate = useNavigate();
+  const { getLabel } = useLanguage();
   const [date, setDate] = useState("");
   const [chartType, setChartType] = useState("pie");
   const [country, setCountry] = useState("");
   const [user, setUser] = useState("");
-  const { getLabel } = useLanguage();
   const [rows, setRows] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
-
+  const [search, setSearch] = useState("");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,15 +63,13 @@ const EqDashboard = () => {
           role: "Admin",
           jobposition: "",
           client: "",
-          username: "demouser.sg"
+          username: localStorage.getItem("user"),
         });
 
-        const data = res?.data;
-
         if (isSuccess(res)) {
+          const data = res?.data;
           setSummary(data.summary || {});
-
-          const formattedRows = (data.detailed || []).map((item) => ({
+          const formattedRows = (data.detailed || []).map(item => ({
             enquiryId: item.enqUId,
             projectNumber: item.projectNo,
             projectName: item.projectDesc,
@@ -78,8 +77,18 @@ const EqDashboard = () => {
             status: item.statusName,
             surveyStatus: item.surveyStatusName
           }));
-
           setRows(formattedRows);
+
+          // Format chart data
+          const formattedChartData = (data.summary?.jobStatus || []).map(
+            ({ statusName, enquiryCount }) => ({
+              name: statusName,
+              value: enquiryCount
+            })
+          );
+          setChartData(formattedChartData);
+
+          console.log("JobStatus chartData:", formattedChartData);
         }
       } catch (error) {
         console.error("API Error", error);
@@ -89,7 +98,7 @@ const EqDashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, []); // empty dependency: run only once on mount
 
   const columns = [
     { field: "enquiryId", header: "Enquiry ID" },
@@ -131,40 +140,20 @@ const EqDashboard = () => {
     },
   ];
 
-  const chartData = [
-    { name: "Draft", value: 10 },
-    { name: "RFQ Sent To Supplier", value: 8 },
-    { name: "Quote Sent To Customer", value: 5 },
-    { name: "Revised Quote Requested", value: 4 },
-    { name: "Chased Customer For Order", value: 7 },
-    { name: "Order Raised", value: 9 },
-    { name: "Order Confirmed", value: 6 },
-    { name: "Awaiting Artwork/Sample", value: 2 }
-  ];
-
-
-
-
   const chartOptions = [
-    {
-      label: "Line",
-      value: "line",
-      icon: <ShowChartIcon fontSize="small" />,
-      component: PLineChart
-    },
-    {
-      label: "Bar",
-      value: "bar",
-      icon: <BarChartIcon fontSize="small" />,
-      component: PBarChart
-    },
-    {
-      label: "Pie",
-      value: "pie",
-      icon: <PieChartIcon fontSize="small" />,
-      component: PPieChart
-    }
+    { label: "Line", value: "line", icon: <ShowChartIcon fontSize="small" /> },
+    { label: "Bar", value: "bar", icon: <BarChartIcon fontSize="small" /> },
+    { label: "Pie", value: "pie", icon: <PieChartIcon fontSize="small" /> }
   ];
+
+  // Map chartType string to component
+  const chartComponents = {
+    line: PLineChart,
+    bar: PBarChart,
+    pie: PPieChart
+  };
+
+  const SelectedChart = chartComponents[chartType];
 
   const userList = [
     { value: 1, label: "demo sg" },
@@ -200,10 +189,12 @@ const EqDashboard = () => {
     { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleChoose }
   ];
 
+  const data = search.trim() === "" ? rows : rows.filter((item) =>
+    item.enquiryId?.toLowerCase().includes(search.toLowerCase()) ||
+    item.projectName?.toLowerCase().includes(search.toLowerCase()) ||
+    item.projectNumber?.toLowerCase().includes(search.toLowerCase())
+  );
 
-
-  const selected = chartOptions.find(c => c.value === chartType);
-  const SelectedChart = selected?.component;
   return (
     <>
       <Box sx={{ px: 3, py: 3 }}>
@@ -260,7 +251,7 @@ const EqDashboard = () => {
             </Box>
           </PGrid>
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "6px 0px", }}>
-            <div style={{ display: "flex", justifyContent: "flex-end", }} >         
+            <div style={{ display: "flex", justifyContent: "flex-end", }} >
               <PToggle
                 options={chartOptions}
                 value={chartType}
@@ -278,7 +269,7 @@ const EqDashboard = () => {
             <PCard style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
               <PGrid container className={Labels.margin.mb3} spacing={1}>
                 <PGrid item xs={12} sm={6} md={6}>
-                  <PSearch width="100%" placeholder={""} />
+                  <PSearch width="100%" placeholder={"Seach by Enquiry ID, Project Number, Project Name"} onChange={(e) => setSearch(e.target.value)} />
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
@@ -307,7 +298,7 @@ const EqDashboard = () => {
                 {loading ? (
                   <Skeleton variant="rectangular" height={300} />
                 ) : (
-                  <PTable columns={columns} rows={rows} onClick={(row) => navigate(labelRoutes.clientInfo)} />)}
+                  <PTable columns={columns} rows={data} onClick={(row) => navigate(labelRoutes.clientInfo)} />)}
               </div>
             </PCard>
           </PGrid>
@@ -316,7 +307,7 @@ const EqDashboard = () => {
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex" }}>
             <PCard style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
               <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {SelectedChart && <SelectedChart data={chartData} />}
+                {SelectedChart && chartData.length > 0 && <SelectedChart data={chartData} />}
               </div>
             </PCard>
           </PGrid>

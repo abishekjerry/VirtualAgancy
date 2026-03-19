@@ -18,31 +18,82 @@ export const Labels = {
   //   wellcomeBack: "Wellcome Back"
   // },
 
-  clientInfo :{
-    division : "Division",
-    brand : "Brand",
-    deliveryCountry : "Delivery Country",
-    clientContact : "Client Contact",
-    pmgEntity : "PMG Entity",
-    aboveAtMarket : "AboveAtMarket"
+  clientInfo: {
+    division: "division",
+    brand: "brand",
+    deliveryCountry: "deliveryCountry",
+    clientContact: "clientContact",
+    pmgEntity: "pmgEntity",
+    aboveAtMarket: "aboveAtMarket"
   },
 
-  // enquiryDetails :{
-  //   enquiryDetails : "Enquiry Details",
-  //   enquiryTitle : "Enter all necessary job details required to set up the event.",
-  //   statusInformation : "Status Information",
-  // },
+  enquiryDetails: {
+    projectNo: "projectNo",
+    estdeliveryDate: "estdeliveryDate",
+    briefReceivedDate: "briefReceivedDate",
+    projectDescription: "projectDescription",
+    projectQuoteType: "projectQuoteType",
+    year: "year",
+    managementFeeType: "managementFeeType",
+    hybrid: "hybrid",
+    projectAttribute: "projectAttribute",
+    slaTemplate: "slaTemplate"
+  },
 
-  // lineItems :{
-  //   lineItems : "Line Items",
-  //   lineItemTitle : "Enter all project deliverables required by your client.",
-  //   sustainabilityInformation : "Sustainability Information",
-  //   sustainabilityInformationTitle : "Enter all sustainability details related to this product as required by your client",
-  //   specifications : "Specifications",
-  //   specificationsTitle : "Enter item specifications below, or populate from an existing item.",
-  //   quantity : "Quantity",
-  //   quantityTitle :  "Choose the project quote type and quantity.",
-  // },
+  lineItems : {
+    category: "category",
+    typeOfJob: "typeOfJob",
+    rateCard: "rateCard",
+    competitiveBiddingMandatory: "competitiveBiddingMandatory",
+    competitiveBiddingCompliant: "competitiveBiddingCompliant",
+    competitiveBiddingExceptionFormSigned: "competitiveBiddingExceptionFormSigned",
+    exceptionsReasonCode: "exceptionsReasonCode",
+    itemCategory: "itemCategory",
+    subCategory: "subCategory",
+    simplex: "simplex",
+    tcoApprovalRequired: "tcoApprovalRequired",
+    tcoApproved: "tcoApproved",
+    dictatedJob: "dictatedJob",
+    itemType: "itemType",
+    itemName: "itemName",
+    itemNameDescription: "itemNameDescription",
+
+    // Sustainability Information
+    fscOrPefcMaterial: "fscOrPefcMaterial",
+    recyclable: "recyclable",
+    sustainabilityOption: "sustainabilityOption",
+    recycledMaterial: "recycledMaterial",
+    designedToBeReused: "designedToBeReused",
+    containsPlastic: "containsPlastic",
+    containsRecycledPlastic: "containsRecycledPlastic",
+    recycledMaterialWeightKg: "recycledMaterialWeightKg",
+
+    // Catalogue Section
+    ratecardCatalogueItemDeclined: "ratecardCatalogueItemDeclined",
+    globalOrderWindowCatalogueName: "globalOrderWindowCatalogueName",
+    regionalOrderWindowCatalogue: "regionalOrderWindowCatalogue",
+    localCatalogueName: "localCatalogueName",
+    eAuction: "eAuction",
+    printingMethod: "printingMethod",
+    typeOfItem: "typeOfItem",
+    noOfMaterials: "noOfMaterials",
+    digitalInnovation: "digitalInnovation",
+    innovation: "innovation",
+    sourcingLocation: "sourcingLocation",
+    savingsType: "savingsType",
+    savingsReason: "savingsReason",
+    owWithLink: "owWithLink",
+
+    // Specifications
+    noOfVersion: "noOfVersion",
+    specifications: "specifications",
+    notesComments: "notesComments",
+
+    // Quantity
+    quantityType: "quantityType",
+    quantity: "quantity"
+  },
+  
 
   commonLabel: {
     dashboard: "Dashboard",
