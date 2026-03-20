@@ -468,7 +468,7 @@ const EqDashboard = () => {
           <>
             <PButton
               fullWidth
-              label={getLabel("lbl124")}
+              label={getLabel("lbl123")}
               variant="outlined"
               onClick={handleCloseChoose}
             />

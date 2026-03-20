@@ -120,7 +120,7 @@ const Suppliers = () => {
         if (!isValidation) {
             setAllowRedirect(true);
             setIsValidation(isValidation);
-            navigate(labelRoutes.clientInfo); //review
+            navigate(labelRoutes.clientInfo); //review`
         }
         else {
             setAllowRedirect(false);
@@ -167,7 +167,7 @@ const Suppliers = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        label={getLabel("lbl123")}
+                                        label={getLabel("lbl122")}
                                         value={print}
                                         onChange={(e) => setPrint(e.target.value)}
                                         options={printList}
