@@ -85,11 +85,10 @@ const EnquiryDetails = () => {
             ...prev,
             [name]: value
         }));
-
-        setErrors({
-            ...errors,
-            [name]: ""
-        });
+        setErrors((prev) => ({
+            ...prev,
+            [name]: ""   // clear only that field error
+        }));
     };
 
     const handleSubmit = () => {

@@ -20,6 +20,7 @@ export const Language_API = {
 
 export const Dashboard_API ={
   Dashboard : Base_Url + "/VA/Viewdashboard",
+  Master : Base_Url + "/VA/MasterDropdowns",
 }
 
  

@@ -1,5 +1,6 @@
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { Labels } from "../constants/labels";
+import * as XLSX from "xlsx";
 
 export const validateName = (name) => {
   if (!name) return "Name is required";
@@ -159,7 +160,7 @@ export function isNotEmpty(value) {
   return true;
 }
 
- export const getEnquirySteps = (getLabel) => [
+export const getEnquirySteps = (getLabel) => [
   { text: getLabel("lbl20"), url: labelRoutes.clientInfo },
   { text: getLabel("lbl21"), url: labelRoutes.enquiryDetails },
   { text: getLabel("lbl22"), url: labelRoutes.lineItems },
@@ -172,4 +173,36 @@ export const API_HEADERS = {
   "PMG-Account": "Nestle",
   "PMG-API-KEY": "sdjfhgdf9847348dfdHJKD97888JDU99"
 };
-  
+
+
+/**
+ * Export JSON data to Excel
+ * @param {Array} data - Array of objects to export
+ * @param {String} fileName - Name of the Excel file (without extension)
+ */
+export const exportToExcel = (data, fileName = Labels.reportName.report) => {
+  if (!data || data.length === 0) return;
+
+  // Convert JSON to worksheet
+  const worksheet = XLSX.utils.json_to_sheet(data);
+
+  // Auto column widths
+  const columnWidths = Object.keys(data[0]).map((key) => ({
+    wch: Math.max(
+      key.length,
+      ...data.map((row) => (row[key] ? row[key].toString().length : 10))
+    ),
+  }));
+  worksheet["!cols"] = columnWidths;
+
+  XLSX.utils.sheet_add_json(worksheet, [], { skipHeader: true });
+  worksheet["!autofilter"] = { ref: worksheet["!ref"] };
+
+  // Create workbook and append worksheet
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+  // Write Excel file
+  const today = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(workbook, `${fileName}_${today}.xlsx`);
+};

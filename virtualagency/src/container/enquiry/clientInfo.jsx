@@ -87,10 +87,10 @@ const ClientInfo = () => {
             [name]: value
         }));
 
-        setErrors({
-            ...errors,
-            [name]: ""
-        });
+        setErrors((prev) => ({
+            ...prev,
+            [name]: "" 
+        }));
     };
 
     const handleSubmit = () => {

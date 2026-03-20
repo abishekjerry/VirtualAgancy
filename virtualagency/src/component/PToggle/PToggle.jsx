@@ -1,7 +1,7 @@
 import React from "react";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
-const PToggle = ({ options = [], value, onChange }) => {
+const PToggle = ({ options = [], value, onChange , disabled = false }) => {
   const handleChange = (event, newValue) => {
     if (newValue !== null) {
       onChange(newValue);
@@ -14,6 +14,7 @@ const PToggle = ({ options = [], value, onChange }) => {
       exclusive
       onChange={handleChange}
       size="small"
+      disabled = {disabled}
       sx={{
         display: "flex",       
         width: "100%",             

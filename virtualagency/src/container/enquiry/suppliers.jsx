@@ -118,7 +118,6 @@ const Suppliers = () => {
     };
     const handleSubmit = () => {
         if (!isValidation) {
-            console.log("issue")
             setAllowRedirect(true);
             setIsValidation(isValidation);
             navigate(labelRoutes.clientInfo); //review
@@ -168,7 +167,7 @@ const Suppliers = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
-                                        label={"Print Capability"}
+                                        label={getLabel("lbl123")}
                                         value={print}
                                         onChange={(e) => setPrint(e.target.value)}
                                         options={printList}

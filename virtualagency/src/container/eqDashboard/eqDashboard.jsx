@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Box, Grid, Button, Typography, Container, Paper, IconButton, Tooltip, Skeleton } from "@mui/material";
+import React, { useState, useEffect, useMemo } from "react";
+import { Box, IconButton, Tooltip, Skeleton } from "@mui/material";
 import PNavbar from "../../component/PNavbar/PNavbar";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
@@ -23,7 +23,6 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import PSearch from "../../component/PSearch/PSearch";
-import PTextField from "../../component/PTextField/PTextField";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleIcon from '@mui/icons-material/TaskAlt';
@@ -31,27 +30,44 @@ import { FontFamily, FontWeight } from '../../utils/constants/fonts'
 import { useLanguage } from "../../utils/constants/language";
 import { Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
-import { isSuccess } from "../../utils/commonFunction/common";
+import { exportToExcel, isSuccess } from "../../utils/commonFunction/common";
 import { useNavigate } from "react-router-dom";
 import { labelRoutes } from "../../navigations/labelRoutes";
+import PDialog from "../../component/PDialog/PDialog";
 
 const EqDashboard = () => {
   const navigate = useNavigate();
   const { getLabel } = useLanguage();
-  const [date, setDate] = useState("");
-  const [chartType, setChartType] = useState("pie");
-  const [country, setCountry] = useState("");
-  const [user, setUser] = useState("");
+  const [openFilter, setOpenFilter] = useState("");
+  //const [chartType, setChartType] = useState("pie");
+  const [country, setCountry] = useState([]);
+  const [user, setUser] = useState({});
   const [rows, setRows] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [chartOrginalData, setChartOrginalData] = useState([]);
+  const [formData, setFormData] = useState({
+    country: "",
+    user: "",
+    startDate: "",
+    endDate: "",
+    search: "",
+    chartType: "pie",
+    status: ""
+  });
+  const [errors, setErrors] = useState({
+    startDate: "",
+    endDate: "",
+  })
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
+        const response = await PostApi(Dashboard_API.Master, {
+        });
+        setCountry(response.country)
         const res = await PostApi(Dashboard_API.Dashboard, {
           userCountryId: 12,
           createdName: 0,
@@ -70,25 +86,27 @@ const EqDashboard = () => {
           const data = res?.data;
           setSummary(data.summary || {});
           const formattedRows = (data.detailed || []).map(item => ({
-            enquiryId: item.enqUId,
+            enquiryId: item.enquiryId,
             projectNumber: item.projectNo,
             projectName: item.projectDesc,
             requestedDate: item.serverTime,
             status: item.statusName,
-            surveyStatus: item.surveyStatusName
+            surveyStatus: item.surveyStatusName,
+            countryID: item.pmgEntity,
+            userID: item.clientId,
+            jobStatusID: item.status,
+            date: item.serverTime,
           }));
           setRows(formattedRows);
-
-          // Format chart data
           const formattedChartData = (data.summary?.jobStatus || []).map(
-            ({ statusName, enquiryCount }) => ({
+            ({ statusName, enquiryCount, statusId }) => ({
               name: statusName,
-              value: enquiryCount
+              value: enquiryCount,
+              id: statusId
             })
           );
           setChartData(formattedChartData);
-
-          console.log("JobStatus chartData:", formattedChartData);
+          setChartOrginalData(formattedChartData);
         }
       } catch (error) {
         console.error("API Error", error);
@@ -153,47 +171,176 @@ const EqDashboard = () => {
     pie: PPieChart
   };
 
-  const SelectedChart = chartComponents[chartType];
+  const SelectedChart = chartComponents[formData.chartType];
 
   const userList = [
     { value: 1, label: "demo sg" },
     { value: 2, label: "Eddie Seah" },
     { value: 3, label: "huikeng tan" }
   ]
-  const counties = [
-    { value: 1, label: "Thailand" },
-    { value: 2, label: "Janpen" },
-    { value: 3, label: "India" }
-  ]
+
 
   const iconStyle = {
     border: "1px solid #e2e8f0",
     color: "#64748b",
     "&:hover": { bgcolor: "#f8fafc" }
   };
+
+  const handleOnClick = (payload) => {
+    setFormData((prev) => ({
+      ...prev,
+      status: prev.status === payload.id ? "" : Number(payload.id)
+    }));
+  };
+
+  const data = useMemo(() => {
+    let result = [...rows]; // copy original rows
+
+    // status filter
+    if (formData.status !== "") {
+      result = result.filter(
+        (item) => item.jobStatusID === Number(formData.status)
+      );
+    }
+
+    // country filter
+    if (formData.country !== "") {
+      result = result.filter(
+        (item) => item.countryID === Number(formData.country)
+      );
+    }
+
+    // user filter
+    if (formData.user !== "") {
+      result = result.filter(
+        (item) => item.userID === Number(formData.user)
+      );
+    }
+
+    //Date Filter
+    if (formData.startDate !== "" && formData.startDate !== "") {
+      result = result.filter(
+        (item) =>
+          new Date(item.date) >= new Date(formData.startDate) &&
+          new Date(item.date) <= new Date(formData.endDate)
+      );
+    }
+
+    // search filter
+    if (formData.search?.trim()) {
+      const search = formData.search.toLowerCase();
+      result = result.filter((item) =>
+        item.enquiryId?.toLowerCase().includes(search) ||
+        item.projectName?.toLowerCase().includes(search) ||
+        item.projectNumber?.toLowerCase().includes(search)
+      );
+    }
+
+    return result;
+
+  }, [rows, formData]);
+
   const handleReset = () => {
-    console.log("Reset form");
+    setErrors((prev) => ({
+      ...prev,
+      startDate: "",
+      endDate: ""
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      startDate: "",
+      endDate: "",
+      country: "",
+      user: "",
+      search: "",
+      status: ""
+    }));
+
+    setChartData(chartOrginalData);
   };
 
   const handleExport = () => {
-    console.log("Export data");
+    // Format data for export
+    const exportData = rows.map((item) => ({
+      "Enquiry ID": item.enquiryId,
+      "Project Name": item.projectName,
+      "Project Number": item.projectNumber,
+      "Status": item.jobStatusName,
+      "Country": item.countryName,
+      "User": item.userName,
+    }));
+    exportToExcel(exportData, Labels.reportName.enquiryReport);
   };
 
-  const handleChoose = () => {
-    console.log("Choose selected");
+  const handleOpenChoose = () => {
+    setOpenFilter(true);
   };
+
+  const handleCloseChoose = () => {
+    setOpenFilter(false);
+    setErrors((prev) => ({
+      ...prev,
+      startDate: "",
+      endDate: ""
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      startDate: "",
+      endDate: "",
+      country: "",
+      user: "",
+      search: "",
+      status: ""
+    }));
+    setChartData(chartOrginalData);
+  };
+
+  const handleSendChoose = () => {
+    const isValid = FliterValidation();
+    if (isValid) {
+      setOpenFilter(false);
+    }
+  };
+  const FliterValidation = () => {
+    const requiredFields = [
+      Labels.dashboard.startDate,
+      Labels.dashboard.endDate
+    ];
+    let newErrors = {};
+
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = Labels.commonLabel.required;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: ""
+    }));
+  };
+
 
   const icons = [
     { icon: <RestartAltIcon fontSize="small" />, tooltip: "Reset", action: handleReset },
     { icon: <FileDownloadIcon fontSize="small" />, tooltip: "Export", action: handleExport },
-    { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleChoose }
+    { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleOpenChoose }
   ];
 
-  const data = search.trim() === "" ? rows : rows.filter((item) =>
-    item.enquiryId?.toLowerCase().includes(search.toLowerCase()) ||
-    item.projectName?.toLowerCase().includes(search.toLowerCase()) ||
-    item.projectNumber?.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <>
@@ -208,34 +355,26 @@ const EqDashboard = () => {
               style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
             />
           </PGrid>
-          <PGrid item xs={12} sm={6} md={5} className="d-flex align-items-center gap-2">
-            <PDatepicker
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              width={250}
-            />
-            <PDatepicker
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              width={250}
-            />
-            <PButton
-              label={getLabel("lbl40")}
-              onClick={(e) => handleSubmit(e, true)}
-              fullWidth
-              width={200}
-
-            />
-          </PGrid>
-
         </PGrid>
 
         <PGrid container className={Labels.margin.mb3}>
-          {cardData.map((card, index) => (
-            <PGrid key={index} item xs={12} sm={6} md={3} lg={3}>
-              <PDashboardCard {...{ ...card, bgColor: CommonColors.bg_violet }} />
-            </PGrid>
-          ))}
+          {loading ? (
+            cardData.map((card, index) => (
+              <PGrid key={index} item xs={12} sm={6} md={3} lg={3}>
+                <Skeleton
+                  variant="rectangular"
+                  height={130}
+                  sx={{ borderRadius: 2 }}
+                />
+              </PGrid>
+            ))
+          ) : (
+            cardData.map((card, index) => (
+              <PGrid key={index} item xs={12} sm={6} md={3} lg={3}>
+                <PDashboardCard {...{ ...card, bgColor: CommonColors.bg_violet }} />
+              </PGrid>
+            ))
+          )}
         </PGrid>
 
         <PGrid container className={Labels.margin.mb3}>
@@ -243,7 +382,7 @@ const EqDashboard = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end", margin: "6px 0px" }}>
               {icons.map((item, index) => (
                 <Tooltip title={item.tooltip} arrow key={index}>
-                  <IconButton sx={iconStyle} onClick={item.action}>
+                  <IconButton sx={iconStyle} onClick={item.action} disabled={loading}>
                     {item.icon}
                   </IconButton>
                 </Tooltip>
@@ -254,9 +393,9 @@ const EqDashboard = () => {
             <div style={{ display: "flex", justifyContent: "flex-end", }} >
               <PToggle
                 options={chartOptions}
-                value={chartType}
-                onChange={setChartType}
-
+                value={formData.chartType}
+                onChange={(value) => setFormData((prev) => ({ ...prev, chartType: value }))}
+                disabled = {loading}
               />
             </div>
           </PGrid>
@@ -269,14 +408,14 @@ const EqDashboard = () => {
             <PCard style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
               <PGrid container className={Labels.margin.mb3} spacing={1}>
                 <PGrid item xs={12} sm={6} md={6}>
-                  <PSearch width="100%" placeholder={"Seach by Enquiry ID, Project Number, Project Name"} onChange={(e) => setSearch(e.target.value)} />
+                  <PSearch width="100%" placeholder={"Seach by Enquiry ID, Project Number, Project Name"} onChange={(e) => setFormData({ ...formData, search: e.target.value })} value={formData.search} />
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
                     label={getLabel("lbl09")}
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    options={counties}
+                    value={formData.country}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    options={country}
                     width={Labels.fontSize.xxxxl}
                     flag={Labels.flag.auto}
                   />
@@ -284,8 +423,8 @@ const EqDashboard = () => {
                 <PGrid item xs={12} sm={6} md={3}>
                   <PDropdown
                     label={getLabel("lbl10")}
-                    value={user}
-                    onChange={(e) => setUser(e.target.value)}
+                    value={formData.user}
+                    onChange={(e) => setFormData({ ...formData, user: e.target.value })}
                     options={userList}
                     width={Labels.fontSize.xxxxl}
                     flag={Labels.flag.auto}
@@ -296,7 +435,7 @@ const EqDashboard = () => {
               {/* flexGrow ensures the table area fills the card height */}
               <div style={{ flexGrow: 1 }}>
                 {loading ? (
-                  <Skeleton variant="rectangular" height={300} />
+                  <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
                 ) : (
                   <PTable columns={columns} rows={data} onClick={(row) => navigate(labelRoutes.clientInfo)} />)}
               </div>
@@ -307,13 +446,65 @@ const EqDashboard = () => {
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex" }}>
             <PCard style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
               <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {SelectedChart && chartData.length > 0 && <SelectedChart data={chartData} />}
+                {loading ? (
+                  <Skeleton variant="rectangular" height={350} width="100%" sx={{ borderRadius: 2 }} />
+                ) : (
+                  SelectedChart && chartData.length > 0 && (
+                    <SelectedChart data={chartData} onSliceClick={handleOnClick} />
+                  )
+                )}
               </div>
             </PCard>
           </PGrid>
 
         </PGrid>
       </Box >
+
+      <PDialog
+        open={openFilter}
+        onClose={handleCloseChoose}
+        //title={Labels.recoverPassword}
+        actions={
+          <>
+            <PButton
+              fullWidth
+              label={getLabel("lbl124")}
+              variant="outlined"
+              onClick={handleCloseChoose}
+            />
+
+            <PButton
+              fullWidth
+              label={getLabel("lbl40")}
+              variant={Labels.contained}
+              onClick={handleSendChoose}
+            />
+          </>
+        }
+      >
+        <PGrid>
+          <PGrid item xs={12} sm={6} md={5}>
+            <PDatepicker
+              name={Labels.dashboard.startDate}
+              label={getLabel("lbl120")}
+              value={formData.startDate}
+              onChange={handleChange}
+              width={250}
+              helperText={errors?.startDate}
+            />
+          </PGrid>
+          <PGrid item xs={12} sm={6} md={5}>
+            <PDatepicker
+              name={Labels.dashboard.endDate}
+              label={getLabel("lbl121")}
+              value={formData.endDate}
+              onChange={handleChange}
+              width={250}
+              helperText={errors?.endDate}
+            />
+          </PGrid>
+        </PGrid>
+      </PDialog>
     </>
   );
 };

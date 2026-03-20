@@ -11,12 +11,10 @@ export const Labels = {
     passwordDoNotMatch: "Password do not match"
   },
 
-  // dashboard: {
-  //   welcomeToVirtualAgency: "WELCOME TO VIRTUAL AGENCY",
-  //   agencyPortal: "Agency Portal",
-  //   toBeginPleaseChooseAnApplication: "To begin, please choose an application",
-  //   wellcomeBack: "Wellcome Back"
-  // },
+  dashboard: {
+    startDate: "startDate",
+    endDate: "endDate",
+  },
 
   clientInfo: {
     division: "division",
@@ -117,7 +115,8 @@ export const Labels = {
     submit: "Submit",
     backToLogin: "Back to Login",
     login: "Login",
-    changePassword: "Change Password"
+    changePassword: "Change Password",
+    reset : "Reset"
   },
 
   footer: {
@@ -131,6 +130,10 @@ export const Labels = {
     status: true,
   },
 
+  reportName : {
+    report : "Report",
+    enquiryReport : "Enquiry Report"
+  },
 
   hex: {
     fff7e6: "#fff7e6",

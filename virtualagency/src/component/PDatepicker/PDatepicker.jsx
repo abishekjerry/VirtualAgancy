@@ -16,12 +16,12 @@ export default function PDatepicker({
   inputRef,
   placeholder = "DD-MM-YYYY",
   mt = 0.4,
+  allowFuture = false, // <-- New prop
 }) {
   const internalRef = useRef(null);
   const textFieldRef = inputRef || internalRef;
   const flatpickrRef = useRef(null);
 
-  // Initialize flatpickr
   useEffect(() => {
     if (!textFieldRef.current) return;
 
@@ -29,7 +29,7 @@ export default function PDatepicker({
       dateFormat: "d-m-Y",
       defaultDate: value || null,
       allowInput: true,
-      maxDate: "today",
+      maxDate: allowFuture ? null : "today", // Block future if false
       clickOpens: true,
       onChange: function (selectedDates, dateStr) {
         if (onChange) {
@@ -46,41 +46,58 @@ export default function PDatepicker({
     return () => {
       flatpickrRef.current?.destroy();
     };
-  }, []);
+  }, [allowFuture]);
 
   const handleIconClick = () => {
     flatpickrRef.current?.open();
   };
 
+  // allow numbers only
+  const handleKeyDown = (e) => {
+    const allowedKeys = [
+      "Backspace",
+      "Delete",
+      "ArrowLeft",
+      "ArrowRight",
+      "Tab",
+    ];
+    if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  // auto format + validation
+  const handleInput = (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+
+    if (value.length > 2) value = value.slice(0, 2) + "-" + value.slice(2);
+    if (value.length > 5) value = value.slice(0, 5) + "-" + value.slice(5);
+    if (value.length > 10) value = value.slice(0, 10);
+
+    e.target.value = value;
+
+    if (value.length === 10) {
+      const [day, month, year] = value.split("-");
+      const enteredDate = new Date(`${year}-${month}-${day}`);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      // Block future if flag is false
+      if (!allowFuture && enteredDate > today) {
+        e.target.value = "";
+      }
+    }
+
+    if (onChange) {
+      onChange({
+        target: {
+          name: name,
+          value: e.target.value,
+        },
+      });
+    }
+  };
+
   const baseSx = FormControlBaseStyle(width, mt);
-  // Same styling as PTextField
-  // const baseSx = {
-  //   width: width || Labels.fontSize.xxxxl,
-  //   mt: 1,
-  //   "& .MuiOutlinedInput-root": {
-  //     borderRadius: "12px",
-  //     backgroundColor: "#ffffff",
-  //     transition: "all 0.3s ease",
-  //     "& fieldset": {
-  //       borderColor: helperText ? "#d32f2f" : "#62BCD8",
-  //     },
-  //     "&:hover fieldset": {
-  //       borderColor: "#62BCD8",
-  //     },
-  //     "&.Mui-focused fieldset": {
-  //       borderColor: "#62BCD8",
-  //       boxShadow: "0 0 0 3px rgba(98, 188, 216, 0.25)",
-  //     },
-  //   },
-  //   "& .MuiInputBase-input": {
-  //     fontSize: Labels.fontSize.xs,
-  //     fontFamily: FontFamily.regular,
-  //   },
-  //   "& .MuiFormHelperText-root": {
-  //     fontSize: Labels.fontSize.xxs,
-  //     marginLeft: 0,
-  //   },
-  // };
 
   return (
     <TextField
@@ -94,14 +111,11 @@ export default function PDatepicker({
       error={!!helperText}
       variant="outlined"
       sx={baseSx}
+      onKeyDown={handleKeyDown}
+      onInput={handleInput}
       InputProps={{
         endAdornment: (
-          <InputAdornment
-            position="end"
-            sx={{
-              marginRight: 0,   // remove default spacing
-            }}
-          >
+          <InputAdornment position="end" sx={{ marginRight: 0 }}>
             <IconButton
               onClick={handleIconClick}
               disabled={disabled}
@@ -112,8 +126,8 @@ export default function PDatepicker({
                 height: "49px",
                 width: "40px",
                 padding: 0,
-                marginRight: "-14px", // push icon to edge
-                marginTop:"4px",
+                marginRight: "-14px",
+                marginTop: "4px",
                 "&:hover": { backgroundColor: "#0b5ed7" },
               }}
             >

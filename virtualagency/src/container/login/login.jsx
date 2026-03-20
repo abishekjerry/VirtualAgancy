@@ -21,11 +21,10 @@ import { AppNavigation } from "../../navigations/appNavigation";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import Logo from "../../utils/assets/Navbar/Logo.svg";
 import { PostApi } from "../../utils/api/networking";
-import { Account_API } from "../../utils/api/apiUrl";
+import { Account_API, Dashboard_API } from "../../utils/api/apiUrl";
 
 function Login(props) {
   const { navigate } = props;
-
   const [isLogin, setIsLogin] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -106,11 +105,10 @@ function Login(props) {
       userName: userName,
       password: password,
     });
-    console.log(res.data, "res");
     if (isLogin) {
       if (isSuccess(res)) {
         localStorage.setItem("user", res?.data?.username);
-        localStorage.setItem("email", res?.data?.email);
+        localStorage.setItem("email", res?.data?.email);    
         navigate(labelRoutes.dashboard);
       } else {
         setErrors((prev) => ({
@@ -179,7 +177,7 @@ function Login(props) {
             </div>
           </div>
         ) : (
-          
+
           <div className="login-left">
             <div className="login-box">
               <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
@@ -200,7 +198,7 @@ function Login(props) {
                 helperText={errors?.password}
                 startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
                 flag={Labels.flag.password}
-                onChange={handleChange}               
+                onChange={handleChange}
               />
 
               <div className="forgot-password">
