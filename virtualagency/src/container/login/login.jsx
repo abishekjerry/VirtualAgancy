@@ -68,7 +68,7 @@ function Login(props) {
         setPassword(value);
         setErrors((prev) => ({
           ...prev,
-          password: value ? validatePassword(value) : "",
+          password: "",
         }));
         break;
 
@@ -108,7 +108,9 @@ function Login(props) {
     if (isLogin) {
       if (isSuccess(res)) {
         localStorage.setItem("user", res?.data?.username);
-        localStorage.setItem("email", res?.data?.email);    
+        localStorage.setItem("email", res?.data?.email);
+        localStorage.setItem("agancyUserID", res?.data?.fkID);
+        localStorage.setItem("userID", res?.data?.userID);
         navigate(labelRoutes.dashboard);
       } else {
         setErrors((prev) => ({

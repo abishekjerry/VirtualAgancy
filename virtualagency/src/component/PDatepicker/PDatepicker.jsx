@@ -78,7 +78,7 @@ export default function PDatepicker({
 
     if (value.length === 10) {
       const [day, month, year] = value.split("-");
-      const enteredDate = new Date(`${year}-${month}-${day}`);
+      const enteredDate = new Date(`${year}/${month}/${day}`);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       // Block future if flag is false

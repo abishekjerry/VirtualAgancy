@@ -22,7 +22,17 @@ export const Labels = {
     deliveryCountry: "deliveryCountry",
     clientContact: "clientContact",
     pmgEntity: "pmgEntity",
-    aboveAtMarket: "aboveAtMarket"
+    aboveAtMarket: "aboveAtMarket",
+
+    firstName: "firstName",
+    lastName: "lastName",
+    logonID: "logonID",
+    jobTitle: "jobTitle",
+    email: "email",
+    phone: "phone",
+    receiveNotification: "receiveNotification",
+    jobRole: "jobRole",
+    brandName: "brandName"
   },
 
   enquiryDetails: {
@@ -38,7 +48,7 @@ export const Labels = {
     slaTemplate: "slaTemplate"
   },
 
-  lineItems : {
+  lineItems: {
     category: "category",
     typeOfJob: "typeOfJob",
     rateCard: "rateCard",
@@ -91,12 +101,22 @@ export const Labels = {
     quantityType: "quantityType",
     quantity: "quantity"
   },
-  
+
 
   commonLabel: {
     dashboard: "Dashboard",
     logo: "logo",
     required: "Required",
+  },
+
+  status: {
+    success: "S",
+    failure: "F"
+  },
+  message: {
+    success: "Success",
+    failed : "Failed",
+    somethingWentWrong: "Something went wrong"
   },
 
   language: {
@@ -116,7 +136,7 @@ export const Labels = {
     backToLogin: "Back to Login",
     login: "Login",
     changePassword: "Change Password",
-    reset : "Reset"
+    reset: "Reset"
   },
 
   footer: {
@@ -128,11 +148,14 @@ export const Labels = {
     password: "Password",
     readonly: "ReadOnly",
     status: true,
+    Insert : "Insert",
+    Update : "Update",
+    
   },
 
-  reportName : {
-    report : "Report",
-    enquiryReport : "Enquiry Report"
+  reportName: {
+    report: "Report",
+    enquiryReport: "Enquiry Report"
   },
 
   hex: {

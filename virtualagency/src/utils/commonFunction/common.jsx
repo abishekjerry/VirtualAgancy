@@ -91,65 +91,65 @@ export const allowEmailCharsOnly = (e) => {
   }
 };
 
-//email hiding format
-export const maskEmail = (email) => {
-  if (!email || typeof email !== "string" || !email.includes("@")) return "-";
-  const [user, domain] = email.split("@");
-  if (!user || !domain) return "-";
+// //email hiding format
+// export const maskEmail = (email) => {
+//   if (!email || typeof email !== "string" || !email.includes("@")) return "-";
+//   const [user, domain] = email.split("@");
+//   if (!user || !domain) return "-";
 
-  const maskedUser = user[0] + "*".repeat(user.length - 1);
-  const domainParts = domain.split(".");
-  const maskedDomain =
-    domainParts[0][0] + "*".repeat(domainParts[0].length - 1);
+//   const maskedUser = user[0] + "*".repeat(user.length - 1);
+//   const domainParts = domain.split(".");
+//   const maskedDomain =
+//     domainParts[0][0] + "*".repeat(domainParts[0].length - 1);
 
-  return `${maskedUser}@${maskedDomain}.${domainParts[1]}`;
-};
+//   return `${maskedUser}@${maskedDomain}.${domainParts[1]}`;
+// };
 
-//mobile hiding format
-export const maskMobile = (number) => {
-  if (!number || typeof number !== "string" || number.trim() === "") return "";
-  const cleaned = number.trim();
-  if (cleaned.length < 4) return "*".repeat(cleaned.length);
-  return (
-    cleaned.slice(0, 2) + "*".repeat(cleaned.length - 4) + cleaned.slice(-2)
-  );
-};
-export const capsFormat = (value) => {
-  const upperValue = value.toUpperCase();
-  return upperValue;
-};
+// //mobile hiding format
+// export const maskMobile = (number) => {
+//   if (!number || typeof number !== "string" || number.trim() === "") return "";
+//   const cleaned = number.trim();
+//   if (cleaned.length < 4) return "*".repeat(cleaned.length);
+//   return (
+//     cleaned.slice(0, 2) + "*".repeat(cleaned.length - 4) + cleaned.slice(-2)
+//   );
+// };
+// export const capsFormat = (value) => {
+//   const upperValue = value.toUpperCase();
+//   return upperValue;
+// };
 
-export function validateEmailOrMobile(value) {
-  const trimmedValue = value.trim();
+// export function validateEmailOrMobile(value) {
+//   const trimmedValue = value.trim();
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const mobileRegex = /^[6-9]\d{9}$/;
+//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//   const mobileRegex = /^[6-9]\d{9}$/;
 
-  if (!trimmedValue) {
-    return "Required";
-  }
+//   if (!trimmedValue) {
+//     return "Required";
+//   }
 
-  if (emailRegex.test(trimmedValue)) {
-    return "";
-  }
+//   if (emailRegex.test(trimmedValue)) {
+//     return "";
+//   }
 
-  if (mobileRegex.test(trimmedValue)) {
-    return "";
-  }
+//   if (mobileRegex.test(trimmedValue)) {
+//     return "";
+//   }
 
-  return "Enter  valid email or mobile number";
-}
+//   return "Enter  valid email or mobile number";
+// }
 
-export const generateCaptcha = () => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({ length: 6 }, () =>
-    chars.charAt(Math.floor(Math.random() * chars.length))
-  ).join("");
-};
+// export const generateCaptcha = () => {
+//   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+//   return Array.from({ length: 6 }, () =>
+//     chars.charAt(Math.floor(Math.random() * chars.length))
+//   ).join("");
+// };
 
-export const toLowerCase = (event) => {
-  event.target.value = event.target.value.toLowerCase();
-};
+// export const toLowerCase = (event) => {
+//   event.target.value = event.target.value.toLowerCase();
+// };
 
 export function isNotEmpty(value) {
   if (value === null || value === undefined) return false;
@@ -174,6 +174,13 @@ export const API_HEADERS = {
   "PMG-API-KEY": "sdjfhgdf9847348dfdHJKD97888JDU99"
 };
 
+let handler;
+export const setToast = (fn) => {
+  handler = fn;
+};
+export const toast = (status, message) => {
+  handler?.({ status,  message});
+};
 
 /**
  * Export JSON data to Excel

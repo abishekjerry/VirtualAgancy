@@ -25,7 +25,8 @@ const PDropdown = ({
   width = "",
   mt = 0.4,
   multiple = false,
-  flag = ""
+  flag = "",
+  disabled = false
 }) => {
 
   const selectedOption = useMemo(
@@ -103,15 +104,28 @@ const PDropdown = ({
     />
   );
 
-  // Autocomplete Mode (Clear icon enabled)
   if (flag === Labels.flag.auto) {
     return (
       <Autocomplete
         options={options}
         value={selectedOption}
-        disableClearable={!selectedOption}   // ✅ show clear icon only when value exists
+        disableClearable={!selectedOption}
         getOptionLabel={(option) => option?.label || ""}
-        onChange={(e, newValue) =>  onChange({ target: { name, value: newValue?.value ?? "" } })}
+        isOptionEqualToValue={(option, value) => option.value === value?.value}
+        renderOption={(props, option) => (
+          <li {...props} key={option.value}>
+            {option.label}
+          </li>
+        )}
+        onChange={(e, newValue) =>
+          onChange({
+            target: {
+              name,
+              value: newValue?.value,
+              label: newValue?.label
+            }
+          })
+        }
         sx={baseSx}
         renderInput={renderTextField}
       />
@@ -129,10 +143,28 @@ const PDropdown = ({
     >
       <InputLabel>{label}</InputLabel>
 
-      <Select value={value} label={label} onChange={onChange} name={name}>
-        <MenuItem value="">
-          <em>-- Choose --</em>
-        </MenuItem>
+      <Select
+        value={value}
+        label={label}
+        name={name}
+        onChange={(e) => {
+          const selected = options.find(
+            (opt) => opt.value === e.target.value
+          );
+          onChange({
+            target: {
+              name: name,
+              value: e.target.value,
+              label: selected?.label || ""
+            }
+          });
+        }}
+      >
+        {!disabled && (
+          <MenuItem value="">
+            <em>-- Choose --</em>
+          </MenuItem>
+        )}
 
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>

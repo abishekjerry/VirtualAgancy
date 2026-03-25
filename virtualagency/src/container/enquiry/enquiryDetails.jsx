@@ -3,7 +3,7 @@ import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
@@ -15,12 +15,15 @@ import { getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate } from "react-router-dom";
+import { Dashboard_API } from "../../utils/api/apiUrl";
+import { PostApi } from "../../utils/api/networking";
 const EnquiryDetails = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
     const enquirySteps = getEnquirySteps(getLabel);
     const [allowRedirect, setAllowRedirect] = useState(false);
-    const [date, setDate] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [quoteStartDate, setQuoteStartDate] = useState("");
     const [formData, setFormData] = useState({
         projectNo: "",
         estdeliveryDate: "",
@@ -48,36 +51,48 @@ const EnquiryDetails = () => {
         slaTemplate: ""
     });
 
-    const yearList = [
-        { label: "Y1", value: 1 },
-        { label: "Y2", value: 2 },
-        { label: "Y3", value: 3 }
-    ];
+    const [formDataList, setFormDataList] = useState({
+        managementFeeType: [],
+        projectAttribute: [],
+        year: [],
+        quoteType: [
+            { label: "Quote of Total price", value: 1 },
+            { label: "Quote of Unit price", value: 2 }
+        ],
+        hybird: [
+            { label: "Yes", value: 1 },
+            { label: "No", value: 2 }
+        ],
+
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+
+                const response = await PostApi(Dashboard_API.Master, {
+                });
+                setFormDataList(prev => ({
+                    ...prev,
+                    managementFeeType: response.managementFeetype,
+                    projectAttribute: response.projectAttribute,
+                    year: response.year
+                }));
+            } catch (error) {
+                console.error("API Error", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
 
     const templateList = [
         { label: "Rack Recurring - SG", value: 1 },
         { label: "Rack Recurring - US", value: 2 },
         { label: "Rack Recurring - UK", value: 3 }
     ];
-
-    const quoteTypeList = [
-        { label: "Quote of Total price", value: 1 },
-        { label: "Quote of Unit price", value: 2 }
-    ];
-
-    const countryList = [
-        { label: "Singapore", value: 1 },
-        { label: "India", value: 2 },
-        { label: "Malaysia", value: 3 },
-        { label: "Thailand", value: 4 }
-    ];
-
-    const pmgEntityList = [
-        { label: "PMG Singapore", value: 1 },
-        { label: "PMG India", value: 2 },
-        { label: "PMG Malaysia", value: 3 }
-    ];
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -99,6 +114,13 @@ const EnquiryDetails = () => {
         }
         else {
             setAllowRedirect(isValid);
+        }
+    };
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate(labelRoutes.home); // fallback route
         }
     };
     const EnquiryDetailsValidation = () => {
@@ -127,13 +149,70 @@ const EnquiryDetails = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    //SLA Date Management Function
+
     const phases = [
-        { name: getLabel("lbl54"), days: 5 },
-        { name: getLabel("lbl55"), days: 5 },
-        { name: getLabel("lbl56"), days: 20 },
-        { name: getLabel("lbl57"), days: 5 },
-        { name: getLabel("lbl58"), days: 10 }
+        { name: getLabel("lbl54"), days: 5, mdays: 5 },
+        { name: getLabel("lbl55"), days: 5, mdays: 5 },
+        { name: getLabel("lbl56"), days: 20, mdays: 20 },
+        { name: getLabel("lbl57"), days: 5, mdays: 5 },
+        { name: getLabel("lbl58"), days: 10, mdays: 10 }
     ];
+    const [phaseDates, setPhaseDates] = useState([]);
+    const addDays = (date, days) => {
+        const d = new Date(date);
+        d.setDate(d.getDate() + Number(days));
+        return d;
+    };
+    const formatDate = (date) => {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+    const parseDate = (dateStr) => {
+        const [day, month, year] = dateStr.split("-");
+        return new Date(year, month - 1, day);
+    };
+    const calculatePlanByQuote = (selectedDate, updatedPhases = null) => {
+        setQuoteStartDate(selectedDate);
+        let startDate = parseDate(selectedDate);
+        const data = updatedPhases || phases;
+        const result = data.map((phase) => {
+            // Always use mdays, it’s never empty
+            const start = new Date(startDate);
+            const end = addDays(start, phase.mdays);
+            startDate = new Date(end);
+
+            return {
+                ...phase,
+                startDate: formatDate(start),
+                endDate: formatDate(end),
+            };
+        });
+        console.log(result);
+
+        setPhaseDates(result);
+    };
+
+    // Handle mdays input change
+    const handleModifiedDays = (index, value) => {
+        // Allow empty while typing
+        if (value === "") {
+            const updatedPhases = [...phases];
+            updatedPhases[index].mdays = "";
+            setPhaseDates(updatedPhases);
+            return;
+        }
+        const num = Number(value.replace(/\D/g, "").replace(/^0+/, ""));
+        if (!num) return;
+        const updatedPhases = [...phases];
+        updatedPhases[index].mdays = num;
+        setPhaseDates(updatedPhases);
+        calculatePlanByQuote(quoteStartDate, updatedPhases);
+    };
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -173,14 +252,7 @@ const EnquiryDetails = () => {
                                         onChange={handleChange}
                                         helperText={errors?.estdeliveryDate}
                                         width={100}
-                                    />
-                                    <PDatepicker
-                                        name={Labels.enquiryDetails.briefReceivedDate}
-                                        label={`${getLabel("lbl44")} ${Labels.symbols.required}`}
-                                        value={formData.briefReceivedDate}
-                                        onChange={handleChange}
-                                        helperText={errors?.briefReceivedDate}
-                                        width={100}
+                                        allowFuture={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
@@ -194,27 +266,42 @@ const EnquiryDetails = () => {
                                         rows={4.5}
                                         width={100}
                                     />
-                                    <Box style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                        <PDropdown
-                                            name={Labels.enquiryDetails.projectQuoteType}
-                                            label={`${getLabel("lbl46")} ${Labels.symbols.required}`}
-                                            value={formData.projectQuoteType}
-                                            onChange={handleChange}
-                                            helperText={errors?.projectQuoteType}
-                                            options={quoteTypeList}
-                                            width={100}
-                                        />
-                                        <PDropdown
-                                            name={Labels.enquiryDetails.year}
-                                            label={`${getLabel("lbl47")} ${Labels.symbols.required}`}
-                                            value={formData.year}
-                                            onChange={handleChange}
-                                            helperText={errors?.year}
-                                            options={yearList}
-                                            width={100}
-                                        />
-                                    </Box>
+                                </PGrid>
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDatepicker
+                                        name={Labels.enquiryDetails.briefReceivedDate}
+                                        label={`${getLabel("lbl44")} ${Labels.symbols.required}`}
+                                        value={formData.briefReceivedDate}
+                                        onChange={handleChange}
+                                        helperText={errors?.briefReceivedDate}
+                                        width={100}
+                                        allowFuture={true}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name={Labels.enquiryDetails.projectQuoteType}
+                                        label={`${getLabel("lbl46")} ${Labels.symbols.required}`}
+                                        value={formData.projectQuoteType}
+                                        onChange={handleChange}
+                                        helperText={errors?.projectQuoteType}
+                                        options={formDataList.quoteType}
+                                        width={100}
+                                    />
+                                </PGrid>
 
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        name={Labels.enquiryDetails.year}
+                                        label={`${getLabel("lbl47")} ${Labels.symbols.required}`}
+                                        value={formData.year}
+                                        onChange={handleChange}
+                                        helperText={errors?.year}
+                                        options={formDataList.year}
+                                        width={100}
+                                    />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
@@ -225,7 +312,7 @@ const EnquiryDetails = () => {
                                         value={formData.managementFeeType}
                                         onChange={handleChange}
                                         helperText={errors?.managementFeeType}
-                                        options={templateList}
+                                        options={formDataList.managementFeeType}
                                         width={100}
                                     />
                                 </PGrid>
@@ -236,8 +323,9 @@ const EnquiryDetails = () => {
                                         value={formData.hybrid}
                                         onChange={handleChange}
                                         helperText={errors?.hybrid}
-                                        options={templateList}
+                                        options={formDataList.hybird}
                                         width={100}
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -247,7 +335,7 @@ const EnquiryDetails = () => {
                                         value={formData.projectAttribute}
                                         onChange={handleChange}
                                         helperText={errors?.projectAttribute}
-                                        options={templateList}
+                                        options={formDataList.projectAttribute}
                                         width={100}
                                     />
                                 </PGrid>
@@ -278,13 +366,14 @@ const EnquiryDetails = () => {
 
                             <PGrid container className="fw-semibold mb-4">
                                 <PGrid item md={2} >{getLabel("lbl50")}</PGrid>
-                                <PGrid item md={2} className="text-nowrap">{getLabel("lbl51")}</PGrid>
-                                <PGrid item md={4} >{getLabel("lbl52")}</PGrid>
-                                <PGrid item md={4} >{getLabel("lbl53")}</PGrid>
+                                <PGrid item md={2}>{getLabel("lbl51")}</PGrid>
+                                <PGrid item md={2}>{"Modified Period (w/days)"}</PGrid>
+                                <PGrid item md={3} >{getLabel("lbl52")}</PGrid>
+                                <PGrid item md={3} >{getLabel("lbl53")}</PGrid>
                             </PGrid>
 
 
-                            {phases.map((phase, index) => (
+                            {(phaseDates.length ? phaseDates : phases).map((phase, index) => (
                                 <PGrid container className="mb-1 align-items-center" key={index}>
 
                                     <PGrid item md={2} className="mb-3">
@@ -294,27 +383,34 @@ const EnquiryDetails = () => {
                                     <PGrid item md={2} className="mb-3">
                                         {phase.days}
                                     </PGrid>
-
-                                    <PGrid item md={4}>
-                                        {index === 0 ? (
-                                            <PDatepicker
-                                                name={`${phase.name}_start`}
-                                                width={100}
-                                            />
-                                        ) : (
-                                            <PTextField
-                                                name={`${phase.name}_start`}
-                                                placeholder="Start Date"
-                                            //width={100}
-                                            />
-                                        )}
+                                    <PGrid item md={2}>
+                                        <PTextField
+                                            value={phase.mdays}
+                                            onChange={(e) => quoteStartDate === "" ? "" : handleModifiedDays(index, e.target.value)}
+                                            width={50}
+                                        />
                                     </PGrid>
 
-                                    <PGrid item md={4}>
+                                    <PGrid item md={3}>
+                                        <PDatepicker
+                                            name={`${phase.name}_start`}
+                                            width={100}
+                                            value={phase.startDate || ""}
+                                            onChange={(e) => {
+                                                const selectedDate = e.target ? e.target.value : e;
+                                                if (index === 0) {
+                                                    calculatePlanByQuote(selectedDate);
+                                                }
+                                            }}
+                                        />
+                                    </PGrid>
+
+                                    <PGrid item md={3}>
                                         <PTextField
                                             name={`${phase.name}_end`}
                                             placeholder="End Date"
-                                        //width={100}
+                                            value={phase.endDate || ""}
+                                            disabled = {true}
                                         />
                                     </PGrid>
 

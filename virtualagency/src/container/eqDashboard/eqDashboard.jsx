@@ -41,7 +41,7 @@ const EqDashboard = () => {
   const [openFilter, setOpenFilter] = useState("");
   //const [chartType, setChartType] = useState("pie");
   const [country, setCountry] = useState([]);
-  const [user, setUser] = useState({});
+  const [filter, setFilter] = useState(false);
   const [rows, setRows] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [summary, setSummary] = useState({});
@@ -96,6 +96,8 @@ const EqDashboard = () => {
             userID: item.clientId,
             jobStatusID: item.status,
             date: item.serverTime,
+            id: item.id,
+            stepID: item.stepId,
           }));
           setRows(formattedRows);
           const formattedChartData = (data.summary?.jobStatus || []).map(
@@ -217,14 +219,17 @@ const EqDashboard = () => {
       );
     }
 
-    //Date Filter
-    if (formData.startDate !== "" && formData.startDate !== "") {
-      result = result.filter(
-        (item) =>
-          new Date(item.date) >= new Date(formData.startDate) &&
-          new Date(item.date) <= new Date(formData.endDate)
-      );
+    if (filter) {
+      // Date Filter
+      if (formData.startDate !== "" && formData.endDate !== "") {
+        result = result.filter(
+          (item) =>
+            new Date(item.date) >= new Date(formData.startDate) &&
+            new Date(item.date) <= new Date(formData.endDate)
+        );
+      }
     }
+
 
     // search filter
     if (formData.search?.trim()) {
@@ -300,6 +305,7 @@ const EqDashboard = () => {
   const handleSendChoose = () => {
     const isValid = FliterValidation();
     if (isValid) {
+      //setFilter(true);
       setOpenFilter(false);
     }
   };
@@ -332,6 +338,7 @@ const EqDashboard = () => {
       ...prev,
       [name]: ""
     }));
+    //setFilter(false);
   };
 
 
@@ -341,6 +348,12 @@ const EqDashboard = () => {
     { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleOpenChoose }
   ];
 
+  const stepRoutes = {
+    1: labelRoutes.clientInfo,
+    2: labelRoutes.enquiryDetails,
+    3: labelRoutes.lineItems,
+    4: labelRoutes.suppliers,
+  }
 
   return (
     <>
@@ -395,7 +408,7 @@ const EqDashboard = () => {
                 options={chartOptions}
                 value={formData.chartType}
                 onChange={(value) => setFormData((prev) => ({ ...prev, chartType: value }))}
-                disabled = {loading}
+                disabled={loading}
               />
             </div>
           </PGrid>
@@ -437,7 +450,17 @@ const EqDashboard = () => {
                 {loading ? (
                   <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
                 ) : (
-                  <PTable columns={columns} rows={data} onClick={(row) => navigate(labelRoutes.clientInfo)} />)}
+                  <PTable
+                    columns={columns}
+                    rows={data}
+                    onClick={(row) => {
+                      console.log(row);
+                      navigate(stepRoutes[row.stepID], {
+                        state: { id: row.id }
+                      });
+                    }}
+                  />
+                )};
               </div>
             </PCard>
           </PGrid>

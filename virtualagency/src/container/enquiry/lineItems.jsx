@@ -3,7 +3,7 @@ import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
@@ -14,11 +14,14 @@ import { getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate } from "react-router-dom";
+import { Dashboard_API } from "../../utils/api/apiUrl";
+import { PostApi } from "../../utils/api/networking";
 const LineItems = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
     const enquirySteps = getEnquirySteps(getLabel);
+    const [loading, setLoading] = useState(true);
     const yesNoOptions = [
         { label: "Yes", value: 1 },
         { label: "No", value: 2 },
@@ -32,6 +35,12 @@ const LineItems = () => {
         { label: "Quote of Quantity", value: 1 },
         { label: "Quote of Quantity & Size", value: 2 }
     ];
+
+    const [formDataList, setFormDataList] = useState({
+        typeOfJob : [],
+        yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
+        quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 },  { label: "Quote of Quantity & Size 3D", value: 3 }],
+    });
 
     const [formData, setFormData] = useState({
         category: "",
@@ -140,6 +149,27 @@ const LineItems = () => {
         quantityType: "",
         quantity: ""
     });
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const response = await PostApi(Dashboard_API.Master, {
+                });
+                setFormDataList(prev => ({
+                    ...prev,
+                    typeOfJob : response.typeofJob,
+                }));
+            } catch (error) {
+                console.error("API Error", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -147,7 +177,7 @@ const LineItems = () => {
             [name]: value
         }));
 
-         setErrors((prev) => ({
+        setErrors((prev) => ({
             ...prev,
             [name]: ""   // clear only that field error
         }));
@@ -161,6 +191,13 @@ const LineItems = () => {
         }
         else {
             setAllowRedirect(isValid);
+        }
+    };
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate(labelRoutes.home); // fallback route
         }
     };
     const LineItemsValidation = () => {
@@ -232,7 +269,7 @@ const LineItems = () => {
         <>
             <Box sx={{ px: 3, py: 3 }}>
                 <PGrid container className={Labels.margin.mb3} >
-                    <PStepper steps={enquirySteps} activeStep={2} allowRedirect ={allowRedirect}></PStepper>
+                    <PStepper steps={enquirySteps} activeStep={2} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
                 <PGrid container className={Labels.margin.mb3} >
                     <PGrid item xs={12} sm={12} md={9}>
@@ -272,7 +309,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.typeOfJob}
                                         name={Labels.lineItems.typeOfJob}
-                                        options={typeofJobOptions}
+                                        options={formDataList.typeOfJob}
                                     />
 
 
@@ -284,7 +321,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.rateCard}
                                         name={Labels.lineItems.rateCard}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
                                     />
 
                                 </PGrid>
@@ -297,7 +334,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.competitiveBiddingMandatory}
                                         name={Labels.lineItems.competitiveBiddingMandatory}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -308,7 +345,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.competitiveBiddingCompliant}
                                         name={Labels.lineItems.competitiveBiddingCompliant}
-                                        options={typeofJobOptions}
+                                        options={formDataList.yesOrNo}
                                     />
 
                                 </PGrid>
@@ -319,7 +356,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.competitiveBiddingExceptionFormSigned}
                                         name={Labels.lineItems.competitiveBiddingExceptionFormSigned}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
 
@@ -384,7 +421,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.tcoApprovalRequired}
                                         name={Labels.lineItems.tcoApprovalRequired}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -395,7 +432,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.tcoApproved}
                                         name={Labels.lineItems.tcoApproved}
-                                        options={typeofJobOptions}
+                                        options={formDataList.yesOrNo}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -488,7 +525,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.fscOrPefcMaterial}
                                         name={Labels.lineItems.fscOrPefcMaterial}
-                                        options={typeofJobOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -499,7 +536,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.recyclable}
                                         name={Labels.lineItems.recyclable}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -510,7 +547,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.sustainabilityOption}
                                         name={Labels.lineItems.sustainabilityOption}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -524,7 +561,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.recycledMaterial}
                                         name={Labels.lineItems.recycledMaterial}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -535,7 +572,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.designedToBeReused}
                                         name={Labels.lineItems.designedToBeReused}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -546,7 +583,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.containsPlastic}
                                         name={Labels.lineItems.containsPlastic}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -561,7 +598,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.containsRecycledPlastic}
                                         name={Labels.lineItems.containsRecycledPlastic}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -603,7 +640,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.ratecardCatalogueItemDeclined}
                                         name={Labels.lineItems.ratecardCatalogueItemDeclined}
-                                        options={typeofJobOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -649,7 +686,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.eAuction}
                                         name={Labels.lineItems.eAuction}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -695,7 +732,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.digitalInnovation}
                                         name={Labels.lineItems.digitalInnovation}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -706,7 +743,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.innovation}
                                         name={Labels.lineItems.innovation}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -752,7 +789,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.owWithLink}
                                         name={Labels.lineItems.owWithLink}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>

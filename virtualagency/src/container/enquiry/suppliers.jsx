@@ -127,6 +127,13 @@ const Suppliers = () => {
             setIsValidation(isValidation);
         }
     };
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate(labelRoutes.home); // fallback route
+        }
+    };
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -199,7 +206,7 @@ const Suppliers = () => {
                                     <PTable columns={tableHeader} rows={data} showCheckbox={true} isChecked={showSelected} onValidationChange={handleValidationChange} />
                                 </PGrid>
                             </PGrid>
-                            { isValidation && (
+                            {isValidation && (
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12}>
                                         <PTypography

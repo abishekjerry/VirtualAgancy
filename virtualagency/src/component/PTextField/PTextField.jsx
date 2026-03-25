@@ -53,8 +53,15 @@ export default function PTextField({
     useEffect(() => {
         if (defaultFileUrl || value) {
             const url = defaultFileUrl || value;
-            const name = url.split("/").pop() || "file.png";
-            setSelectedFiles([{ name, url }]);
+            // ✅ Ensure it's a string before split
+            let fileName = "file.png";
+            if (typeof url === "string") {
+                fileName = url.split("/").pop() || "file.png";
+            } else if (url?.name) {
+                // if it's a File object
+                fileName = url.name;
+            }
+            setSelectedFiles([{ name: fileName, url }]);
         } else {
             setSelectedFiles([]);
         }
@@ -87,7 +94,7 @@ export default function PTextField({
     };
     //const baseSx = FormControlBaseStyle(width, mt);
     const baseSx = {
-        width:  width ? `${width}%` : Labels.fontSize.xxxxl,
+        width: width ? `${width}%` : Labels.fontSize.xxxxl,
         mt: 0.4,
         //mt: 1,
         "& .MuiOutlinedInput-root": {

@@ -23,4 +23,12 @@ export const Dashboard_API ={
   Master : Base_Url + "/VA/MasterDropdowns",
 }
 
+
+export const ClientInfo_API ={
+  AddUpdateClientInfo : Base_Url + "/VA/EnqClientinfo",
+  ClientInfoMaster : Base_Url + "/VA/EnqClientinfoDropdowns",
+  AddUpdateClientContant : Base_Url + "/VA/AddnewClient",
+  AddUpdateBrand : Base_Url + "/VA/AddnewBrands",
+  CheckforUsername: Base_Url + "/VA/CheckforUsername",
+}
  

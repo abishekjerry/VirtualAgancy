@@ -1,9 +1,11 @@
 import './App.css'
 import AppRoutes from './navigations/routes';
 
+
 function App() {
   return (
-   <AppRoutes />
-  )
+      <AppRoutes />  
+  );
 }
-export default App
+
+export default App;
