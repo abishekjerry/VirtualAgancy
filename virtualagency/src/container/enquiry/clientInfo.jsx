@@ -9,7 +9,7 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { getEnquirySteps, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common"
+import { allowOnlyNumbers, getEnquirySteps, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common"
 import AddIcon from "@mui/icons-material/Add"
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
@@ -57,10 +57,10 @@ const ClientInfo = () => {
         country: "",
         entityName: "",
         businessUnit: "",
-        channel: "",
+        globalBUMapping: "",
         countryCode: "",
         clientCode: "",
-        globalBUMapping: ""
+        channel: "",
     });
 
 
@@ -87,7 +87,7 @@ const ClientInfo = () => {
         deliveryCountry: [],
         clientContact: [],
         pmgEntity: [],
-        aboveAtMarket: [],
+        aboveAtMarket: [{ label: "Above Market", value: 1 }, { label: "Above", value: 2 }, { label: "At Market", value: 3 } ],
 
         receiveNotification: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
         jobRole: [{ label: "Admin", value: 1 }, { label: "User", value: 2 }, { label: "Client", value: 3 }],
@@ -95,14 +95,10 @@ const ClientInfo = () => {
 
     const ClientInfoMaster = async (division) => {
         try {
-            console.log(division, "division");
-            setLoading(false);
-            const response = await PostApi(
-                `${ClientInfo_API.ClientInfoMaster}?Divisionid=${division}`,
-                {}
-            );
-            // const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
-            // });
+            setLoading(false);        
+            const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
+                Divisionid : division
+            });
             setFormDataList(prev => ({
                 ...prev,
                 brand: response.brands,
@@ -137,11 +133,6 @@ const ClientInfo = () => {
         fetchData();
     }, []);
 
-    const aboveAtMarketList = [
-        { label: "Above", value: 1 },
-        { label: "At Market", value: 2 },
-
-    ];
     const handleChange = async (e) => {
         const { name, value } = e.target;
         const label = e.target.label || "";
@@ -174,7 +165,6 @@ const ClientInfo = () => {
         if (name === Labels.clientInfo.division) {
             const parts = label.split(">").map(v => v.trim());
             const keys = Object.keys(fields);
-
             setFieldsData((prev) => {
                 const data = { ...prev };
                 keys.forEach((key, index) => {
@@ -207,12 +197,12 @@ const ClientInfo = () => {
                     if (isSuccess(response)) {
                         setErrors((prev) => ({
                             ...prev,
-                            logonID: response?.data,
+                            logonID: "",
                         }));
                     } else {
                         setErrors((prev) => ({
                             ...prev,
-                            logonID: "",
+                            logonID: response?.data,
                         }));
                     }
 
@@ -228,6 +218,7 @@ const ClientInfo = () => {
     const handleSubmit = async () => {
         const isValid = ClientInfoValidation();
         const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+        const id = state?.id > 0 ? state.id : 0;
         if (isValid) {
             try {
                 setLoading(true);
@@ -240,7 +231,8 @@ const ClientInfo = () => {
                     deliveryCountryId: formData.deliveryCountry,
                     pMGEntity: formData.pmgEntity,
                     aboveorAtmarket: formData.aboveAtMarketValue,
-                    //flag : flag
+                    Action : flag,
+                    Enqid : id
                 });
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
@@ -364,6 +356,7 @@ const ClientInfo = () => {
                     if (isSuccess(response)) {
                         setCcOpenFilter(false);
                         toast(Labels.status.success, Labels.message.success);
+                        ClientInfoMaster(formData.division);
                     } else {
                         setErrors((prev) => ({
                             ...prev,
@@ -385,19 +378,20 @@ const ClientInfo = () => {
                 try {
                     setLoading(true);
                     const response = await PostApi(ClientInfo_API.AddUpdateBrand, {
-                        brandName: formData.brandName,
-                        divisionid: formData.division
+                        brand : formData.brandName,
+                        Divisionid: formData.division
                     });
                     if (isSuccess(response)) {
                         setBrandOpenFilter(false);
                         toast(Labels.status.success, Labels.message.success);
+                        ClientInfoMaster(formData.division);
                     } else {
                         setErrors((prev) => ({
                             ...prev,
                             name: ""
                         }));
                         setBrandOpenFilter(true);
-                        toast(Labels.status.failure, Labels.message.failed);
+                        toast(Labels.status.failure, Labels.message.failed);                       
                     }
                 } catch (error) {
                     toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -421,7 +415,7 @@ const ClientInfo = () => {
                 <PGrid container className={Labels.margin.mb3} >
                     <PStepper steps={enquirySteps} activeStep={0} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
-                <PGrid container className={Labels.margin.mb3} >
+                <PGrid container className={`${Labels.margin.mb3} ${ccOpenFilter || brandOpenFilter ? "pe-none opacity-50" : ""}`}>
                     <PGrid item xs={12} sm={12} md={9}>
                         <PCard>
                             <PGrid container className={Labels.margin.mb3}>
@@ -465,46 +459,6 @@ const ClientInfo = () => {
                                         weight={FontWeight.bold}
                                     />
                                 </PGrid>
-
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PTypography
-                                        labelText={getLabel("lbl29")}
-                                        weight={FontWeight.bold}
-                                    />
-                                    <PTypography
-                                        labelText={fields.entityName}
-                                        color={CommonColors.grey.main}
-                                        weight={FontWeight.bold}
-                                    />
-                                </PGrid>
-
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PTypography
-                                        labelText={getLabel("lbl30")}
-                                        weight={FontWeight.bold}
-                                    />
-                                    <PTypography
-                                        labelText={fields.businessUnit}
-                                        color={CommonColors.grey.main}
-                                        weight={FontWeight.bold}
-                                    />
-                                </PGrid>
-
-                            </PGrid>
-
-                            <PGrid container className={Labels.margin.mb3}>
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PTypography
-                                        labelText={getLabel("lbl31")}
-                                        weight={FontWeight.bold}
-
-                                    />
-                                    <PTypography
-                                        labelText={fields.channel}
-                                        color={CommonColors.grey.main}
-                                        weight={FontWeight.bold}
-                                    />
-                                </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
                                         labelText={getLabel("lbl09")}
@@ -518,18 +472,29 @@ const ClientInfo = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
-                                        labelText={getLabel("lbl32")}
+                                        labelText={getLabel("lbl29")}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
-                                        labelText={fields.clientCode}
+                                        labelText={fields.entityName}
                                         color={CommonColors.grey.main}
                                         weight={FontWeight.bold}
                                     />
                                 </PGrid>
-
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb3}>
+
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PTypography
+                                        labelText={getLabel("lbl30")}
+                                        weight={FontWeight.bold}
+                                    />
+                                    <PTypography
+                                        labelText={fields.businessUnit}
+                                        color={CommonColors.grey.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
                                         labelText={getLabel("lbl91")}
@@ -541,7 +506,34 @@ const ClientInfo = () => {
                                         weight={FontWeight.bold}
                                     />
                                 </PGrid>
+
                             </PGrid>
+                            {/* <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PTypography
+                                        labelText={getLabel("lbl32")}
+                                        weight={FontWeight.bold}
+                                    />
+                                    <PTypography
+                                        labelText={fields.clientCode}
+                                        color={CommonColors.grey.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PTypography
+                                        labelText={getLabel("lbl31")}
+                                        weight={FontWeight.bold}
+
+                                    />
+                                    <PTypography
+                                        labelText={fields.channel}
+                                        color={CommonColors.grey.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
+
+                            </PGrid> */}
 
                             {/* Row 3 */}
                             <PGrid container className={Labels.margin.mb4}>
@@ -620,9 +612,10 @@ const ClientInfo = () => {
                                         label={`${getLabel("lbl92")} ${Labels.symbols.required}`}
                                         value={formData.aboveAtMarket}
                                         onChange={handleChange}
-                                        options={aboveAtMarketList}
+                                        options={formDataList.aboveAtMarket}
                                         width={100}
                                         helperText={errors?.aboveAtMarket}
+                                        disabled = {true}
                                     />
                                 </PGrid>
                             </PGrid >
@@ -700,9 +693,9 @@ const ClientInfo = () => {
                 onClose={handleCloseChoose}
                 title={"Add New Contact"}
                 showCloseIcon={true}
-                maxWidth="lg"
+                maxWidth="md"
                 actions={
-                    < PGrid container className="d-flex align-items-center justify-content-end gap-2" >
+                    < PGrid className="d-flex align-items-center justify-content-end gap-2" >
                         <PButton
                             fullWidth
                             label={"Cancel"}
@@ -723,8 +716,8 @@ const ClientInfo = () => {
                 }
 
             >
-                <PGrid container className={Labels.margin.mb3}>
-                    <PGrid item xs={12} sm={6} md={3}>
+                <PGrid container>
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.firstName}
                             label={`First Name ${Labels.symbols.required}`}
@@ -733,7 +726,7 @@ const ClientInfo = () => {
                             helperText={errors?.firstName}
                         />
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={3}>
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.lastName}
                             label={`Last Name`}
@@ -741,7 +734,9 @@ const ClientInfo = () => {
                             onChange={handleChange}
                         />
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={3}>
+                </PGrid>
+                <PGrid container>
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.logonID}
                             label={`Logon ID ${Labels.symbols.required}`}
@@ -750,17 +745,7 @@ const ClientInfo = () => {
                             helperText={errors?.logonID}
                         />
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={3}>
-                        <PTextField
-                            name={Labels.clientInfo.jobTitle}
-                            label={`Job Title`}
-                            value={formData.jobTitle}
-                            onChange={handleChange}
-                        />
-                    </PGrid>
-                </PGrid>
-                <PGrid container >
-                    <PGrid item xs={12} sm={6} md={3}>
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.email}
                             label={`Email ${Labels.symbols.required}`}
@@ -768,16 +753,29 @@ const ClientInfo = () => {
                             onChange={handleChange}
                             helperText={errors?.email}
                         />
+
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={3}>
+                </PGrid>
+                <PGrid container >
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
-                            name={Labels.clientInfo.phone}
-                            label={`Phone`}
-                            value={formData.phone}
+                            name={Labels.clientInfo.jobTitle}
+                            label={`Job Title`}
+                            value={formData.jobTitle}
                             onChange={handleChange}
                         />
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={3}>
+                    <PGrid item xs={12} sm={6} md={6}>
+                        <PTextField
+                            name={Labels.clientInfo.phone}
+                            label={`Phone`}
+                            value={allowOnlyNumbers(formData.phone)}
+                            onChange={handleChange}
+                        />
+                    </PGrid>
+                </PGrid>
+                <PGrid container >
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PDropdown
                             name={Labels.clientInfo.receiveNotification}
                             label={`Receive Notification  ${Labels.symbols.required}`}
@@ -789,7 +787,7 @@ const ClientInfo = () => {
                             disabled={true}
                         />
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={3}>
+                    <PGrid item xs={12} sm={6} md={6}>
                         <PDropdown
                             name={Labels.clientInfo.jobRole}
                             label={`Job Role ${Labels.symbols.required}`}
