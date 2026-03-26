@@ -7,7 +7,9 @@ export const labelRoutes = {
   enquiryDetails : "/enquiryDetails",
   lineItems : "/lineItems",
   suppliers : "/suppliers",
+  review : "/review",
   PageNotFound: "/pageNotFound",
+  
   //PageNotFound: "*"
 
 };

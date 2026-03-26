@@ -120,7 +120,7 @@ const Suppliers = () => {
         if (!isValidation) {
             setAllowRedirect(true);
             setIsValidation(isValidation);
-            navigate(labelRoutes.clientInfo); //review`
+            navigate(labelRoutes.review); //review`
         }
         else {
             setAllowRedirect(false);

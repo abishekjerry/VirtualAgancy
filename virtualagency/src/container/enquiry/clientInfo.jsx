@@ -236,14 +236,14 @@ const ClientInfo = () => {
                 });
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
-                    toast(Labels.status.success, Labels.message.success);
+                    toast(Labels.status.success, response.data.message);
                     navigate(labelRoutes.enquiryDetails);
                 } else {
                     setErrors((prev) => ({
                         ...prev,
                         name: ""
                     }));
-                    toast(Labels.status.failure, Labels.message.failed);
+                    toast(Labels.status.failure, response.data.message);
                 }
 
             } catch (error) {
@@ -355,7 +355,7 @@ const ClientInfo = () => {
                     });
                     if (isSuccess(response)) {
                         setCcOpenFilter(false);
-                        toast(Labels.status.success, Labels.message.success);
+                        toast(Labels.status.success, response.data);
                         ClientInfoMaster(formData.division);
                     } else {
                         setErrors((prev) => ({
@@ -363,7 +363,7 @@ const ClientInfo = () => {
                             name: ""
                         }));
                         setCcOpenFilter(true);
-                        toast(Labels.status.failure, Labels.message.failed);
+                        toast(Labels.status.failure, response.data);
                     }
 
                 } catch (error) {
@@ -383,7 +383,7 @@ const ClientInfo = () => {
                     });
                     if (isSuccess(response)) {
                         setBrandOpenFilter(false);
-                        toast(Labels.status.success, Labels.message.success);
+                        toast(Labels.status.success, response.data);
                         ClientInfoMaster(formData.division);
                     } else {
                         setErrors((prev) => ({
@@ -391,7 +391,7 @@ const ClientInfo = () => {
                             name: ""
                         }));
                         setBrandOpenFilter(true);
-                        toast(Labels.status.failure, Labels.message.failed);                       
+                        toast(Labels.status.failure, response.data);                       
                     }
                 } catch (error) {
                     toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -808,7 +808,7 @@ const ClientInfo = () => {
                 title={"Add New Brand"}
                 showCloseIcon={true}
                 actions={
-                    < PGrid container className="d-flex align-items-center justify-content-end gap-2" >
+                    < PGrid className="d-flex align-items-center justify-content-end gap-2" >
                         <PButton
                             fullWidth
                             label={"Cancel"}

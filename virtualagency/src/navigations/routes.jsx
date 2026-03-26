@@ -17,6 +17,7 @@ const ClientInfo = lazy(() =>import("../container/enquiry/clientInfo"));
 const EnquiryDetails = lazy(() => import("../container/enquiry/enquiryDetails"));
 const LineItems = lazy(() => import("../container/enquiry/lineItems"));
 const Suppliers = lazy(() => import("../container/enquiry/suppliers"));
+const Review = lazy(() => import("../container/enquiry/review"));
 
 function AppRoutes() {
   return (
@@ -34,6 +35,7 @@ function AppRoutes() {
           <Route path={labelRoutes.enquiryDetails} element={<EnquiryDetails />} />
           <Route path={labelRoutes.lineItems} element={<LineItems />} />
           <Route path={labelRoutes.suppliers} element={<Suppliers />} />
+           <Route path={labelRoutes.review} element={<Review />} />
         </Route>
 
         {/* Page Not Found */}
