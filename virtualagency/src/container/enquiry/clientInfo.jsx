@@ -87,7 +87,7 @@ const ClientInfo = () => {
         deliveryCountry: [],
         clientContact: [],
         pmgEntity: [],
-        aboveAtMarket: [{ label: "Above Market", value: 1 }, { label: "Above", value: 2 }, { label: "At Market", value: 3 } ],
+        aboveAtMarket: [{ label: "Above Market", value: 1 }, { label: "Above", value: 2 }, { label: "At Market", value: 3 }],
 
         receiveNotification: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
         jobRole: [{ label: "Admin", value: 1 }, { label: "User", value: 2 }, { label: "Client", value: 3 }],
@@ -95,9 +95,9 @@ const ClientInfo = () => {
 
     const ClientInfoMaster = async (division) => {
         try {
-            setLoading(false);        
+            setLoading(false);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
-                Divisionid : division
+                Divisionid: division
             });
             setFormDataList(prev => ({
                 ...prev,
@@ -116,6 +116,8 @@ const ClientInfo = () => {
             try {
                 setLoading(true);
                 const response = await PostApi(Dashboard_API.Master, {
+                    userCountryId: parseInt(localStorage.getItem("countryID")),
+                    role: localStorage.getItem("role")
                 });
                 setFormDataList(prev => ({
                     ...prev,
@@ -231,8 +233,8 @@ const ClientInfo = () => {
                     deliveryCountryId: formData.deliveryCountry,
                     pMGEntity: formData.pmgEntity,
                     aboveorAtmarket: formData.aboveAtMarketValue,
-                    Action : flag,
-                    Enqid : id
+                    Action: flag,
+                    Enqid: id
                 });
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
@@ -378,7 +380,7 @@ const ClientInfo = () => {
                 try {
                     setLoading(true);
                     const response = await PostApi(ClientInfo_API.AddUpdateBrand, {
-                        brand : formData.brandName,
+                        brand: formData.brandName,
                         Divisionid: formData.division
                     });
                     if (isSuccess(response)) {
@@ -391,7 +393,7 @@ const ClientInfo = () => {
                             name: ""
                         }));
                         setBrandOpenFilter(true);
-                        toast(Labels.status.failure, response.data);                       
+                        toast(Labels.status.failure, response.data);
                     }
                 } catch (error) {
                     toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -407,6 +409,14 @@ const ClientInfo = () => {
             setCcOpenFilter(true);
         } else {
             setBrandOpenFilter(true);
+        }
+    };
+
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            navigate(labelRoutes.eqDashboard);
+        } else {
+            navigate(labelRoutes.home); // fallback route
         }
     };
     return (
@@ -583,6 +593,7 @@ const ClientInfo = () => {
                                         options={formDataList.clientContact}
                                         width={100}
                                         helperText={errors?.clientContact}
+                                        flag={Labels.flag.auto}
                                     />
                                     <Tooltip title="Add New Contant" arrow>
                                         <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, marginTop: "9px", "&:hover": { backgroundColor: "#1976d2" }, }}
@@ -615,7 +626,7 @@ const ClientInfo = () => {
                                         options={formDataList.aboveAtMarket}
                                         width={100}
                                         helperText={errors?.aboveAtMarket}
-                                        disabled = {true}
+                                        disabled={true}
                                     />
                                 </PGrid>
                             </PGrid >

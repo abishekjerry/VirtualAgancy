@@ -31,15 +31,12 @@ const LineItems = () => {
         { label: "Digital", value: 2 },
     ];
 
-    const quoteTypeOptions = [
-        { label: "Quote of Quantity", value: 1 },
-        { label: "Quote of Quantity & Size", value: 2 }
-    ];
-
     const [formDataList, setFormDataList] = useState({
-        typeOfJob : [],
+        typeOfJob: [{ label: "Strategic", value: 1 }, { label: "Tactical", value: 2 }, { label: "Operational", value: 3 }, { label: "Non-Addressable", value: 4 }],
+        category: [],
         yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
-        quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 },  { label: "Quote of Quantity & Size 3D", value: 3 }],
+        simplex: [{ label: "Non-Simplex", value: 1 }, { label: "Simplex", value: 2 }, { label: "Not Applicable", value: 3 }],
+        quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 }, { label: "Quote of Quantity & Size 3D", value: 3 }],
     });
 
     const [formData, setFormData] = useState({
@@ -93,7 +90,10 @@ const LineItems = () => {
 
         // Quantity
         quantityType: "",
-        quantity: ""
+        quantity: "",
+        length: "",
+        width: "",
+        depth: ""
     });
 
     const [errors, setErrors] = useState({
@@ -147,7 +147,10 @@ const LineItems = () => {
 
         // Quantity
         quantityType: "",
-        quantity: ""
+        quantity: "",
+        length: "",
+        width: "",
+        depth: ""
     });
 
 
@@ -159,7 +162,7 @@ const LineItems = () => {
                 });
                 setFormDataList(prev => ({
                     ...prev,
-                    typeOfJob : response.typeofJob,
+                    category: response.typeofJob,
                 }));
             } catch (error) {
                 console.error("API Error", error);
@@ -195,7 +198,7 @@ const LineItems = () => {
     };
     const handleBack = () => {
         if (window.history.length > 1) {
-            navigate(-1);
+            navigate(labelRoutes.enquiryDetails);
         } else {
             navigate(labelRoutes.home); // fallback route
         }
@@ -265,6 +268,12 @@ const LineItems = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    //Quote of Quantity 
+    const type = Number(formData.quantityType);
+    const flatSize = formData.length && formData.width ? formData.length * formData.width : 0;
+    const totalSize = type === 3 && formData.depth ? flatSize * formData.depth : flatSize;
+
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -297,10 +306,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.category}
                                         name={Labels.lineItems.category}
-                                        options={typeofJobOptions}
+                                        options={formDataList.category}
                                     />
-
-
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
@@ -311,8 +318,6 @@ const LineItems = () => {
                                         name={Labels.lineItems.typeOfJob}
                                         options={formDataList.typeOfJob}
                                     />
-
-
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
@@ -322,8 +327,8 @@ const LineItems = () => {
                                         helperText={errors?.rateCard}
                                         name={Labels.lineItems.rateCard}
                                         options={formDataList.yesOrNo}
+                                        disabled={true}
                                     />
-
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
@@ -384,8 +389,6 @@ const LineItems = () => {
                                         options={typeofJobOptions}
 
                                     />
-
-
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
@@ -397,7 +400,6 @@ const LineItems = () => {
                                         options={typeofJobOptions}
 
                                     />
-
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
@@ -409,7 +411,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.simplex}
                                         name={Labels.lineItems.simplex}
-                                        options={yesNoOptions}
+                                        options={formDataList.simplex}
 
                                     />
                                 </PGrid>
@@ -795,6 +797,7 @@ const LineItems = () => {
                                 </PGrid>
                             </PGrid>
 
+                            {/* Spacifications */}
                             <hr className="my-4" />
                             <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
@@ -850,6 +853,7 @@ const LineItems = () => {
                                 </PGrid>
                             </PGrid>
 
+                            {/* Quantity */}
                             <hr className="my-4" />
                             <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
@@ -874,20 +878,83 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.quantityType}
                                         name={Labels.lineItems.quantityType}
-                                        options={quoteTypeOptions}
+                                        options={formDataList.quoteType}
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PTextField
-                                        label={`${getLabel("lbl87")} ${Labels.symbols.required}`}
-                                        value={formData.quantity}
-                                        onChange={handleChange}
-                                        helperText={errors?.quantity}
-                                        name={Labels.lineItems.quantity}
-                                    />
-                                </PGrid>
+                                {[1, 2, 3].includes(type) && (
+                                    <PGrid item xs={12} sm={6} md={4}>
+                                        <PTextField
+                                            label={`${getLabel("lbl87")} ${Labels.symbols.required}`}
+                                            value={formData.quantity}
+                                            onChange={handleChange}
+                                            helperText={errors?.quantity}
+                                            name={Labels.lineItems.quantity}
+                                        />
+                                    </PGrid>
+                                )}
+                                {[2, 3].includes(type) && (
+                                    <PGrid item xs={12} sm={6} md={4}>
+                                        <PTextField
+                                            label={`Flat Size - L(m) ${Labels.symbols.required}`}
+                                            value={formData.length}
+                                            onChange={handleChange}
+                                            helperText={errors?.length}
+                                            name={Labels.lineItems.length}
+                                        />
+                                    </PGrid>
+                                )}
                             </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
+                                {[2, 3].includes(type) && (
+                                    <PGrid item xs={12} sm={6} md={4}>
+                                        <PTextField
+                                            label={`Flat Size - W(m) ${Labels.symbols.required}`}
+                                            value={formData.width}
+                                            onChange={handleChange}
+                                            helperText={errors?.width}
+                                            name={Labels.lineItems.width}
+                                        />
+                                    </PGrid>
+                                )}
+                                {type === 3 && (
+                                    <PGrid item xs={12} sm={6} md={4}>
+                                        <PTextField
+                                            label={`Flat Size - D/H(m) ${Labels.symbols.required}`}
+                                            value={formData.depth}
+                                            onChange={handleChange}
+                                            helperText={errors?.depth}
+                                            name={Labels.lineItems.depth}
+                                        />
+                                    </PGrid>
+                                )}
+                            </PGrid>
+                            {[2, 3].includes(type) && (
+                                <PGrid container className={Labels.margin.mb4}>
+                                    <PGrid item xs={12} sm={12} md={4}>
+                                        <PTypography
+                                            labelText={type == 2 ? "Flat Size (SQM)" : "Flat Size (Cu.M)"}
+                                            weight={FontWeight.bold}
+                                        />
+                                        <PTypography
+                                            labelText={flatSize}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                    </PGrid>
+                                    <PGrid item xs={12} sm={12} md={4}>
+                                        <PTypography
+                                            labelText={type == 2 ? "Total Size (SQM)" : "Total Size (Cu.M)"}
+                                            weight={FontWeight.bold}
+                                        />
+                                        <PTypography
+                                            labelText={totalSize}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                    </PGrid>
+                                </PGrid>
+                            )}
                             <hr className="my-4" />
                             <PGrid container className="d-flex align-items-center justify-content-between">
                                 <PGrid item xs={12} sm={6} md={8}>

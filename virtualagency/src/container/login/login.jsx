@@ -111,6 +111,8 @@ function Login(props) {
         localStorage.setItem("email", res?.data?.email);
         localStorage.setItem("agancyUserID", res?.data?.fkID);
         localStorage.setItem("userID", res?.data?.userID);
+        localStorage.setItem("countryID", res?.data?.countryId);
+        localStorage.setItem("role", res?.data?.role);
         navigate(labelRoutes.dashboard);
       } else {
         setErrors((prev) => ({

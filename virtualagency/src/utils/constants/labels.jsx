@@ -99,7 +99,10 @@ export const Labels = {
 
     // Quantity
     quantityType: "quantityType",
-    quantity: "quantity"
+    quantity: "quantity",
+    length: "length",
+    width: "width",
+    depth: "depth"
   },
 
 
@@ -115,7 +118,7 @@ export const Labels = {
   },
   message: {
     success: "Success",
-    failed : "Failed",
+    failed: "Failed",
     somethingWentWrong: "Something went wrong"
   },
 
@@ -148,9 +151,9 @@ export const Labels = {
     password: "Password",
     readonly: "ReadOnly",
     status: true,
-    Insert : "Insert",
-    Update : "Update",
-    
+    Insert: "Insert",
+    Update: "Update",
+
   },
 
   reportName: {

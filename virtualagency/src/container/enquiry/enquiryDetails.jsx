@@ -55,6 +55,7 @@ const EnquiryDetails = () => {
         managementFeeType: [],
         projectAttribute: [],
         year: [],
+        slaTemplate: [],
         quoteType: [
             { label: "Quote of Total price", value: 1 },
             { label: "Quote of Unit price", value: 2 }
@@ -72,12 +73,15 @@ const EnquiryDetails = () => {
                 setLoading(true);
 
                 const response = await PostApi(Dashboard_API.Master, {
+                    userCountryId: parseInt(localStorage.getItem("countryID")),
+                    role: localStorage.getItem("role")
                 });
                 setFormDataList(prev => ({
                     ...prev,
                     managementFeeType: response.managementFeetype,
                     projectAttribute: response.projectAttribute,
-                    year: response.year
+                    year: response.year,
+                    slaTemplate: response.sla
                 }));
             } catch (error) {
                 console.error("API Error", error);
@@ -118,7 +122,7 @@ const EnquiryDetails = () => {
     };
     const handleBack = () => {
         if (window.history.length > 1) {
-            navigate(-1);
+            navigate(labelRoutes.clientInfo);
         } else {
             navigate(labelRoutes.home); // fallback route
         }
@@ -357,8 +361,9 @@ const EnquiryDetails = () => {
                                         value={formData.slaTemplate}
                                         onChange={handleChange}
                                         helperText={errors?.slaTemplate}
-                                        options={templateList}
+                                        options={formDataList.slaTemplate}
                                         width={100}
+                                        flag={Labels.flag.auto}
                                     />
                                 </PGrid>
 
@@ -410,7 +415,7 @@ const EnquiryDetails = () => {
                                             name={`${phase.name}_end`}
                                             placeholder="End Date"
                                             value={phase.endDate || ""}
-                                            disabled = {true}
+                                            disabled={true}
                                         />
                                     </PGrid>
 

@@ -129,7 +129,7 @@ const Suppliers = () => {
     };
     const handleBack = () => {
         if (window.history.length > 1) {
-            navigate(-1);
+            navigate(labelRoutes.lineItems);
         } else {
             navigate(labelRoutes.home); // fallback route
         }

@@ -26,6 +26,7 @@ import PSearch from "../../component/PSearch/PSearch";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleIcon from '@mui/icons-material/TaskAlt';
+import AddTaskRoundedIcon from '@mui/icons-material/AddTaskRounded';
 import { FontFamily, FontWeight } from '../../utils/constants/fonts'
 import { useLanguage } from "../../utils/constants/language";
 import { Dashboard_API } from "../../utils/api/apiUrl";
@@ -66,17 +67,19 @@ const EqDashboard = () => {
         setLoading(true);
 
         const response = await PostApi(Dashboard_API.Master, {
+          userCountryId: parseInt(localStorage.getItem("countryID")),
+          role: localStorage.getItem("role")
         });
         setCountry(response.country)
         const res = await PostApi(Dashboard_API.Dashboard, {
-          userCountryId: 12,
+          userCountryId: parseInt(localStorage.getItem("countryID")),
+          role: localStorage.getItem("role"),
           createdName: 0,
           enqUId: "",
           projectNo: "",
           startDate: "",
           endDate: "",
           statusId: "",
-          role: "Admin",
           jobposition: "",
           client: "",
           username: localStorage.getItem("user"),
@@ -219,17 +222,14 @@ const EqDashboard = () => {
       );
     }
 
-    if (filter) {
-      // Date Filter
-      if (formData.startDate !== "" && formData.endDate !== "") {
-        result = result.filter(
-          (item) =>
-            new Date(item.date) >= new Date(formData.startDate) &&
-            new Date(item.date) <= new Date(formData.endDate)
-        );
-      }
+    // Date Filter
+    if (filter && formData.startDate !== "" && formData.endDate !== "") {
+      result = result.filter(
+        (item) =>
+          new Date(item.date) >= new Date(formData.startDate) &&
+          new Date(item.date) <= new Date(formData.endDate)
+      );
     }
-
 
     // search filter
     if (formData.search?.trim()) {
@@ -243,7 +243,7 @@ const EqDashboard = () => {
 
     return result;
 
-  }, [rows, formData]);
+  }, [rows, formData, filter]);
 
   const handleReset = () => {
     setErrors((prev) => ({
@@ -305,7 +305,7 @@ const EqDashboard = () => {
   const handleSendChoose = () => {
     const isValid = FliterValidation();
     if (isValid) {
-      //setFilter(true);
+      setFilter(true);
       setOpenFilter(false);
     }
   };
@@ -341,11 +341,16 @@ const EqDashboard = () => {
     //setFilter(false);
   };
 
+  const handleRedirect = () => {
+    navigate(labelRoutes.clientInfo);
+  };
 
   const icons = [
+    { icon: <AddTaskRoundedIcon fontSize="small" />, tooltip: "Add Enquiry", action: handleRedirect },
     { icon: <RestartAltIcon fontSize="small" />, tooltip: "Reset", action: handleReset },
     { icon: <FileDownloadIcon fontSize="small" />, tooltip: "Export", action: handleExport },
-    { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleOpenChoose }
+    { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleOpenChoose },
+
   ];
 
   const stepRoutes = {
@@ -454,7 +459,6 @@ const EqDashboard = () => {
                     columns={columns}
                     rows={data}
                     onClick={(row) => {
-                      console.log(row);
                       navigate(stepRoutes[row.stepID], {
                         state: { id: row.id }
                       });
@@ -486,7 +490,8 @@ const EqDashboard = () => {
       <PDialog
         open={openFilter}
         onClose={handleCloseChoose}
-        //title={Labels.recoverPassword}
+        title={"Date Range"}
+        showCloseIcon={true}
         actions={
           <>
             <PButton
