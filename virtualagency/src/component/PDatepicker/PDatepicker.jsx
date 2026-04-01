@@ -17,6 +17,8 @@ export default function PDatepicker({
   placeholder = "DD-MM-YYYY",
   mt = 0.4,
   allowFuture = false, // <-- New prop
+  minDate = null,   // ✅ add
+  maxDate = null,   // ✅ add
 }) {
   const internalRef = useRef(null);
   const textFieldRef = inputRef || internalRef;
@@ -29,8 +31,10 @@ export default function PDatepicker({
       dateFormat: "d-m-Y",
       defaultDate: value || null,
       allowInput: true,
-      maxDate: allowFuture ? null : "today", // Block future if false
+      minDate: minDate || null, // ✅ dynamic
+      maxDate: maxDate || (allowFuture ? null : "today"), // ✅ combine logic
       clickOpens: true,
+
       onChange: function (selectedDates, dateStr) {
         if (onChange) {
           onChange({
@@ -46,7 +50,7 @@ export default function PDatepicker({
     return () => {
       flatpickrRef.current?.destroy();
     };
-  }, [allowFuture]);
+  }, [allowFuture, minDate, maxDate, value]);
 
   const handleIconClick = () => {
     flatpickrRef.current?.open();
@@ -113,6 +117,13 @@ export default function PDatepicker({
       sx={baseSx}
       onKeyDown={handleKeyDown}
       onInput={handleInput}
+      autoComplete="off"
+      inputProps={{
+        autoComplete: "off",
+        form: {
+          autoComplete: "off",
+        },
+      }}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end" sx={{ marginRight: 0 }}>

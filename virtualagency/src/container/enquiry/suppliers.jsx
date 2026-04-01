@@ -15,6 +15,7 @@ import PSearch from "../../component/PSearch/PSearch";
 import PTable from "../../component/PTable/PTable";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate } from "react-router-dom";
+import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 const Suppliers = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
@@ -25,7 +26,7 @@ const Suppliers = () => {
     const [country, setCountry] = useState("");
     const [print, setPrint] = useState("");
     const [search, setSearch] = useState("");
-
+    const [open, setOpen] = useState(false);
     const printList = [
         { value: 0, label: "All" },
         { value: 1, label: "Print" },
@@ -133,6 +134,9 @@ const Suppliers = () => {
         } else {
             navigate(labelRoutes.home); // fallback route
         }
+    };
+    const handleExitDraft = () => {
+        setOpen(true);
     };
     return (
         <>
@@ -258,7 +262,12 @@ const Suppliers = () => {
                     </PGrid>
                 </PGrid>
             </Box>
-
+            <PDraftDialog
+                open={open}
+                onClose={() => setOpen(false)}
+                onSave={handleSubmit}
+                onDelete={handleSubmit}
+            />
         </>
     );
 };

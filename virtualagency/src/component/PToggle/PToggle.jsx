@@ -37,7 +37,7 @@ const PToggle = ({ options = [], value, onChange , disabled = false }) => {
           textTransform: "none",
           display: "flex",
           alignItems: "center",
-          gap: "3px",
+          gap: "5px",
           transition: "all 0.25s ease",
 
           "&:hover": {

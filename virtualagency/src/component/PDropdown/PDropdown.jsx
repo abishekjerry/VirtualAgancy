@@ -26,7 +26,8 @@ const PDropdown = ({
   mt = 0.4,
   multiple = false,
   flag = "",
-  disabled = false
+  disabled = false,
+  readOnly = false
 }) => {
 
   const selectedOption = useMemo(
@@ -140,6 +141,7 @@ const PDropdown = ({
       required={required}
       error={!!helperText}
       sx={baseSx}
+      disabled = {readOnly}
     >
       <InputLabel>{label}</InputLabel>
 

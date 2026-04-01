@@ -16,12 +16,14 @@ import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate } from "react-router-dom";
 import { Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
+import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 const LineItems = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
     const enquirySteps = getEnquirySteps(getLabel);
     const [loading, setLoading] = useState(true);
+    const [open, setOpen] = useState(false);
     const yesNoOptions = [
         { label: "Yes", value: 1 },
         { label: "No", value: 2 },
@@ -271,8 +273,11 @@ const LineItems = () => {
 
     //Quote of Quantity 
     const type = Number(formData.quantityType);
-    const flatSize = formData.length && formData.width ? formData.length * formData.width : 0;
-    const totalSize = type === 3 && formData.depth ? flatSize * formData.depth : flatSize;
+    const flatSize = type === 3 ? (+formData.length || 0) * (+formData.width || 0) * (+formData.depth || 0) : (+formData.length || 0) * (+formData.width || 0);
+    const totalSize = flatSize * (+formData.quantity || 0);
+ const handleExitDraft = () => {
+        setOpen(true);
+    };
 
     return (
         <>
@@ -996,6 +1001,12 @@ const LineItems = () => {
                 </PGrid>
             </Box>
 
+            <PDraftDialog
+                open={open}
+                onClose={() => setOpen(false)}
+                onSave={handleSubmit}
+                onDelete={handleSubmit}
+            />
         </>
     );
 };

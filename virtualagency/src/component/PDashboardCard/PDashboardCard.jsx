@@ -8,6 +8,7 @@ const PDashboardCard = ({
   icon,
   subtitle,
   route,
+  onClick, 
   showNavIcon = false,
   iconBoxSize = 45,
   iconSize = 22,
@@ -20,11 +21,15 @@ const PDashboardCard = ({
 
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    if (route) {
-      navigate(route);
-    }
-  };
+  const handleOnClick = () => {
+  if (onClick) {
+    onClick(); // 👉 filter function
+  }
+
+  if (route) {
+    navigate(route); // 👉 navigation
+  }
+};
 
   return (
     <>
@@ -83,7 +88,7 @@ const PDashboardCard = ({
 
       <div
         className="dashboard-card"
-        onClick={route ? handleClick : undefined}
+        onClick={handleOnClick}
         style={{ cursor: route ? "pointer" : "default", background: bgColor }}
       >
         {showNavIcon && route && (

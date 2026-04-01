@@ -31,7 +31,7 @@ import { FontFamily, FontWeight } from '../../utils/constants/fonts'
 import { useLanguage } from "../../utils/constants/language";
 import { Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
-import { exportToExcel, isSuccess } from "../../utils/commonFunction/common";
+import { exportToExcel, isNotEmpty, isSuccess } from "../../utils/commonFunction/common";
 import { useNavigate } from "react-router-dom";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import PDialog from "../../component/PDialog/PDialog";
@@ -55,25 +55,28 @@ const EqDashboard = () => {
     endDate: "",
     search: "",
     chartType: "pie",
-    status: ""
+    status: "",
+    createEnquiry: "Create Enquiry"
   });
   const [errors, setErrors] = useState({
     startDate: "",
     endDate: "",
   })
+  const role = localStorage.getItem("role");
+  const countryID = parseInt(localStorage.getItem("countryID"))
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
         const response = await PostApi(Dashboard_API.Master, {
-          userCountryId: parseInt(localStorage.getItem("countryID")),
-          role: localStorage.getItem("role")
+          userCountryId: countryID,
+          role: role
         });
-        setCountry(response.country)
+        setCountry(role === "Admin" ? response.country : response.country.filter((c) => c.value === countryID));
         const res = await PostApi(Dashboard_API.Dashboard, {
-          userCountryId: parseInt(localStorage.getItem("countryID")),
-          role: localStorage.getItem("role"),
+          userCountryId: countryID,
+          role: role,
           createdName: 0,
           enqUId: "",
           projectNo: "",
@@ -87,6 +90,7 @@ const EqDashboard = () => {
 
         if (isSuccess(res)) {
           const data = res?.data;
+
           setSummary(data.summary || {});
           const formattedRows = (data.detailed || []).map(item => ({
             enquiryId: item.enquiryId,
@@ -119,9 +123,18 @@ const EqDashboard = () => {
         setLoading(false);
       }
     };
-
+    handleReset();
     fetchData();
   }, []); // empty dependency: run only once on mount
+
+  useEffect(() => {
+    if (country.length === 1) {
+      setFormData(prev => ({
+        ...prev,
+        country: country[0].value
+      }));
+    }
+  }, [country]); // separate effect, only does auto-select
 
   const columns = [
     { field: "enquiryId", header: "Enquiry ID" },
@@ -139,6 +152,7 @@ const EqDashboard = () => {
       subtitle: getLabel("lbl16"),
       iconColor: Labels.primary,
       icon: <AssignmentIcon />,
+      statusId: 1
     },
     {
       title: getLabel("lbl13"),
@@ -146,6 +160,7 @@ const EqDashboard = () => {
       subtitle: getLabel("lbl17"),
       iconColor: Labels.primary,
       icon: <PendingActionsIcon />,
+      statusId: 3
     },
     {
       title: getLabel("lbl14"),
@@ -153,6 +168,7 @@ const EqDashboard = () => {
       subtitle: getLabel("lbl18"),
       iconColor: Labels.primary,
       icon: <EmojiEventsIcon />,
+      statusId: 6
     },
     {
       title: getLabel("lbl15"),
@@ -160,6 +176,7 @@ const EqDashboard = () => {
       subtitle: getLabel("lbl18"),
       iconColor: Labels.primary,
       icon: <TaskAltIcon />,
+      statusId: 24
     },
   ];
 
@@ -198,39 +215,49 @@ const EqDashboard = () => {
     }));
   };
 
+  const handleFilter = (statusId) => {
+    setFormData((prev) => ({
+      ...prev,
+      status: prev.status === statusId ? "" : Number(statusId),
+    }));
+  };
   const data = useMemo(() => {
     let result = [...rows]; // copy original rows
 
     // status filter
-    if (formData.status !== "") {
-      result = result.filter(
-        (item) => item.jobStatusID === Number(formData.status)
-      );
+    if (isNotEmpty(formData.status)) {
+      const status = Number(formData.status);
+      result = result.filter((item) => status === 6 ? item.jobStatusID >= 6 && item.jobStatusID !== 24 : item.jobStatusID === status);
     }
 
     // country filter
-    if (formData.country !== "") {
+    if (isNotEmpty(formData.country)) {
       result = result.filter(
         (item) => item.countryID === Number(formData.country)
       );
     }
 
     // user filter
-    if (formData.user !== "") {
+    if (isNotEmpty(formData.user)) {
       result = result.filter(
         (item) => item.userID === Number(formData.user)
       );
     }
 
+
+    const parse = d => new Date(...(d.includes("/") ? d.split("/") : d.split("-")).reverse().map((v, i) => i === 1 ? v - 1 : +v));
     // Date Filter
-    if (filter && formData.startDate !== "" && formData.endDate !== "") {
-      result = result.filter(
-        (item) =>
-          new Date(item.date) >= new Date(formData.startDate) &&
-          new Date(item.date) <= new Date(formData.endDate)
-      );
+    if (filter && isNotEmpty(formData.startDate) && isNotEmpty(formData.endDate)) {
+      result = result.filter(item => {
+        const req = parse(item.requestedDate);
+        const start = parse(formData.startDate);
+        const end = parse(formData.endDate);
+        end.setHours(23, 59, 59, 999);
+        return req >= start && req <= end;
+      });
     }
 
+    console.log(formData.startDate, formData.endDate, result, "date");
     // search filter
     if (formData.search?.trim()) {
       const search = formData.search.toLowerCase();
@@ -240,7 +267,6 @@ const EqDashboard = () => {
         item.projectNumber?.toLowerCase().includes(search)
       );
     }
-
     return result;
 
   }, [rows, formData, filter]);
@@ -338,7 +364,6 @@ const EqDashboard = () => {
       ...prev,
       [name]: ""
     }));
-    //setFilter(false);
   };
 
   const handleRedirect = () => {
@@ -346,18 +371,19 @@ const EqDashboard = () => {
   };
 
   const icons = [
-    { icon: <AddTaskRoundedIcon fontSize="small" />, tooltip: "Add Enquiry", action: handleRedirect },
+    { icon: <AddTaskRoundedIcon fontSize="small" color="green" />, tooltip: "Create Enquiry", action: handleRedirect },
     { icon: <RestartAltIcon fontSize="small" />, tooltip: "Reset", action: handleReset },
     { icon: <FileDownloadIcon fontSize="small" />, tooltip: "Export", action: handleExport },
-    { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Choose", action: handleOpenChoose },
+    { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Date Range Filter", action: handleOpenChoose },
 
   ];
 
   const stepRoutes = {
-    1: labelRoutes.clientInfo,
-    2: labelRoutes.enquiryDetails,
-    3: labelRoutes.lineItems,
-    4: labelRoutes.suppliers,
+    //1: labelRoutes.clientInfo,
+    1: labelRoutes.enquiryDetails,
+    2: labelRoutes.lineItems,
+    3: labelRoutes.suppliers,
+    4: labelRoutes.review,
   }
 
   return (
@@ -389,7 +415,7 @@ const EqDashboard = () => {
           ) : (
             cardData.map((card, index) => (
               <PGrid key={index} item xs={12} sm={6} md={3} lg={3}>
-                <PDashboardCard {...{ ...card, bgColor: CommonColors.bg_violet }} />
+                <PDashboardCard {...{ ...card, bgColor: CommonColors.bg_violet }} onClick={() => handleFilter(card.statusId)} />
               </PGrid>
             ))
           )}
@@ -397,15 +423,39 @@ const EqDashboard = () => {
 
         <PGrid container className={Labels.margin.mb3}>
           <PGrid item xs={12} sm={6} md={8}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end", margin: "6px 0px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between",  margin: "6px 0px", width: "100%" }}>
+              <Box sx={{width : 180}}>
+                {icons.length > 0 && (
+                  <PToggle options={[{ ...icons[0], value: formData.createEnquiry, label: icons[0].tooltip }]}
+                    value={formData.createEnquiry}
+                    onChange={(value) => { icons[0].action(), setFormData((prev) => ({ ...prev, createEnquiry: value })); }}
+                    disabled={loading}
+                  />
+                )}
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                {icons.slice(1).map((item, index) => (
+                  <Tooltip title={item.tooltip} arrow key={index}>
+                    <IconButton
+                      sx={iconStyle}
+                      onClick={item.action}
+                      disabled={loading}
+                    >
+                      {item.icon}
+                    </IconButton>
+                  </Tooltip>
+                ))}
+              </Box>
+            </Box>
+            {/* <Box sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end", margin: "6px 0px" }}>
               {icons.map((item, index) => (
                 <Tooltip title={item.tooltip} arrow key={index}>
-                  <IconButton sx={iconStyle} onClick={item.action} disabled={loading}>
+                  <IconButton sx={iconStyle} onClick={item.action} disabled={loading} >
                     {item.icon}
                   </IconButton>
                 </Tooltip>
               ))}
-            </Box>
+            </Box> */}
           </PGrid>
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "6px 0px", }}>
             <div style={{ display: "flex", justifyContent: "flex-end", }} >
@@ -519,6 +569,7 @@ const EqDashboard = () => {
               onChange={handleChange}
               width={250}
               helperText={errors?.startDate}
+              maxDate={formData.endDate}
             />
           </PGrid>
           <PGrid item xs={12} sm={6} md={5}>
@@ -529,6 +580,7 @@ const EqDashboard = () => {
               onChange={handleChange}
               width={250}
               helperText={errors?.endDate}
+              minDate={formData.startDate}
             />
           </PGrid>
         </PGrid>

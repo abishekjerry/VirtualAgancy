@@ -18,6 +18,7 @@ import { ClientInfo_API, Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import PDialog from "../../component/PDialog/PDialog";
 import PTextField from "../../component/PTextField/PTextField";
+import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 const ClientInfo = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -27,6 +28,7 @@ const ClientInfo = () => {
     const [loading, setLoading] = useState(true);
     const [ccOpenFilter, setCcOpenFilter] = useState(false);
     const [brandOpenFilter, setBrandOpenFilter] = useState(false);
+    const [open, setOpen] = useState(false);
     const [disible, setDisible] = useState(true);
     const [type, setType] = useState("");
     const [formData, setFormData] = useState({
@@ -49,7 +51,10 @@ const ClientInfo = () => {
         phone: "",
         receiveNotification: "",
         jobRole: "",
-        brandName: ""
+        brandName: "",
+
+        reason: "",
+        remarks: ""
     });
 
     const [fields, setFieldsData] = useState({
@@ -78,7 +83,9 @@ const ClientInfo = () => {
         email: "",
         receiveNotification: "",
         jobRole: "",
-        brandName: ""
+        brandName: "",
+
+        remarks: ""
     });
 
     const [formDataList, setFormDataList] = useState({
@@ -87,13 +94,19 @@ const ClientInfo = () => {
         deliveryCountry: [],
         clientContact: [],
         pmgEntity: [],
-        aboveAtMarket: [{ label: "Above Market", value: 1 }, { label: "Above", value: 2 }, { label: "At Market", value: 3 }],
+        aboveAtMarket: [{ label: "Above", value: 1 }, { label: "At Market", value: 2 }],
 
         receiveNotification: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
-        jobRole: [{ label: "Admin", value: 1 }, { label: "User", value: 2 }, { label: "Client", value: 3 }],
+        jobRole: [{ label: "Procurement", value: 1 }, { label: "Marketing & Sales", value: 2 }, { label: "Team Lead", value: 3 }, { label: "Reg_Proc_PBI", value: 4 }, { label: "Others", value: 5 }],
+
+        reason: [{ label: "Entry is stale/expired", value: 1 }, { label: "Wrongly input", value: 2 }, { label: "Others", value: 3 }],
     });
 
+    const role = localStorage.getItem("role");
+    const countryID = parseInt(localStorage.getItem("countryID"))
+
     const ClientInfoMaster = async (division) => {
+        console.log(division, "division");
         try {
             setLoading(false);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
@@ -116,15 +129,44 @@ const ClientInfo = () => {
             try {
                 setLoading(true);
                 const response = await PostApi(Dashboard_API.Master, {
-                    userCountryId: parseInt(localStorage.getItem("countryID")),
-                    role: localStorage.getItem("role")
+                    userCountryId: countryID,
+                    role: role
                 });
                 setFormDataList(prev => ({
                     ...prev,
                     division: response.division,
-                    pmgEntity: response.country,
+                    pmgEntity: (role === "Admin" ? response.country : response.country.filter((c) => c.value === countryID)),
                     deliveryCountry: response.country,
                 }));
+                console.log(response);
+                const id = state?.id > 0 ? state.id : 0;
+
+                // if (id !== 0) {
+                //     const data = await PostApi(Dashboard_API.GetDetails, {
+                //         Enquiryid: id,
+                //     });
+                //     const division = response.division?.find(d => d.value === data.enqClientinfo.divisionid)?.label || " - ";
+                //     handleDivisionSelection(data.enqClientinfo.divisionid, division);
+                //     const brandValue = formDataList.brand?.find(b => b.label === data.enqClientinfo.brand)?.value || "";
+                //     console.log(brandValue);
+                //     const aboveAtMarketValue = formDataList.aboveAtMarket?.find(a => a.label === data.enqClientinfo.aboveorAtmarket)?.value || "";
+
+                //     // Update state
+                //     setFormData(prev => ({
+                //         ...prev,
+                //         division: data.enqClientinfo.divisionid,
+                //         clientContact: data.enqClientinfo.clientContactId,
+                //         pmgEntity: data.enqClientinfo.pmgEntity,
+                //         deliveryCountry: data.enqClientinfo.deliveryCountryId,
+                //         brand: brandValue,
+                //         aboveAtMarket: aboveAtMarketValue,
+                //         brandValue: data.enqClientinfo.brand,
+                //         aboveAtMarketValue: data.enqClientinfo.aboveorAtmarket
+                //     }));
+
+
+                // }
+
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -134,6 +176,15 @@ const ClientInfo = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (formDataList.pmgEntity.length === 1) {
+            setFormData(prev => ({
+                ...prev,
+                pmgEntity: formDataList.pmgEntity[0].value
+            }));
+        }
+    }, [formDataList.pmgEntity, formDataList.brand, formDataList.clientContact]); // separate effect, only does auto-select
 
     const handleChange = async (e) => {
         const { name, value } = e.target;
@@ -165,16 +216,7 @@ const ClientInfo = () => {
 
         // Division logic
         if (name === Labels.clientInfo.division) {
-            const parts = label.split(">").map(v => v.trim());
-            const keys = Object.keys(fields);
-            setFieldsData((prev) => {
-                const data = { ...prev };
-                keys.forEach((key, index) => {
-                    data[key] = parts[index] || " - ";
-                });
-                return data;
-            });
-            ClientInfoMaster(value);
+            handleDivisionSelection(value, label);
             setDisible(false);
         }
 
@@ -217,6 +259,21 @@ const ClientInfo = () => {
         }
     };
 
+    const handleDivisionSelection = (divisionId, division) => {
+        if (!divisionId) return;
+
+        console.log(divisionId, division);
+        const parts = division.split(">").map(v => v.trim());
+        const keys = Object.keys(fields);
+        setFieldsData(prev => {
+            const data = { ...prev };
+            keys.forEach((key, index) => {
+                data[key] = parts[index] || " - ";
+            });
+            return data;
+        });
+        ClientInfoMaster(divisionId);
+    };
     const handleSubmit = async () => {
         const isValid = ClientInfoValidation();
         const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
@@ -315,6 +372,8 @@ const ClientInfo = () => {
     const handleCloseChoose = () => {
         setCcOpenFilter(false);
         setBrandOpenFilter(false);
+        setSaveDraft(false);
+        setDeleteDraft(false);
         setFormData((prev) => ({
             ...prev,
             firstName: "",
@@ -418,6 +477,9 @@ const ClientInfo = () => {
         } else {
             navigate(labelRoutes.home); // fallback route
         }
+    };
+    const handleExitDraft = () => {
+        setOpen(true);
     };
     return (
         <>
@@ -556,6 +618,7 @@ const ClientInfo = () => {
                                         options={formDataList.brand}
                                         width={100}
                                         helperText={errors?.brand}
+                                        flag={Labels.flag.auto}
                                     />
 
                                     <Tooltip title="Add New Brand" arrow>
@@ -612,7 +675,8 @@ const ClientInfo = () => {
                                         options={formDataList.pmgEntity}
                                         width={100}
                                         helperText={errors?.pmgEntity}
-                                        flag={Labels.flag.auto}
+                                        //flag={Labels.flag.auto}
+                                        readOnly={true}
                                     />
                                 </PGrid>
                             </PGrid >
@@ -652,13 +716,13 @@ const ClientInfo = () => {
                                     md={4}
                                     className="d-flex justify-content-end gap-2"
                                 >
-                                    <PButton
+                                    {/* <PButton
                                         label={getLabel("lbl38")}
                                         variant="contained"
                                         color={CommonColors.grey.main}
                                         onClick={(e) => handleBack(e)}
                                         width={120}
-                                    />
+                                    /> */}
 
                                     <PButton
                                         label={getLabel("lbl39")}
@@ -849,6 +913,13 @@ const ClientInfo = () => {
                     />
                 </PGrid>
             </PDialog >
+
+            <PDraftDialog
+                open={open}
+                onClose={() => setOpen(false)}
+                onSave={handleSubmit}
+                onDelete={handleSubmit}
+            />
         </>
     );
 };

@@ -21,6 +21,7 @@ export const Language_API = {
 export const Dashboard_API ={
   Dashboard : Base_Url + "/VA/Viewdashboard",
   Master : Base_Url + "/VA/MasterDropdowns",
+  GetDetails : Base_Url + "/VA/GetDetails",
 }
 
 
@@ -30,5 +31,10 @@ export const ClientInfo_API ={
   AddUpdateClientContant : Base_Url + "/VA/AddnewClient",
   AddUpdateBrand : Base_Url + "/VA/AddnewBrands",
   CheckforUsername: Base_Url + "/VA/CheckforUsername",
+}
+
+export const EnquiryDetails_API ={
+  AddUpdateEnquiryDetails : Base_Url + "/VA/EnqProjectinfo",
+  GetSlatemplateMaster : Base_Url + "/VA/GetSlatemplate",
 }
  
