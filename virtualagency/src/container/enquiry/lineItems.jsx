@@ -167,7 +167,7 @@ const LineItems = () => {
                     category: response.typeofJob,
                 }));
             } catch (error) {
-                console.error("API Error", error);
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
                 setLoading(false);
             }
@@ -256,7 +256,10 @@ const LineItems = () => {
 
             // Quantity
             Labels.lineItems.quantityType,
-            Labels.lineItems.quantity
+            Labels.lineItems.quantity,
+            Labels.lineItems.width,
+            Labels.lineItems.depth,
+            Labels.lineItems.length,
         ];
 
         let newErrors = {};
@@ -275,21 +278,21 @@ const LineItems = () => {
     const type = Number(formData.quantityType);
     const flatSize = type === 3 ? (+formData.length || 0) * (+formData.width || 0) * (+formData.depth || 0) : (+formData.length || 0) * (+formData.width || 0);
     const totalSize = flatSize * (+formData.quantity || 0);
- const handleExitDraft = () => {
+    const handleExitDraft = () => {
         setOpen(true);
     };
 
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
-                <PGrid container className={Labels.margin.mb3} >
+                <PGrid container className={Labels.margin.mb4} >
                     <PStepper steps={enquirySteps} activeStep={2} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
-                <PGrid container className={Labels.margin.mb3} >
+                <PGrid container className={Labels.margin.mb4} >
                     <PGrid item xs={12} sm={12} md={9}>
                         <PCard>
                             {/* Line Items */}
-                            <PGrid container className={Labels.margin.mb3}>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
                                     labelText={getLabel("lbl22")}
                                     flag={Labels.fontFlags.subHeader}
@@ -443,10 +446,6 @@ const LineItems = () => {
                                     />
                                 </PGrid>
                             </PGrid>
-
-                            {/* Extra Field only for nestle */}
-
-
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
@@ -482,7 +481,6 @@ const LineItems = () => {
                                     />
                                 </PGrid> */}
                             </PGrid>
-
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
@@ -508,7 +506,7 @@ const LineItems = () => {
 
                             {/* Sustainability Information */}
                             <hr className="my-4" />
-                            <PGrid container className={Labels.margin.mb3}>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
                                     labelText={getLabel("lbl68")}
                                     flag={Labels.fontFlags.subHeader}
@@ -624,7 +622,7 @@ const LineItems = () => {
 
                             {/* Catalogue & Sourcing Information */}
                             <hr className="my-4" />
-                            <PGrid container className={Labels.margin.mb3}>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
                                     labelText={getLabel("lbl104")}
                                     flag={Labels.fontFlags.subHeader}
@@ -675,7 +673,7 @@ const LineItems = () => {
                                 </PGrid>
 
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+                            <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl109")} ${Labels.symbols.required}`}
@@ -708,11 +706,9 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-
-
                             </PGrid>
-                            <PGrid container>
-                                <PGrid item xs={12} sm={6} md={3}>
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl112")} ${Labels.symbols.required}`}
                                         value={formData.typeOfItem}
@@ -723,7 +719,7 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={3}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
                                         label={`${getLabel("lbl113")} ${Labels.symbols.required}`}
                                         value={formData.noOfMaterials}
@@ -732,7 +728,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.noOfMaterials}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={3}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl114")} ${Labels.symbols.required}`}
                                         value={formData.digitalInnovation}
@@ -743,7 +739,9 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={3}>
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl115")} ${Labels.symbols.required}`}
                                         value={formData.innovation}
@@ -754,9 +752,7 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb3}>
-                                <PGrid item xs={12} sm={6} md={3}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl116")} ${Labels.symbols.required}`}
                                         value={formData.sourcingLocation}
@@ -767,7 +763,7 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={3}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl117")} ${Labels.symbols.required}`}
                                         value={formData.savingsType}
@@ -778,7 +774,10 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={3}>
+
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl118")} ${Labels.symbols.required}`}
                                         value={formData.savingsReason}
@@ -789,7 +788,7 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={3}>
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl119")} ${Labels.symbols.required}`}
                                         value={formData.owWithLink}
@@ -801,6 +800,7 @@ const LineItems = () => {
                                     />
                                 </PGrid>
                             </PGrid>
+
 
                             {/* Spacifications */}
                             <hr className="my-4" />
@@ -831,7 +831,7 @@ const LineItems = () => {
                                 </PGrid>
 
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+                            <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTextField
                                         label={`${getLabel("lbl83")} ${Labels.symbols.required}`}
@@ -935,7 +935,7 @@ const LineItems = () => {
                                 )}
                             </PGrid>
                             {[2, 3].includes(type) && (
-                                <PGrid container className={Labels.margin.mb4}>
+                                <PGrid container className={Labels.margin.mb3}>
                                     <PGrid item xs={12} sm={12} md={4}>
                                         <PTypography
                                             labelText={type == 2 ? "Flat Size (SQM)" : "Flat Size (Cu.M)"}
@@ -960,6 +960,8 @@ const LineItems = () => {
                                     </PGrid>
                                 </PGrid>
                             )}
+
+                            {/* Button Section */}
                             <hr className="my-4" />
                             <PGrid container className="d-flex align-items-center justify-content-between">
                                 <PGrid item xs={12} sm={6} md={8}>

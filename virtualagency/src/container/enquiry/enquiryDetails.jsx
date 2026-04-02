@@ -73,11 +73,9 @@ const EnquiryDetails = () => {
     });
 
     useEffect(() => {
-        console.log(state,"dewdwhedj");
         const fetchData = async () => {
             try {
                 setLoading(true);
-
                 const response = await PostApi(Dashboard_API.Master, {
                     userCountryId: parseInt(localStorage.getItem("countryID")),
                     role: localStorage.getItem("role")
@@ -91,7 +89,7 @@ const EnquiryDetails = () => {
                 }));
 
             } catch (error) {
-                console.error("API Error", error);
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
                 setLoading(false);
             }
@@ -100,6 +98,15 @@ const EnquiryDetails = () => {
         calculatePlanByQuote(today);
     }, [formDataList.slaTemplateData]);
 
+    useEffect(() => {
+        if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
+            setFormData(prev => ({
+                ...prev,
+                slaTemplate: formDataList.slaTemplate[0].value
+            }));
+            slaTemplateData(formDataList.slaTemplate[0].value);
+        }
+    }, [formDataList.slaTemplate]);
 
     const slaTemplateData = async (sla) => {
         try {
@@ -107,13 +114,12 @@ const EnquiryDetails = () => {
             const response = await PostApi(EnquiryDetails_API.GetSlatemplateMaster, {
                 SlaId: sla,
             });
-            console.log(response);
             setFormDataList(prev => ({
                 ...prev,
                 slaTemplateData: response,
             }));
         } catch (error) {
-            console.error("API Error", error);
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
         }
@@ -168,7 +174,6 @@ const EnquiryDetails = () => {
                     year: formData.yearValue,
                     ...dynamicData
                 });
-                //console.log(response, "Payload")
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
@@ -225,16 +230,14 @@ const EnquiryDetails = () => {
     };
 
     //SLA Date Management Function
-    // const { quote, proof, production, fileCopies, invoicing, defQuote, defProof, defProduction
-    //     , defFileCopies, defInvoices } = formDataList.slaTemplateData || {};
 
     const slaData = formDataList.slaTemplateData;
     const phases = [
-        { name: getLabel("lbl54"), days: slaData?.quote ?? 5, mdays: slaData?.defQuote ?? 5 },
-        { name: getLabel("lbl55"), days: slaData?.proof ?? 5, mdays: slaData?.defProof ?? 5 },
-        { name: getLabel("lbl56"), days: slaData?.production ?? 20, mdays: slaData?.defProduction ?? 20 },
-        { name: getLabel("lbl57"), days: slaData?.fileCopies ?? 5, mdays: slaData?.defFileCopies ?? 5 },
-        { name: getLabel("lbl58"), days: slaData?.invoicing ?? 10, mdays: slaData?.defInvoices ?? 10 }
+        { name: getLabel("lbl54"), days: slaData?.quote, mdays: slaData?.defQuote },
+        { name: getLabel("lbl55"), days: slaData?.proof, mdays: slaData?.defProof },
+        { name: getLabel("lbl56"), days: slaData?.production, mdays: slaData?.defProduction },
+        { name: getLabel("lbl57"), days: slaData?.fileCopies, mdays: slaData?.defFileCopies },
+        { name: getLabel("lbl58"), days: slaData?.invoicing, mdays: slaData?.defInvoices }
     ];
     const [phaseDates, setPhaseDates] = useState([]);
     const keys = ["quote", "proof", "production", "filecopies", "invoice"];
@@ -298,9 +301,7 @@ const EnquiryDetails = () => {
         setPhaseDates(result);
     };
 
-    // Handle mdays input change
     const handleModifiedDays = (index, value) => {
-        // Allow empty while typing
         if (value === "") {
             const updatedPhases = [...phases];
             updatedPhases[index].mdays = "";
@@ -315,19 +316,20 @@ const EnquiryDetails = () => {
         calculatePlanByQuote(quoteStartDate, updatedPhases);
     };
 
+  
     const handleExitDraft = () => {
         setOpen(true);
     };
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
-                <PGrid container className={Labels.margin.mb3} >
+                <PGrid container className={Labels.margin.mb4} >
                     <PStepper steps={enquirySteps} activeStep={1} allowRedirect={allowRedirect}></PStepper>
                 </PGrid>
-                <PGrid container className={Labels.margin.mb3} >
+                <PGrid container className={Labels.margin.mb4} >
                     <PGrid item xs={12} sm={12} md={9}>
                         <PCard>
-                            <PGrid container className={Labels.margin.mb3}>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PTypography
                                     labelText={getLabel("lbl21")}
                                     flag={Labels.fontFlags.subHeader}
@@ -341,7 +343,7 @@ const EnquiryDetails = () => {
                                     weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid container>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
                                         name={Labels.enquiryDetails.projectNo}
@@ -511,6 +513,7 @@ const EnquiryDetails = () => {
                                                     calculatePlanByQuote(selectedDate);
                                                 }
                                             }}
+                                            allowFuture={true}
                                         />
                                     </PGrid>
 

@@ -108,7 +108,7 @@ export default function PDatepicker({
       name={name}
       label={label}
       inputRef={textFieldRef}
-      defaultValue={value}
+      value={value || ""}
       disabled={disabled}
       placeholder={placeholder}
       helperText={helperText || " "}
@@ -123,6 +123,9 @@ export default function PDatepicker({
         form: {
           autoComplete: "off",
         },
+      }}
+      InputLabelProps={{
+        shrink: !!value, // ✅ ensures label floats properly
       }}
       InputProps={{
         endAdornment: (
