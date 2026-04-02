@@ -428,7 +428,8 @@ const EqDashboard = () => {
                 {icons.length > 0 && (
                   <PToggle options={[{ ...icons[0], value: formData.createEnquiry, label: icons[0].tooltip }]}
                     value={formData.createEnquiry}
-                    onChange={(value) => { icons[0].action(), setFormData((prev) => ({ ...prev, createEnquiry: value })); }}
+                    //onChange={(value) => {setFormData((prev) => ({ ...prev, createEnquiry: value })); }}
+                    onclick={icons[0].action}
                     disabled={loading}
                   />
                 )}

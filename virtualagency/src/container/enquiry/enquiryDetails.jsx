@@ -35,7 +35,7 @@ const EnquiryDetails = () => {
         projectQuoteType: "",
         year: "",
         managementFeeType: "",
-        hybrid: "",
+        hybrid: 2,
         projectAttribute: "",
         slaTemplate: "",
         projectAttributeValue: "",
@@ -73,6 +73,7 @@ const EnquiryDetails = () => {
     });
 
     useEffect(() => {
+        console.log(state,"dewdwhedj");
         const fetchData = async () => {
             try {
                 setLoading(true);
@@ -426,7 +427,7 @@ const EnquiryDetails = () => {
                                     <PDropdown
                                         name={Labels.enquiryDetails.hybrid}
                                         label={`${getLabel("lbl94")} ${Labels.symbols.required}`}
-                                        value={formData.hybrid || 2}
+                                        value={formData.hybrid}
                                         onChange={handleChange}
                                         helperText={errors?.hybrid}
                                         options={formDataList.hybird}

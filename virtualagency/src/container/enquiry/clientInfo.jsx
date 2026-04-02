@@ -296,7 +296,9 @@ const ClientInfo = () => {
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
-                    navigate(labelRoutes.enquiryDetails);
+                    navigate(labelRoutes.enquiryDetails, {
+                        state: { id: response.data.enqId }
+                    });
                 } else {
                     setErrors((prev) => ({
                         ...prev,
