@@ -44,21 +44,21 @@ export default function PTextField({
     onBlur,
     mt = 0.4
 }) {
-    const isFile = type === "file";
+    const isFile = type === Labels.flag.file;
     const isPassword = flag === Labels.flag.password;
     const [showPassword, setShowPassword] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [fileError, setFileError] = useState("");
     const internalRef = React.useRef(null);
     const textFieldRef = inputRef || internalRef;
+    const allowedExtensions = ["pdf", "png", "jpg", "jpeg", "doc", "docx", "ppt", "pptx", "xls", "xlsx"];
     useEffect(() => {
         if (defaultFileUrl || value) {
             const url = defaultFileUrl || value;
-            // ✅ Ensure it's a string before split
             let fileName = "file.png";
             if (typeof url === "string") {
                 fileName = url.split("/").pop() || "file.png";
             } else if (url?.name) {
-                // if it's a File object
                 fileName = url.name;
             }
             setSelectedFiles([{ name: fileName, url }]);
@@ -73,24 +73,55 @@ export default function PTextField({
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files || []);
-        const fileWithPreview = files.map((file) => ({
-            name: file.name,
-            url: URL.createObjectURL(file),
-        }));
+        let errorMsg = "";
+        let updatedFiles = [...selectedFiles, ...files];
+        if (updatedFiles.length > maxLength) {
+            setFileError(`You may attach up to ${maxLength} files only`);
+            e.target.value = "";
+            return;
+        }
+        updatedFiles = updatedFiles
+            .filter(file => {
+                const ext = file.name.split(".").pop().toLowerCase();
+                const isValidType = allowedExtensions.includes(ext);
+                const isValidSize = file.size <= (multiple ? 20 * 1024 * 1024 : 2 * 1024 * 1024);
+                if (!isValidType || !isValidSize) {
+                    errorMsg = multiple
+                        ? "You may upload up to 5 files (max 20MB each). Allowed types: .pdf, .png, .jpg, .jpeg, .doc, .docx, .ppt, .pptx, .xls, .xlsx"
+                        : "File must be under 2MB. Allowed types: .pdf, .png, .jpg, .jpeg, .doc, .docx, .ppt, .pptx, .xls, .xlsx";
+                }
+                return isValidType && isValidSize;
+            })
+            .map(file => ({
+                name: file.name,
+                url: file.url || URL.createObjectURL(file),
+                file: file.file || file
+            }));
 
-        setSelectedFiles(fileWithPreview);
-        onChange?.(e);
+        setSelectedFiles(updatedFiles);
+
+        onChange?.({
+            target: { name, files: updatedFiles.map(f => f.file) }
+        });
+        setFileError(errorMsg);
+        e.target.value = "";
     };
 
-    const handleClearFiles = () => {
-        setSelectedFiles([]);
-        const fakeEvent = {
-            target: {
-                name,
-                files: [],
-            },
-        };
-        onChange?.(fakeEvent);
+    const handleClearFiles = (index) => {
+        let updatedFiles;
+        if (index !== undefined) {
+            updatedFiles = selectedFiles.filter((_, i) => i !== index);
+        } else {
+            updatedFiles = [];
+        }
+        setSelectedFiles(updatedFiles);
+        onChange?.({
+            target: { name, files: updatedFiles.map(f => f.file) }
+        });
+        setFileError("");
+        if (!index && textFieldRef?.current) {
+            textFieldRef.current.value = "";
+        }
     };
     //const baseSx = FormControlBaseStyle(width, mt);
     const baseSx = {
@@ -132,7 +163,7 @@ export default function PTextField({
     if (isFile) {
         return (
             <>
-                <TextField
+                {/* <TextField
                     name={name}
                     label={label}
                     variant={variant}
@@ -185,7 +216,123 @@ export default function PTextField({
                             </>
                         ),
                     }}
+                /> */}
+                <TextField
+                    name={name}
+                    label={label}
+                    variant={variant}
+                    fullWidth
+                    disabled={disabled}
+                    onBlur={onBlur}
+                    inputRef={textFieldRef}
+                    placeholder={"Choose file"}
+                    error={!!fileError}
+                    helperText={fileError || " "}
+                    value={""}
+                    // selectedFiles.length > 0 ? selectedFiles
+                    //     .map((f) =>
+                    //         f.name.length > 30
+                    //             ? `${f.name.slice(0, 30)}...`
+                    //             : f.name
+                    //     )
+                    //     .join(", ")
+                    //     : ""
+
+                    inputProps={{ readOnly: true }}
+                    sx={{
+                        ...baseSx,
+                        "& .MuiInputBase-input": {
+                            paddingRight: "8px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap"
+                        },
+                        "& .MuiInputAdornment-root": {
+                            marginLeft: "4px"
+                        }
+                    }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <UploadFileIcon
+                                    sx={{
+                                        color: disabled ? "#6B7280" : "#62BCD8"
+                                    }}
+                                />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <>
+                                    {/* {selectedFiles.length > 0 && (
+                                        <Tooltip title="Clear">
+                                            <IconButton size="small" onClick={handleClearFiles}>
+                                                <CloseIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    )} */}
+
+                                    <input
+                                        hidden
+                                        type="file"
+                                        name={name}
+                                        multiple={multiple}
+                                        disabled={disabled}
+                                        onChange={handleFileChange}
+                                        id={`upload-${name}`}
+                                        accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                    />
+
+                                    <label htmlFor={`upload-${name}`}>
+                                        <Tooltip title="Upload">
+                                            <IconButton component="span">
+                                                <InsertDriveFileIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </label>
+                                </>
+                            </InputAdornment>
+                        )
+                    }}
                 />
+
+                {selectedFiles.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                        {selectedFiles.map((file, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    padding: "8px 12px",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "10px",
+                                    marginBottom: "8px",
+                                    background: "#fafafa",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        fontSize: 13,
+                                        fontWeight: 500,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                        maxWidth: "80%"
+                                    }}
+                                >
+                                    {file.name}
+                                </span>
+
+                                <IconButton size="small" onClick={() => handleClearFiles(index)}>
+                                    <CloseIcon fontSize="small" />
+                                </IconButton>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </>
         );
     }

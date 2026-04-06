@@ -114,7 +114,7 @@ export default function PDatepicker({
       helperText={helperText || " "}
       error={!!helperText}
       variant="outlined"
-      sx={baseSx}
+      sx={baseSx}     
       onKeyDown={handleKeyDown}
       onInput={handleInput}
       autoComplete="off"

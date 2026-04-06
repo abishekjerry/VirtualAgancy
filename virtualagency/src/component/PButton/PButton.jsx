@@ -8,6 +8,7 @@ export default function PButton({
   label,
   onClick,
   width,
+  height,
   children,
   color = "primary",
   font = FontFamily.medium,
@@ -55,7 +56,7 @@ export default function PButton({
       fullWidth={fullWidth}
       sx={{
         width: width,
-
+        height: height,
         cursor: "pointer",
         textTransform: "none",
         fontFamily: font,

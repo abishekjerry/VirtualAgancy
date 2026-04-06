@@ -95,7 +95,8 @@ const LineItems = () => {
         quantity: "",
         length: "",
         width: "",
-        depth: ""
+        depth: "",
+        files: ""
     });
 
     const [errors, setErrors] = useState({
@@ -152,7 +153,7 @@ const LineItems = () => {
         quantity: "",
         length: "",
         width: "",
-        depth: ""
+        depth: "",
     });
 
 
@@ -177,6 +178,7 @@ const LineItems = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log();
         setFormData((prev) => ({
             ...prev,
             [name]: value
@@ -186,6 +188,8 @@ const LineItems = () => {
             ...prev,
             [name]: ""   // clear only that field error
         }));
+
+        console.log(formData.files);
     };
 
     const handleSubmit = () => {
@@ -961,6 +965,49 @@ const LineItems = () => {
                                 </PGrid>
                             )}
 
+                            {[1, 2, 3].includes(type) && (
+                                <PGrid container className={Labels.margin.mb4}>
+                                    <PGrid item xs={12} sm={12} md={6}>
+                                        <PTextField
+                                            value={formData.files}
+                                            onChange={handleChange}
+                                            name={Labels.lineItems.files}
+                                            type={Labels.flag.file}
+                                            multiple={true}
+                                            maxLength={5}
+                                        />
+                                        {/* <PTypography
+                                            labelText={"You may attach up to 5 files of no more than 20mb each.."}
+                                            flag={Labels.fontFlags.smallText}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                        <PTypography
+                                            labelText={"Type: .pdf .png .jpg .jpeg .doc .docx .ppt .pptx .xls .xls"}
+                                            flag={Labels.fontFlags.smallText}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        /> */}
+                                    </PGrid>
+
+                                    <PGrid item xs={12} sm={12} md={6} className="d-flex justify-content-end gap-2 mb-1">
+                                        <PButton
+                                            label={"Add New Item"}
+                                            variant="outlined"
+                                            onClick={(e) => handleSubmit(e, true)}
+                                            width={180}
+                                            height={50}
+                                            color={CommonColors.blue.main}
+                                        />
+                                    </PGrid>
+
+
+                                </PGrid>
+
+
+
+                            )}
+                        
                             {/* Button Section */}
                             <hr className="my-4" />
                             <PGrid container className="d-flex align-items-center justify-content-between">

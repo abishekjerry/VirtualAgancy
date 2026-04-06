@@ -307,7 +307,7 @@ const EnquiryDetails = () => {
             return;
         }
         const num = Number(value);
-        if (isNaN(num) || num < 0) return;
+        if (isNaN(num) || num <= 0) return;
         const updated = phaseDates.map((item, i) =>
             i === index ? { ...item, mdays: num } : item
         );

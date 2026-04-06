@@ -102,7 +102,8 @@ export const Labels = {
     quantity: "quantity",
     length: "length",
     width: "width",
-    depth: "depth"
+    depth: "depth",
+    files : "files" 
   },
 
 
@@ -153,7 +154,7 @@ export const Labels = {
     status: true,
     Insert: "Insert",
     Update: "Update",
-
+    file : "File",
   },
 
   reportName: {
