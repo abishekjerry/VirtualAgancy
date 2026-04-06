@@ -91,65 +91,19 @@ export const allowEmailCharsOnly = (e) => {
   }
 };
 
-// //email hiding format
-// export const maskEmail = (email) => {
-//   if (!email || typeof email !== "string" || !email.includes("@")) return "-";
-//   const [user, domain] = email.split("@");
-//   if (!user || !domain) return "-";
 
-//   const maskedUser = user[0] + "*".repeat(user.length - 1);
-//   const domainParts = domain.split(".");
-//   const maskedDomain =
-//     domainParts[0][0] + "*".repeat(domainParts[0].length - 1);
+export const formatDate = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
 
-//   return `${maskedUser}@${maskedDomain}.${domainParts[1]}`;
-// };
-
-// //mobile hiding format
-// export const maskMobile = (number) => {
-//   if (!number || typeof number !== "string" || number.trim() === "") return "";
-//   const cleaned = number.trim();
-//   if (cleaned.length < 4) return "*".repeat(cleaned.length);
-//   return (
-//     cleaned.slice(0, 2) + "*".repeat(cleaned.length - 4) + cleaned.slice(-2)
-//   );
-// };
-// export const capsFormat = (value) => {
-//   const upperValue = value.toUpperCase();
-//   return upperValue;
-// };
-
-// export function validateEmailOrMobile(value) {
-//   const trimmedValue = value.trim();
-
-//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//   const mobileRegex = /^[6-9]\d{9}$/;
-
-//   if (!trimmedValue) {
-//     return "Required";
-//   }
-
-//   if (emailRegex.test(trimmedValue)) {
-//     return "";
-//   }
-
-//   if (mobileRegex.test(trimmedValue)) {
-//     return "";
-//   }
-
-//   return "Enter  valid email or mobile number";
-// }
-
-// export const generateCaptcha = () => {
-//   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-//   return Array.from({ length: 6 }, () =>
-//     chars.charAt(Math.floor(Math.random() * chars.length))
-//   ).join("");
-// };
-
-// export const toLowerCase = (event) => {
-//   event.target.value = event.target.value.toLowerCase();
-// };
+  return `${day}/${month}/${year}`;
+};
+export const parseDate = (dateStr) => {
+  const p = dateStr.split(/[\/-]/);
+  return p[0].length === 4 ? new Date(p[0], p[1] - 1, p[2]) : new Date(p[2], p[1] - 1, p[0]);
+};
 
 export function isNotEmpty(value) {
   if (value === null || value === undefined) return false;
@@ -179,7 +133,7 @@ export const setToast = (fn) => {
   handler = fn;
 };
 export const toast = (status, message) => {
-  handler?.({ status,  message});
+  handler?.({ status, message });
 };
 
 /**
