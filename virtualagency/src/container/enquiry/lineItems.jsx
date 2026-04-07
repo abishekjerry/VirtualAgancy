@@ -1,4 +1,11 @@
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
+import {
+    UploadFile as UploadFileIcon,
+    Close as CloseIcon,
+    InsertDriveFile as InsertDriveFileIcon,
+    Visibility,
+    VisibilityOff,
+} from "@mui/icons-material";
 import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
@@ -17,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
+import PreviewDialog from "../../component/PDialog/PPreviewDialog";
 const LineItems = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
@@ -24,10 +32,9 @@ const LineItems = () => {
     const enquirySteps = getEnquirySteps(getLabel);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
-    const yesNoOptions = [
-        { label: "Yes", value: 1 },
-        { label: "No", value: 2 },
-    ];
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    
     const typeofJobOptions = [
         { label: "Print", value: 1 },
         { label: "Digital", value: 2 },
@@ -36,6 +43,7 @@ const LineItems = () => {
     const [formDataList, setFormDataList] = useState({
         typeOfJob: [{ label: "Strategic", value: 1 }, { label: "Tactical", value: 2 }, { label: "Operational", value: 3 }, { label: "Non-Addressable", value: 4 }],
         category: [],
+        yesNoNa : [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "N/A", value: 3 , selected: true}],
         yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
         simplex: [{ label: "Non-Simplex", value: 1 }, { label: "Simplex", value: 2 }, { label: "Not Applicable", value: 3 }],
         quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 }, { label: "Quote of Quantity & Size 3D", value: 3 }],
@@ -96,7 +104,7 @@ const LineItems = () => {
         length: "",
         width: "",
         depth: "",
-        files: ""
+        files: []
     });
 
     const [errors, setErrors] = useState({
@@ -177,19 +185,17 @@ const LineItems = () => {
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        console.log();
+        const { name, value, files } = e.target;
+
         setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: files ? files : value   // ✅ FIX
         }));
 
         setErrors((prev) => ({
             ...prev,
-            [name]: ""   // clear only that field error
+            [name]: ""
         }));
-
-        console.log(formData.files);
     };
 
     const handleSubmit = () => {
@@ -261,15 +267,25 @@ const LineItems = () => {
             // Quantity
             Labels.lineItems.quantityType,
             Labels.lineItems.quantity,
-            Labels.lineItems.width,
-            Labels.lineItems.depth,
-            Labels.lineItems.length,
+        ];
+
+        const optionFields = [
+            { field: Labels.lineItems.length, visible: [2, 3] },
+            { field: Labels.lineItems.width, visible: [2, 3] },
+            { field: Labels.lineItems.depth, visible: [3] },
         ];
 
         let newErrors = {};
 
         requiredFields.forEach((field) => {
             if (!formData[field]) {
+                newErrors[field] = Labels.commonLabel.required;
+            }
+        });
+
+        optionFields.forEach(({ field, visible }) => {
+            const isVisible = visible.includes(type); // type is your current selection
+            if (isVisible && !formData[field]) {
                 newErrors[field] = Labels.commonLabel.required;
             }
         });
@@ -284,6 +300,10 @@ const LineItems = () => {
     const totalSize = flatSize * (+formData.quantity || 0);
     const handleExitDraft = () => {
         setOpen(true);
+    };
+    const handlePreview = (index) => {
+        setCurrentIndex(index);
+        setPreviewOpen(true);
     };
 
     return (
@@ -387,7 +407,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.exceptionsReasonCode}
                                         name={Labels.lineItems.exceptionsReasonCode}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -458,7 +478,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.dictatedJob}
                                         name={Labels.lineItems.dictatedJob}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -480,7 +500,7 @@ const LineItems = () => {
                                         label={`${getLabel("lbl104")} ${Labels.symbols.required}`}
                                         value={typeofJob}
                                         onChange={handleChange}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
                                         
                                     />
                                 </PGrid> */}
@@ -528,13 +548,12 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-
                                         label={`${getLabel("lbl70")} ${Labels.symbols.optional}`}
                                         value={formData.fscOrPefcMaterial}
                                         onChange={handleChange}
                                         helperText={errors?.fscOrPefcMaterial}
                                         name={Labels.lineItems.fscOrPefcMaterial}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -545,7 +564,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.recyclable}
                                         name={Labels.lineItems.recyclable}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -556,7 +575,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.sustainabilityOption}
                                         name={Labels.lineItems.sustainabilityOption}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -570,7 +589,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.recycledMaterial}
                                         name={Labels.lineItems.recycledMaterial}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -581,7 +600,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.designedToBeReused}
                                         name={Labels.lineItems.designedToBeReused}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -592,7 +611,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.containsPlastic}
                                         name={Labels.lineItems.containsPlastic}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -607,7 +626,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.containsRecycledPlastic}
                                         name={Labels.lineItems.containsRecycledPlastic}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -660,7 +679,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.globalOrderWindowCatalogueName}
                                         name={Labels.lineItems.globalOrderWindowCatalogueName}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -671,7 +690,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.regionalOrderWindowCatalogue}
                                         name={Labels.lineItems.regionalOrderWindowCatalogue}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -685,7 +704,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.localCatalogueName}
                                         name={Labels.lineItems.localCatalogueName}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -706,7 +725,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.printingMethod}
                                         name={Labels.lineItems.printingMethod}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -719,7 +738,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.typeOfItem}
                                         name={Labels.lineItems.typeOfItem}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -739,7 +758,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.digitalInnovation}
                                         name={Labels.lineItems.digitalInnovation}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -752,7 +771,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.innovation}
                                         name={Labels.lineItems.innovation}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesNoNa}
 
                                     />
                                 </PGrid>
@@ -763,7 +782,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.sourcingLocation}
                                         name={Labels.lineItems.sourcingLocation}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -774,7 +793,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.savingsType}
                                         name={Labels.lineItems.savingsType}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -788,7 +807,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.savingsReason}
                                         name={Labels.lineItems.savingsReason}
-                                        options={yesNoOptions}
+                                        options={formDataList.yesOrNo}
 
                                     />
                                 </PGrid>
@@ -964,50 +983,112 @@ const LineItems = () => {
                                     </PGrid>
                                 </PGrid>
                             )}
-
+                            {/* Attachment Section */}
                             {[1, 2, 3].includes(type) && (
-                                <PGrid container className={Labels.margin.mb4}>
-                                    <PGrid item xs={12} sm={12} md={6}>
-                                        <PTextField
-                                            value={formData.files}
-                                            onChange={handleChange}
-                                            name={Labels.lineItems.files}
-                                            type={Labels.flag.file}
-                                            multiple={true}
-                                            maxLength={5}
-                                        />
-                                        {/* <PTypography
-                                            labelText={"You may attach up to 5 files of no more than 20mb each.."}
-                                            flag={Labels.fontFlags.smallText}
-                                            color={CommonColors.grey.main}
-                                            weight={FontWeight.bold}
-                                        />
-                                        <PTypography
-                                            labelText={"Type: .pdf .png .jpg .jpeg .doc .docx .ppt .pptx .xls .xls"}
-                                            flag={Labels.fontFlags.smallText}
-                                            color={CommonColors.grey.main}
-                                            weight={FontWeight.bold}
-                                        /> */}
+                                <>
+                                    {/* Row with file input + button */}
+                                    <PGrid container className={Labels.margin.mb4}>
+                                        <PGrid item xs={12} sm={12} md={6}>
+                                            <PTextField
+                                                value={formData.files}
+                                                onChange={handleChange}
+                                                name={Labels.lineItems.files}
+                                                type={Labels.flag.file}
+                                                multiple={true}
+                                                maxLength={5}
+                                            />
+                                        </PGrid>
+
+                                        <PGrid item xs={12} sm={12} md={6} className="d-flex justify-content-end gap-2 mb-1">
+                                            <PButton
+                                                label={"Add New Item"}
+                                                variant="outlined"
+                                                onClick={(e) => handleSubmit(e, true)}
+                                                width={180}
+                                                height={50}
+                                                color={CommonColors.blue.main}
+                                            />
+                                        </PGrid>
                                     </PGrid>
 
-                                    <PGrid item xs={12} sm={12} md={6} className="d-flex justify-content-end gap-2 mb-1">
-                                        <PButton
-                                            label={"Add New Item"}
-                                            variant="outlined"
-                                            onClick={(e) => handleSubmit(e, true)}
-                                            width={180}
-                                            height={50}
-                                            color={CommonColors.blue.main}
-                                        />
-                                    </PGrid>
+                                    {formData.files?.length > 0 && (
+                                        <PGrid container>
+                                            {formData.files.map((file, index) => (
+                                                <PGrid item xs={12} sm={6} key={index} className={Labels.margin.mb2}>
+                                                    <div
+                                                        style={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "space-between",
+                                                            padding: "6px 10px",
+                                                            borderRadius: "10px",
+                                                            background: "#e4e3e3",
+                                                            border: "1px solid #d4d4d4",
+                                                            fontSize: "13px",
+                                                            width: "100%",
+                                                            boxSizing: "border-box",
+                                                        }}
+                                                    >
+                                                        {/* Left content */}
+                                                        <div
+                                                            style={{
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                gap: 6,
+                                                                overflow: "hidden",
+                                                            }}
+                                                        >
+                                                            {/* File name */}
+                                                            <span
+                                                                style={{
+                                                                    whiteSpace: "nowrap",
+                                                                    overflow: "hidden",
+                                                                    textOverflow: "ellipsis",
+                                                                    maxWidth: "140px",
+                                                                }}
+                                                            >
+                                                                {file.name}
+                                                            </span>
 
+                                                            {/* File size */}
+                                                            <span style={{ fontSize: "11px", color: "#555" }}>
+                                                                ({(file.size / (1024 * 1024)).toFixed(1)} MB)
+                                                            </span>
+                                                        </div>
 
-                                </PGrid>
+                                                        {/* Actions */}
+                                                        <div style={{ display: "flex", gap: 4 }}>
+                                                            <IconButton size="small" onClick={() => handlePreview(index)}>
+                                                                <Visibility fontSize="inherit" />
+                                                            </IconButton>
 
-
-
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() =>
+                                                                    setFormData((prev) => ({
+                                                                        ...prev,
+                                                                        files: prev.files.filter((_, i) => i !== index),
+                                                                    }))
+                                                                }
+                                                            >
+                                                                <CloseIcon fontSize="inherit" />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </PGrid>
+                                            ))}
+                                        </PGrid>
+                                    )}
+                                    <PreviewDialog
+                                        open={previewOpen}
+                                        onClose={() => setPreviewOpen(false)}
+                                        files={formData.files}
+                                        currentIndex={currentIndex}
+                                        setCurrentIndex={setCurrentIndex}
+                                    />
+                                </>
                             )}
-                        
+
                             {/* Button Section */}
                             <hr className="my-4" />
                             <PGrid container className="d-flex align-items-center justify-content-between">

@@ -7,18 +7,18 @@ import PageNotFound from "../container/pageNotFound/pageNotFound";
 const UserRoute = () => {
   const verifiedUser = useSelector((state) => state.userDetails.user);
   //return verifiedUser?.UserName ? <Outlet /> : <Navigate to={labelRoutes.dashboard} replace />;
-  return <Navigate to={labelRoutes.home} replace />; 
+  return <Navigate to={labelRoutes.home} replace />;
 };
 
 const LoginPage = lazy(() => import("../container/login/login"));
 const Dashboard = lazy(() => import("../container/dashboard/dashboard"));
 const EqDashboard = lazy(() => import("../container/eqDashboard/eqDashboard"));
-const ClientInfo = lazy(() =>import("../container/enquiry/clientInfo"));
+const ClientInfo = lazy(() => import("../container/enquiry/clientInfo"));
 const EnquiryDetails = lazy(() => import("../container/enquiry/enquiryDetails"));
 const LineItems = lazy(() => import("../container/enquiry/lineItems"));
 const Suppliers = lazy(() => import("../container/enquiry/suppliers"));
 const Review = lazy(() => import("../container/enquiry/review"));
-
+const Report = lazy(() => import("../container/report/Report"));
 function AppRoutes() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -31,15 +31,16 @@ function AppRoutes() {
         <Route element={<PageLayout />}>
           <Route path={labelRoutes.dashboard} element={<Dashboard />} />
           <Route path={labelRoutes.eqDashboard} element={<EqDashboard />} />
+          <Route path={labelRoutes.report} element={<Report />} />
           <Route path={labelRoutes.clientInfo} element={<ClientInfo />} />
           <Route path={labelRoutes.enquiryDetails} element={<EnquiryDetails />} />
           <Route path={labelRoutes.lineItems} element={<LineItems />} />
           <Route path={labelRoutes.suppliers} element={<Suppliers />} />
-           <Route path={labelRoutes.review} element={<Review />} />
+          <Route path={labelRoutes.review} element={<Review />} />
         </Route>
 
         {/* Page Not Found */}
-        <Route path= {labelRoutes.PageNotFound} element={<PageNotFound />} />
+        <Route path={labelRoutes.PageNotFound} element={<PageNotFound />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to={labelRoutes.home} replace />} />

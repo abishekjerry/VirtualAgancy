@@ -3,6 +3,9 @@ export const labelRoutes = {
   Login: "/login",
   dashboard: "/dashboard",
   eqDashboard: "/eqDashboard",
+  report: "/Report",
+
+  // Enquiry Pages
   clientInfo: "/clientInfo",
   enquiryDetails : "/enquiryDetails",
   lineItems : "/lineItems",

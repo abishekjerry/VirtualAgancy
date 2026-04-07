@@ -23,6 +23,7 @@ export const Labels = {
     clientContact: "clientContact",
     pmgEntity: "pmgEntity",
     aboveAtMarket: "aboveAtMarket",
+    globalBUMapping :"globalBUMapping",
 
     firstName: "firstName",
     lastName: "lastName",

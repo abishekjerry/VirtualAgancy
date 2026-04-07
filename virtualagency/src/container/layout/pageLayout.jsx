@@ -1,6 +1,6 @@
 import {
   FaHome,
-  FaBuilding
+  FaBuilding,FaFileInvoice 
 } from "react-icons/fa";
 import React, { useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
@@ -21,7 +21,7 @@ function PageLayout() {
   const { getLabel } = useLanguage();
   const [openMenu, setOpenMenu] = useState(null);
   const [isDashborad, setIsDashborad] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -37,16 +37,11 @@ function PageLayout() {
       icon: <FaBuilding size={20} />,
       name: "Enquiries",
       route: labelRoutes.eqDashboard,
-      children: [
-        {
-          name: "Create Enquiry",
-          route: "/enquiry/new"
-        },
-        {
-          name: "Report",
-          route: "/enquiry/list"
-        }
-      ]
+    },
+    {
+      icon: <FaFileInvoice  size={20} />,
+      name: "Reports",
+      route: labelRoutes.report,
     }
   ];
 

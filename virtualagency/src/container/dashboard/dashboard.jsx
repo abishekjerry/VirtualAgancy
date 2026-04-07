@@ -47,7 +47,8 @@ const Dashboard = () => {
       title: getLabel("lbl06"),
       icon: <BarChartIcon />,
       iconBg: "#4f46e5",
-      route: null
+      route: labelRoutes.report,
+      showNavIcon: true
     }
   ];
 

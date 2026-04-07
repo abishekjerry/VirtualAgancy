@@ -38,6 +38,7 @@ const ClientInfo = () => {
         clientContact: "",
         pmgEntity: "",
         aboveAtMarket: "",
+        globalBUMapping: "",
         brandValue: "",
         aboveAtMarketValue: "",
         jobPosition: "",
@@ -77,6 +78,7 @@ const ClientInfo = () => {
         clientContact: "",
         pmgEntity: "",
         aboveAtMarket: "",
+        globalBUMapping: "",
 
         firstName: "",
         logonID: "",
@@ -95,6 +97,7 @@ const ClientInfo = () => {
         clientContact: [],
         pmgEntity: [],
         aboveAtMarket: [{ label: "Above", value: 1 }, { label: "At Market", value: 2 }],
+        globalBUMapping: [],
 
         receiveNotification: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
         jobRole: [{ label: "Procurement", value: 1 }, { label: "Marketing & Sales", value: 2 }, { label: "Team Lead", value: 3 }, { label: "Reg_Proc_PBI", value: 4 }, { label: "Others", value: 5 }],
@@ -325,6 +328,7 @@ const ClientInfo = () => {
             Labels.clientInfo.clientContact,
             Labels.clientInfo.pmgEntity,
             Labels.clientInfo.aboveAtMarket,
+            Labels.clientInfo.globalBUMapping,
         ];
 
         let newErrors = {};
@@ -569,7 +573,7 @@ const ClientInfo = () => {
                                         weight={FontWeight.bold}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+                                {/* <PGrid item xs={12} sm={6} md={4}>
                                     <PTypography
                                         labelText={getLabel("lbl91")}
                                         weight={FontWeight.bold}
@@ -579,7 +583,7 @@ const ClientInfo = () => {
                                         color={CommonColors.grey.main}
                                         weight={FontWeight.bold}
                                     />
-                                </PGrid>
+                                </PGrid> */}
 
                             </PGrid>
                             {/* <PGrid container className={Labels.margin.mb3}>
@@ -611,7 +615,7 @@ const ClientInfo = () => {
 
                             {/* Row 3 */}
                             <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "center", gap: "8px" }} >
+                                <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }} >
                                     <PDropdown
                                         name={Labels.clientInfo.brand}
                                         label={`${getLabel("lbl33")} ${Labels.symbols.required}`}
@@ -622,14 +626,15 @@ const ClientInfo = () => {
                                         helperText={errors?.brand}
                                         flag={Labels.flag.auto}
                                     />
-
-                                    <Tooltip title="Add New Brand" arrow>
-                                        <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, marginTop: "9px", "&:hover": { backgroundColor: "#1976d2" }, }}
-                                            onClick={!disible ? (e) => handleOpenChoose(e, "Brand") : undefined}
-                                        >
-                                            <AddIcon />
-                                        </IconButton>
-                                    </Tooltip>
+                                    <div style={{ marginTop: "15px" }}>
+                                        <Tooltip title="Add New Brand" arrow>
+                                            <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, "&:hover": { backgroundColor: "#1976d2" }, }}
+                                                onClick={!disible ? (e) => handleOpenChoose(e, "Brand") : undefined}
+                                            >
+                                                <AddIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </div>
                                 </PGrid>
 
                                 <PGrid item xs={12} sm={6} md={6}>
@@ -649,7 +654,7 @@ const ClientInfo = () => {
 
                             {/* Row 4 */}
                             <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
                                     <PDropdown
                                         name={Labels.clientInfo.clientContact}
                                         label={`${getLabel("lbl35")} ${Labels.symbols.required}`}
@@ -660,13 +665,15 @@ const ClientInfo = () => {
                                         helperText={errors?.clientContact}
                                         flag={Labels.flag.auto}
                                     />
-                                    <Tooltip title="Add New Contant" arrow>
-                                        <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, marginTop: "9px", "&:hover": { backgroundColor: "#1976d2" }, }}
-                                            onClick={!disible ? (e) => handleOpenChoose(e, "Contant") : undefined}
-                                        >
-                                            <AddIcon />
-                                        </IconButton>
-                                    </Tooltip>
+                                    <div style={{ marginTop: "15px" }}>
+                                        <Tooltip title="Add New Contant" arrow>
+                                            <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, "&:hover": { backgroundColor: "#1976d2" }, }}
+                                                onClick={!disible ? (e) => handleOpenChoose(e, "Contant") : undefined}
+                                            >
+                                                <AddIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </div>
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PDropdown
@@ -693,6 +700,18 @@ const ClientInfo = () => {
                                         width={100}
                                         helperText={errors?.aboveAtMarket}
                                         disabled={true}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PDropdown
+                                        name={Labels.clientInfo.globalBUMapping}
+                                        label={`${getLabel("lbl91")} ${Labels.symbols.required}`}
+                                        value={formData.globalBUMapping}
+                                        onChange={handleChange}
+                                        options={formDataList.globalBUMapping}
+                                        width={100}
+                                        helperText={errors?.globalBUMapping}
+                                        flag={Labels.flag.auto}
                                     />
                                 </PGrid>
                             </PGrid >

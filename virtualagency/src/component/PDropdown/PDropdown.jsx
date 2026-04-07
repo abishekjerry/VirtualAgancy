@@ -30,10 +30,20 @@ const PDropdown = ({
   readOnly = false
 }) => {
 
+  const internalValue = useMemo(() => {
+    if (value !== undefined && value !== null && value !== "") return value;
+    const selectedOption = options.find(opt => opt.selected);
+    return selectedOption ? selectedOption.value : "";
+  }, [options, value]);
+
   const selectedOption = useMemo(
-    () => options.find((o) => o.value === value) || null,
-    [options, value]
+    () => options.find((o) => o.value === internalValue) || null,
+    [options, internalValue]
   );
+  // const selectedOption = useMemo(
+  //   () => options.find((o) => o.value === value) || null,
+  //   [options, value]
+  // );
 
   const baseSx = {
     width: width ? `${width}%` : Labels.fontSize.xxxxl,
@@ -141,12 +151,12 @@ const PDropdown = ({
       required={required}
       error={!!helperText}
       sx={baseSx}
-      disabled = {readOnly}
+      disabled={readOnly}
     >
       <InputLabel>{label}</InputLabel>
 
       <Select
-        value={value}
+        value={internalValue}
         label={label}
         name={name}
         onChange={(e) => {
