@@ -10,7 +10,9 @@ import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import PButton from "../../component/PButton/PButton";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { useLanguage } from "../../utils/constants/language";
 const Report = () => {
+    const { getLabel } = useLanguage();
     const [formData, setFormData] = useState({
         clientName: "",
         typeofReport: "",
@@ -50,7 +52,7 @@ const Report = () => {
             <hr className="mt-3" />
 
             <PGrid container className={Labels.margin.mb4} >
-                <PGrid item xs={12} sm={12} md={12}>
+                <PGrid item xs={12} sm={12} md={12} >
                     <PCard>
                         <PGrid container className={Labels.margin.mb4} >
                             <PGrid item xs={12} sm={6} md={4}>
@@ -143,7 +145,7 @@ const Report = () => {
                                 className="d-flex justify-content-end gap-2"
                             >
                                 <PButton
-                                    label={"Reset"}
+                                    label={getLabel("lbl123")}
                                     variant="outlined"
                                     onClick={(e) => handleExitDraft(e)}
                                     width={180}

@@ -17,11 +17,11 @@ import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
-import { getEnquirySteps } from "../../utils/commonFunction/common";
+import { allowOnlyNumbers, getEnquirySteps } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate } from "react-router-dom";
-import { Dashboard_API } from "../../utils/api/apiUrl";
+import { Dashboard_API, LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import PreviewDialog from "../../component/PDialog/PPreviewDialog";
@@ -34,17 +34,27 @@ const LineItems = () => {
     const [open, setOpen] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-    
+
     const typeofJobOptions = [
         { label: "Print", value: 1 },
         { label: "Digital", value: 2 },
     ];
 
     const [formDataList, setFormDataList] = useState({
-        typeOfJob: [{ label: "Strategic", value: 1 }, { label: "Tactical", value: 2 }, { label: "Operational", value: 3 }, { label: "Non-Addressable", value: 4 }],
+        typeOfJob: [],
         category: [],
-        yesNoNa : [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "N/A", value: 3 , selected: true}],
-        yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
+        itemCategory: [],
+        subCategory: [],
+        exceptionsReasonCode: [],
+        typeOfItem: [],
+        localCatalog :[],
+        sourcingLocation:[],
+        savingsType : [],
+        yesNoNa: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "N/A", value: 3, selected: true }],
+        yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
+        tcoYesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
+        yesOrNoNot: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "Not Applicable", value: 3 }],
+        competitiveBiddingExceptionFormSigned: [],
         simplex: [{ label: "Non-Simplex", value: 1 }, { label: "Simplex", value: 2 }, { label: "Not Applicable", value: 3 }],
         quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 }, { label: "Quote of Quantity & Size 3D", value: 3 }],
     });
@@ -182,16 +192,73 @@ const LineItems = () => {
             }
         };
         fetchData();
+        const yesOrNo = formDataList.yesOrNo.find(option => option.selected);
+        const option = formDataList.yesNoNa.find(option => option.selected);
+        const updatedYesOrNo = formDataList.yesOrNoNot.filter(option => option.value !== 2);
+        if (option.value != "" && yesOrNo.value != "") {
+            setFormData(prev => ({
+                ...prev,
+                fscOrPefcMaterial: option.value,
+                recyclable: option.value,
+                sustainabilityOption: option.value,
+                recycledMaterial: option.value,
+                designedToBeReused: option.value,
+                containsPlastic: option.value,
+                containsRecycledPlastic: option.value,
+                digitalInnovation: option.value,
+                innovation: option.value,
+                rateCard: yesOrNo.value,
+                eAuction: yesOrNo.value,
+                owWithLink: yesOrNo.value,
+
+            }));
+        }
+        if (updatedYesOrNo != []) {
+            setFormDataList(prev => ({
+                ...prev,
+                competitiveBiddingExceptionFormSigned: updatedYesOrNo
+            }));
+        }
+
     }, []);
 
-    const handleChange = (e) => {
-        const { name, value, files } = e.target;
+    const LineItemsMaster = async (data) => {
+        try {
+            setLoading(false);
+            const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
+                TypeOfJob: data
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                itemCategory: response.itemCategory,
+                subCategory: response.subCategory,
+                exceptionsReasonCode: response.exceptionReason, 
+                typeOfItem : response.typeOfItem, 
+                localCatalog : response.localCatalog,
+                sourcingLocation : response.sourcingLocation,
+                savingsType : response.savingsType,        
+            }));
 
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value: inputValue, files, label } = e.target;
+        const value = name === Labels.lineItems.recycledMaterialWeightKg || name === Labels.lineItems.noOfMaterials || name === Labels.lineItems.noOfVersion
+            || name === Labels.lineItems.quantity || name === Labels.lineItems.width || name === Labels.lineItems.length || name === Labels.lineItems.depth
+            ? allowOnlyNumbers(inputValue) : inputValue;
+
+        if (name == Labels.lineItems.category) {
+            LineItemsMaster(label);
+        }
         setFormData((prev) => ({
             ...prev,
-            [name]: files ? files : value   // ✅ FIX
+            [name]: files ? files : value
         }));
-
         setErrors((prev) => ({
             ...prev,
             [name]: ""
@@ -306,6 +373,7 @@ const LineItems = () => {
         setPreviewOpen(true);
     };
 
+
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -339,6 +407,7 @@ const LineItems = () => {
                                         helperText={errors?.category}
                                         name={Labels.lineItems.category}
                                         options={formDataList.category}
+                                        flag={Labels.flag.auto}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -371,7 +440,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.competitiveBiddingMandatory}
                                         name={Labels.lineItems.competitiveBiddingMandatory}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesOrNoNot}
 
                                     />
                                 </PGrid>
@@ -382,7 +451,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.competitiveBiddingCompliant}
                                         name={Labels.lineItems.competitiveBiddingCompliant}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.yesOrNoNot}
                                     />
 
                                 </PGrid>
@@ -393,7 +462,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.competitiveBiddingExceptionFormSigned}
                                         name={Labels.lineItems.competitiveBiddingExceptionFormSigned}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.competitiveBiddingExceptionFormSigned}
+                                        flag={Labels.flag.auto}
 
                                     />
 
@@ -407,7 +477,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.exceptionsReasonCode}
                                         name={Labels.lineItems.exceptionsReasonCode}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.exceptionsReasonCode}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>
@@ -418,7 +489,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.itemCategory}
                                         name={Labels.lineItems.itemCategory}
-                                        options={typeofJobOptions}
+                                        options={formDataList.itemCategory}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>
@@ -429,7 +501,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.subCategory}
                                         name={Labels.lineItems.subCategory}
-                                        options={typeofJobOptions}
+                                        options={formDataList.subCategory}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>
@@ -444,6 +517,7 @@ const LineItems = () => {
                                         helperText={errors?.simplex}
                                         name={Labels.lineItems.simplex}
                                         options={formDataList.simplex}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>
@@ -455,7 +529,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.tcoApprovalRequired}
                                         name={Labels.lineItems.tcoApprovalRequired}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.tcoYesOrNo}
 
                                     />
                                 </PGrid>
@@ -466,7 +540,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.tcoApproved}
                                         name={Labels.lineItems.tcoApproved}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.tcoYesOrNo}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -489,7 +563,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.itemType}
                                         name={Labels.lineItems.itemType}
-                                        options={typeofJobOptions}
+                                        options={formDataList.itemType}
+                                        flag={Labels.flag.auto}
 
                                     />
 
@@ -704,7 +779,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.localCatalogueName}
                                         name={Labels.lineItems.localCatalogueName}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.localCatalog}
+                                        flag={Labels.flag.auto}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -738,7 +814,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.typeOfItem}
                                         name={Labels.lineItems.typeOfItem}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.typeOfItem}
 
                                     />
                                 </PGrid>
@@ -782,7 +858,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.sourcingLocation}
                                         name={Labels.lineItems.sourcingLocation}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.sourcingLocation}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>
@@ -793,7 +870,8 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.savingsType}
                                         name={Labels.lineItems.savingsType}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.savingsType}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>

@@ -371,7 +371,7 @@ const EqDashboard = () => {
   };
 
   const icons = [
-    { icon: <AddTaskRoundedIcon fontSize="small" color="green" />, tooltip: "Create Enquiry", action: handleRedirect },
+    { icon: <AddTaskRoundedIcon fontSize="small" color="green" />, tooltip: getLabel("lbl19"), action: handleRedirect },
     { icon: <RestartAltIcon fontSize="small" />, tooltip: "Reset", action: handleReset },
     { icon: <FileDownloadIcon fontSize="small" />, tooltip: "Export", action: handleExport },
     { icon: <CheckCircleIcon fontSize="small" />, tooltip: "Date Range Filter", action: handleOpenChoose },
@@ -428,7 +428,6 @@ const EqDashboard = () => {
                 {icons.length > 0 && (
                   <PToggle options={[{ ...icons[0], value: formData.createEnquiry, label: icons[0].tooltip }]}
                     value={formData.createEnquiry}
-                    //onChange={(value) => {setFormData((prev) => ({ ...prev, createEnquiry: value })); }}
                     onclick={icons[0].action}
                     disabled={loading}
                   />
@@ -447,16 +446,7 @@ const EqDashboard = () => {
                   </Tooltip>
                 ))}
               </Box>
-            </Box>
-            {/* <Box sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end", margin: "6px 0px" }}>
-              {icons.map((item, index) => (
-                <Tooltip title={item.tooltip} arrow key={index}>
-                  <IconButton sx={iconStyle} onClick={item.action} disabled={loading} >
-                    {item.icon}
-                  </IconButton>
-                </Tooltip>
-              ))}
-            </Box> */}
+            </Box>   
           </PGrid>
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "6px 0px", }}>
             <div style={{ display: "flex", justifyContent: "flex-end", }} >

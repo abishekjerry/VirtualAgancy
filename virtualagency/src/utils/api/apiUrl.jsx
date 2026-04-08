@@ -38,3 +38,7 @@ export const EnquiryDetails_API ={
   GetSlatemplateMaster : Base_Url + "/VA/GetSlatemplate",
 }
  
+export const LineItems_API ={
+  GetEnqLineItemsMaster : Base_Url + "/VA/EnqLineItemsDropdowns",
+}
+ 

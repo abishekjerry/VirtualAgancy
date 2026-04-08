@@ -108,8 +108,7 @@ const ClientInfo = () => {
     const role = localStorage.getItem("role");
     const countryID = parseInt(localStorage.getItem("countryID"))
 
-    const ClientInfoMaster = async (division) => {
-        console.log(division, "division");
+    const GlobalBuMappingMaster = async (division) => {
         try {
             setLoading(false);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
@@ -119,10 +118,29 @@ const ClientInfo = () => {
                 ...prev,
                 brand: response.brands,
                 clientContact: response.client,
+                globalBUMapping: response.division,
             }));
 
         } catch (error) {
-            console.error("API Error", error);
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const ClientInfoMaster = async (globalBUMapping) => {
+        try {
+            setLoading(false);
+            const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
+                Divisionid: globalBUMapping
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                brand: response.brands,
+                clientContact: response.client,
+            }));
+
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
         }
@@ -141,7 +159,6 @@ const ClientInfo = () => {
                     pmgEntity: (role === "Admin" ? response.country : response.country.filter((c) => c.value === countryID)),
                     deliveryCountry: response.country,
                 }));
-                console.log(response);
                 const id = state?.id > 0 ? state.id : 0;
 
                 // if (id !== 0) {
@@ -220,6 +237,11 @@ const ClientInfo = () => {
         // Division logic
         if (name === Labels.clientInfo.division) {
             handleDivisionSelection(value, label);
+
+        }
+
+        if (name == Labels.clientInfo.globalBUMapping) {
+            ClientInfoMaster(value);
             setDisible(false);
         }
 
@@ -264,8 +286,6 @@ const ClientInfo = () => {
 
     const handleDivisionSelection = (divisionId, division) => {
         if (!divisionId) return;
-
-        console.log(divisionId, division);
         const parts = division.split(">").map(v => v.trim());
         const keys = Object.keys(fields);
         setFieldsData(prev => {
@@ -275,7 +295,7 @@ const ClientInfo = () => {
             });
             return data;
         });
-        ClientInfoMaster(divisionId);
+        GlobalBuMappingMaster(divisionId);
     };
     const handleSubmit = async () => {
         const isValid = ClientInfoValidation();
@@ -285,7 +305,7 @@ const ClientInfo = () => {
             try {
                 setLoading(true);
                 const response = await PostApi(ClientInfo_API.AddUpdateClientInfo, {
-                    divisionid: formData.division,
+                    divisionid: formData.globalBUMapping, //formData.division,
                     clientContactId: formData.clientContact,
                     createdBy: parseInt(localStorage.getItem("userID")),
                     modifiedBy: parseInt(localStorage.getItem("agancyUserID")),
@@ -418,12 +438,13 @@ const ClientInfo = () => {
                         phone: formData.phone,
                         jobposition: formData.jobPosition,
                         receivenotification: formData.receiveNotification == 1 ? true : false,
-                        divisionid: formData.division
+                        divisionid: formData.globalBUMapping //formData.division
                     });
                     if (isSuccess(response)) {
                         setCcOpenFilter(false);
                         toast(Labels.status.success, response.data);
-                        ClientInfoMaster(formData.division);
+                        GlobalBuMappingMaster(formData.division);
+                        //ClientInfoMaster(formData.globalBUMapping);
                     } else {
                         setErrors((prev) => ({
                             ...prev,
@@ -446,12 +467,13 @@ const ClientInfo = () => {
                     setLoading(true);
                     const response = await PostApi(ClientInfo_API.AddUpdateBrand, {
                         brand: formData.brandName,
-                        Divisionid: formData.division
+                        Divisionid: formData.globalBUMapping //formData.division
                     });
                     if (isSuccess(response)) {
                         setBrandOpenFilter(false);
                         toast(Labels.status.success, response.data);
-                        ClientInfoMaster(formData.division);
+                        GlobalBuMappingMaster(formData.division);
+                        //ClientInfoMaster(formData.globalBUMapping);
                     } else {
                         setErrors((prev) => ({
                             ...prev,
@@ -615,6 +637,32 @@ const ClientInfo = () => {
 
                             {/* Row 3 */}
                             <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PDropdown
+                                        name={Labels.clientInfo.globalBUMapping}
+                                        label={`${getLabel("lbl91")} ${Labels.symbols.required}`}
+                                        value={formData.globalBUMapping}
+                                        onChange={handleChange}
+                                        options={formDataList.globalBUMapping}
+                                        width={100}
+                                        helperText={errors?.globalBUMapping}
+                                        flag={Labels.flag.auto}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PDropdown
+                                        name={Labels.clientInfo.aboveAtMarket}
+                                        label={`${getLabel("lbl92")} ${Labels.symbols.required}`}
+                                        value={formData.aboveAtMarket}
+                                        onChange={handleChange}
+                                        options={formDataList.aboveAtMarket}
+                                        width={100}
+                                        helperText={errors?.aboveAtMarket}
+                                        disabled={true}
+                                    />
+                                </PGrid>
+                            </PGrid >
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={6} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }} >
                                     <PDropdown
                                         name={Labels.clientInfo.brand}
@@ -689,32 +737,7 @@ const ClientInfo = () => {
                                     />
                                 </PGrid>
                             </PGrid >
-                            <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={6}>
-                                    <PDropdown
-                                        name={Labels.clientInfo.aboveAtMarket}
-                                        label={`${getLabel("lbl92")} ${Labels.symbols.required}`}
-                                        value={formData.aboveAtMarket}
-                                        onChange={handleChange}
-                                        options={formDataList.aboveAtMarket}
-                                        width={100}
-                                        helperText={errors?.aboveAtMarket}
-                                        disabled={true}
-                                    />
-                                </PGrid>
-                                <PGrid item xs={12} sm={6} md={6}>
-                                    <PDropdown
-                                        name={Labels.clientInfo.globalBUMapping}
-                                        label={`${getLabel("lbl91")} ${Labels.symbols.required}`}
-                                        value={formData.globalBUMapping}
-                                        onChange={handleChange}
-                                        options={formDataList.globalBUMapping}
-                                        width={100}
-                                        helperText={errors?.globalBUMapping}
-                                        flag={Labels.flag.auto}
-                                    />
-                                </PGrid>
-                            </PGrid >
+
                             <hr className="my-4" />
 
                             <PGrid container className="d-flex align-items-center justify-content-between">
