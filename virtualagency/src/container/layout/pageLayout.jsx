@@ -30,17 +30,17 @@ function PageLayout() {
   const menuItems = [
     {
       icon: <FaHome size={20} />,
-      name: "Dashboard",
+      name: getLabel("lbl149"),
       route: labelRoutes.dashboard,
     },
     {
       icon: <FaBuilding size={20} />,
-      name: "Enquiries",
+      name: getLabel("lbl11"),
       route: labelRoutes.eqDashboard,
     },
     {
       icon: <FaFileInvoice  size={20} />,
-      name: "Reports",
+      name: getLabel("lbl150"),
       route: labelRoutes.report,
     }
   ];

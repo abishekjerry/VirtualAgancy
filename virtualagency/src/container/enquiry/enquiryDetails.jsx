@@ -481,7 +481,7 @@ const EnquiryDetails = () => {
                             <PGrid container className="fw-semibold mb-4">
                                 <PGrid item md={2} >{getLabel("lbl50")}</PGrid>
                                 <PGrid item md={2}>{getLabel("lbl51")}</PGrid>
-                                <PGrid item md={2}>{"Modified Period (w/days)"}</PGrid>
+                                <PGrid item md={2}>{getLabel("lbl140")}</PGrid>
                                 <PGrid item md={3} >{getLabel("lbl52")}</PGrid>
                                 <PGrid item md={3} >{getLabel("lbl53")}</PGrid>
                             </PGrid>

@@ -41,20 +41,20 @@ const Report = () => {
     };
     return (
         <>
-            <PGrid container className="text-center">
+            {/* <PGrid container className="text-center">
                 <PTypography
                     labelText={"Report"}
                     flag={Labels.fontFlags.mainHeader}
                     color={CommonColors.grey.main}
                     weight={FontWeight.bold}
                 />
-            </PGrid>
-            <hr className="mt-3" />
+            </PGrid> 
+            <hr className="mt-3" />*/}
 
             <PGrid container className={Labels.margin.mb4} >
                 <PGrid item xs={12} sm={12} md={12} >
                     <PCard>
-                        <PGrid container className={Labels.margin.mb4} >
+                        <PGrid container className={Labels.margin.mt4}>
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
                                     name={"ClientName"}
@@ -81,7 +81,7 @@ const Report = () => {
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
                                     name={"country"}
-                                    label={`${"Country"} ${Labels.symbols.required}`}
+                                    label={`${getLabel("lbl09")} ${Labels.symbols.required}`}
                                     value={formData.country}
                                     onChange={handleChange}
                                     options={formDataList.country}
@@ -91,7 +91,7 @@ const Report = () => {
                                 />
                             </PGrid>
                         </PGrid>
-                        <PGrid container className={Labels.margin.mb4} >
+                        <PGrid container className={Labels.margin.mt4} >
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
                                     name={"jobstatus"}
@@ -152,7 +152,7 @@ const Report = () => {
                                     startIcon={<RestartAltIcon />}
                                 />
                                 <PButton
-                                    label={"Export"}
+                                    label={getLabel("lbl126")}
                                     variant="contained"
                                     color={CommonColors.green.main}
                                     onClick={(e) => handleSubmit(e, true)}

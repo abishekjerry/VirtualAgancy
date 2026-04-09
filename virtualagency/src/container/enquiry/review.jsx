@@ -359,7 +359,7 @@ const Review = () => {
                                 className="d-flex justify-content-end gap-2"
                             >
                                 <PButton
-                                    label={"Submit Enquiry"}
+                                    label={getLabel("lbl127")}
                                     variant="contained"
                                     color={CommonColors.green.main}
                                     onClick={(e) => handleSubmit(e, true)}

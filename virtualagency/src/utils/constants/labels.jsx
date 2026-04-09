@@ -69,6 +69,7 @@ export const Labels = {
 
     // Sustainability Information
     fscOrPefcMaterial: "fscOrPefcMaterial",
+    taxCertification:"taxCertification",
     recyclable: "recyclable",
     sustainabilityOption: "sustainabilityOption",
     recycledMaterial: "recycledMaterial",
@@ -107,6 +108,9 @@ export const Labels = {
     files : "files" 
   },
 
+  suppiers : {
+    required : "Please select at least one supplier to proceed."
+  },
 
   commonLabel: {
     dashboard: "Dashboard",

@@ -197,7 +197,7 @@ const Suppliers = () => {
                                     />
 
                                     <PTypography
-                                        labelText="Show selected suppliers only"
+                                        labelText= {getLabel("lbl148")}
                                         flag={Labels.fontFlags.smallText}
                                         color={CommonColors.grey.main}
                                         weight={FontWeight.bold}
@@ -214,7 +214,7 @@ const Suppliers = () => {
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12}>
                                         <PTypography
-                                            labelText={"Please select at least one supplier to proceed."}
+                                            labelText={Labels.suppiers.required}
                                             flag={Labels.fontFlags.smallText}
                                             color={CommonColors.red.main}
                                             weight={FontWeight.bold}

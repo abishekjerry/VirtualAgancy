@@ -398,7 +398,7 @@ const ClientInfo = () => {
     const handleCloseChoose = () => {
         setCcOpenFilter(false);
         setBrandOpenFilter(false);
-        setSaveDraft(false);
+        // setSaveDraft(false);
         setDeleteDraft(false);
         setFormData((prev) => ({
             ...prev,
@@ -810,14 +810,14 @@ const ClientInfo = () => {
             < PDialog
                 open={ccOpenFilter}
                 onClose={handleCloseChoose}
-                title={"Add New Contact"}
+                title={getLabel("lbl129")}
                 showCloseIcon={true}
                 maxWidth="md"
                 actions={
                     < PGrid className="d-flex align-items-center justify-content-end gap-2" >
                         <PButton
                             fullWidth
-                            label={"Cancel"}
+                            label={getLabel("lbl125")}
                             variant="outlined"
                             onClick={handleCloseChoose}
                             color={CommonColors.grey.main}
@@ -825,7 +825,7 @@ const ClientInfo = () => {
                         />
                         <PButton
                             fullWidth
-                            label={"Save"}
+                            label={getLabel("lbl124")}
                             variant={Labels.contained}
                             onClick={handleSendChoose}
                             color={CommonColors.green.main}
@@ -839,7 +839,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.firstName}
-                            label={`First Name ${Labels.symbols.required}`}
+                            label={`${getLabel("lbl130")} ${Labels.symbols.required}`}
                             value={formData.firstName}
                             onChange={handleChange}
                             helperText={errors?.firstName}
@@ -848,7 +848,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.lastName}
-                            label={`Last Name`}
+                            label={`${getLabel("lbl131")}`}
                             value={formData.lastName}
                             onChange={handleChange}
                         />
@@ -858,7 +858,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.logonID}
-                            label={`Logon ID ${Labels.symbols.required}`}
+                            label={`${getLabel("lbl132")} ${Labels.symbols.required}`}
                             value={formData.logonID}
                             onChange={handleChange}
                             helperText={errors?.logonID}
@@ -867,7 +867,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.email}
-                            label={`Email ${Labels.symbols.required}`}
+                            label={`${getLabel("lbl133")} ${Labels.symbols.required}`}
                             value={formData.email}
                             onChange={handleChange}
                             helperText={errors?.email}
@@ -879,7 +879,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.jobTitle}
-                            label={`Job Title`}
+                            label={`${getLabel("lbl134")}`}
                             value={formData.jobTitle}
                             onChange={handleChange}
                         />
@@ -887,7 +887,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PTextField
                             name={Labels.clientInfo.phone}
-                            label={`Phone`}
+                            label={`${getLabel("lbl135")}`}
                             value={allowOnlyNumbers(formData.phone)}
                             onChange={handleChange}
                         />
@@ -897,7 +897,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PDropdown
                             name={Labels.clientInfo.receiveNotification}
-                            label={`Receive Notification  ${Labels.symbols.required}`}
+                            label={`${getLabel("lbl136")}  ${Labels.symbols.required}`}
                             value={formData.receiveNotification}
                             onChange={handleChange}
                             options={formDataList.receiveNotification}
@@ -909,7 +909,7 @@ const ClientInfo = () => {
                     <PGrid item xs={12} sm={6} md={6}>
                         <PDropdown
                             name={Labels.clientInfo.jobRole}
-                            label={`Job Role ${Labels.symbols.required}`}
+                            label={`${getLabel("lbl137")} ${Labels.symbols.required}`}
                             value={formData.jobRole}
                             onChange={handleChange}
                             options={formDataList.jobRole}
@@ -924,13 +924,13 @@ const ClientInfo = () => {
             < PDialog
                 open={brandOpenFilter}
                 onClose={handleCloseChoose}
-                title={"Add New Brand"}
+                title= {getLabel("lbl138")}
                 showCloseIcon={true}
                 actions={
                     < PGrid className="d-flex align-items-center justify-content-end gap-2" >
                         <PButton
                             fullWidth
-                            label={"Cancel"}
+                            label={getLabel("lbl125")}
                             variant="outlined"
                             onClick={handleCloseChoose}
                             color={CommonColors.grey.main}
@@ -938,7 +938,7 @@ const ClientInfo = () => {
                         />
                         <PButton
                             fullWidth
-                            label={"Save"}
+                            label={getLabel("lbl124")}
                             variant={Labels.contained}
                             onClick={handleSendChoose}
                             color={CommonColors.green.main}
@@ -950,7 +950,7 @@ const ClientInfo = () => {
                 <PGrid>
                     <PTextField
                         name={Labels.clientInfo.brandName}
-                        label={`Brand Name ${Labels.symbols.required}`}
+                        label={`${getLabel("lbl139")} ${Labels.symbols.required}`}
                         value={formData.brandName}
                         onChange={handleChange}
                         helperText={errors?.brandName}
