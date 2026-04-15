@@ -38,8 +38,6 @@ const EnquiryDetails = () => {
         hybrid: 2,
         projectAttribute: "",
         slaTemplate: "",
-        // projectAttributeValue: "",
-        // yearValue: "",
     });
 
     // Single state for all errors
@@ -187,7 +185,7 @@ const EnquiryDetails = () => {
                         navigate(labelRoutes.lineItems, {
                             state: { id: response.data.enqId }
                         });
-                    })
+                    }, 500);
                 } else {
                     setErrors((prev) => ({
                         ...prev,

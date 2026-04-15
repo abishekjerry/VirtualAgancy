@@ -451,7 +451,7 @@ const LineItems = () => {
                         navigate(labelRoutes.suppliers, {
                             state: { id: response.data.enqId }
                         });
-                    }, 1500);
+                    }, 500);
                 } else {
                     setErrors((prev) => ({
                         ...prev,

@@ -39,10 +39,6 @@ const ClientInfo = () => {
         pmgEntity: "",
         aboveAtMarket: "",
         globalBUMapping: "",
-        // brandValue: "",
-        // aboveAtMarketValue: "",
-        // jobPosition: "",
-
 
         firstName: "",
         lastName: "",
@@ -307,7 +303,7 @@ const ClientInfo = () => {
                         navigate(labelRoutes.enquiryDetails, {
                             state: { id: response.data.enqId }
                         });
-                    });
+                    }, 500);
                 } else {
                     setErrors((prev) => ({
                         ...prev,

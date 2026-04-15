@@ -35,7 +35,7 @@ const Review = () => {
     const [loading, setLoading] = useState(true);
     const [formDataList, setFormDataList] = useState({
         suppliers: [],
-        lineItems :[],
+        lineItems: [],
     });
 
     useEffect(() => {
@@ -55,7 +55,7 @@ const Review = () => {
                 setFormDataList(prev => ({
                     ...prev,
                     suppliers: suppliers,
-                    lineItems : response.enqlineItems,
+                    lineItems: response.enqlineItems,
                 }));
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -67,36 +67,40 @@ const Review = () => {
         fetchData();
     }, []);
     const data = [
-        { label: "Division", value: "UAT SG Customer 1 > Singapore", color: "primary" },
-        { label: "Client Name", value: "UAT SG Customer 1", color: "success" },
-        { label: "Country", value: "Singapore", color: "info" },
-        { label: "Client Contact", value: "test(uatsgclient)", color: "warning" },
+        { label: getLabel("lbl27"), value: "UAT SG Customer 1 > Singapore", color: "primary" },
+        { label: getLabel("lbl28"), value: "UAT SG Customer 1", color: "success" },
+        { label: getLabel("lbl09"), value: "Singapore", color: "info" },
+        { label: getLabel("lbl29"), value: "test(uatsgclient)", color: "warning" },
 
-        { label: "Source", value: "UAT SG Customer 1", color: "danger" },
-        { label: "Client Name", value: "Singapore", color: "secondary" },
-        { label: "Business Div", value: "Cross Media Singapore Business Div Ltd", color: "dark" },
-        { label: "Sales Entity", value: "Cross Media Singapore Business Div Ltd", color: "primary" },
+        { label: getLabel("lbl30"), value: "UAT SG Customer 1", color: "danger" },
+        { label: getLabel("lbl91"), value: "Singapore", color: "secondary" },
+        { label: getLabel("lbl92"), value: "Cross Media Singapore Business Div Ltd", color: "dark" },
+        { label: getLabel("lbl33"), value: "Cross Media Singapore Business Div Ltd", color: "primary" },
 
-        { label: "Business Unit", value: "Data Marketing", color: "success" },
-        { label: "Brand", value: "N/A", color: "info" },
-        { label: "Contact Primary", value: "testmanjeet91", color: "warning" },
-        { label: "Contact Secondary", value: "Singapore", color: "danger" }
+        { label: getLabel("lbl34"), value: "Data Marketing", color: "success" },
+        { label: getLabel("lbl35"), value: "N/A", color: "info" },
+        { label: getLabel("lbl36"), value: "testmanjeet91", color: "warning" },
+
     ];
 
     const enquiryDetails = [
-        { label: "Project No", value: "Test", color: "primary" },
-        { label: "Project Name", value: "TestProject", color: "success" },
-        { label: "Est. Delivery", value: "18/02/2026", color: "warning" },
-        { label: "Date of Brief Received", value: "18/02/2026", color: "danger" },
-        { label: "Year", value: "Y2", color: "info" },
-        { label: "Project Quote Type", value: "Quote By Total Price", color: "secondary" },
-        { label: "SLA Template", value: "PRINT Complex - SG", color: "dark" },
+        { label: getLabel("lbl42"), value: "Test", color: "primary" },
+        { label: getLabel("lbl43"), value: "18/02/2026", color: "warning" },
+        { label: getLabel("lbl44"), value: "18/02/2026", color: "danger" },
+        { label: getLabel("lbl45"), value: "TestProject", color: "success" },
+        { label: getLabel("lbl46"), value: "Y2", color: "info" },
+        { label: getLabel("lbl47"), value: "Quote By Total Price", color: "secondary" },
+        { label: getLabel("lbl93"), value: "Cost Reduction V1", color: "warning" },
+        { label: getLabel("lbl94"), value: "No", color: "danger" },
+        { label: getLabel("lbl95"), value: "Regular Job", color: "info" },
+        { label: getLabel("lbl49"), value: "PRINT Complex - SG", color: "dark" },
 
-        { label: "Quote", value: "18/02/2026 - 23/02/2026", color: "primary" },
-        { label: "Proof", value: "23/02/2026 - 25/02/2026", color: "success" },
-        { label: "Production", value: "25/02/2026 - 04/03/2026", color: "warning" },
-        { label: "File Copies", value: "04/03/2026 - 11/03/2026", color: "danger" },
-        { label: "Invoicing", value: "11/03/2026 - 25/03/2026", color: "info" }
+
+        { label: getLabel("lbl54"), value: "18/02/2026 - 23/02/2026", color: "primary" },
+        { label: getLabel("lbl55"), value: "23/02/2026 - 25/02/2026", color: "success" },
+        { label: getLabel("lbl56"), value: "25/02/2026 - 04/03/2026", color: "warning" },
+        { label: getLabel("lbl57"), value: "04/03/2026 - 11/03/2026", color: "danger" },
+        { label: getLabel("lbl58"), value: "11/03/2026 - 25/03/2026", color: "info" }
     ];
 
     const lineItems = [
@@ -104,15 +108,24 @@ const Review = () => {
             itemTitle: "Item 1",
             itemColor: "warning", // header color
             data: [
-                { label: "Type of Job", value: "Print" },
-                { label: "Item Category", value: "Brochures/Manuals" },
-                { label: "Urgent/Non-Urgent Job", value: "Urgent" },
-                { label: "Dictated Job", value: "Yes" },
-                { label: "Item Type", value: "New Item" },
-                { label: "Rate Card", value: formDataList.lineItems.rateCard },
-                { label: "Item Name", value: "Testing" },
+                { label: getLabel("lbl62"), value: "Print" },
+                { label: getLabel("lbl60"), value: "Brochures/Manuals" },
+                { label: getLabel("lbl65"), value: "Urgent" },
+                { label: getLabel("lbl96"), value: "Yes" },
+                { label: getLabel("lbl97"), value: "Yes" },
+                { label: getLabel("lbl98"), value: "Yes" },
+                { label: getLabel("lbl99"), value: "Testing" },
+                { label: getLabel("lbl61"), value: "Yes" },
+                { label: getLabel("lbl100"), value: "Yes" },
+                { label: getLabel("lbl101"), value: "Yes" },
+                { label: getLabel("lbl102"), value: "Yes" },
+                { label: getLabel("lbl103"), value: "Yes" },
+                { label: getLabel("lbl63"), value: "New Item" },
+                { label: getLabel("lbl64"), value: "New Item Values" },
+                { label: getLabel("lbl152"), value: "Others" },
+                { label: getLabel("lbl66"), value: "Testing" },
+                { label: getLabel("lbl67"), value: "Testing" },
 
-                { label: "Item Description", value: "Testing" },
                 { label: "Is the item produced on FSC or PEFC material?", value: "N/A" },
                 { label: "Is the item recyclable?", value: "N/A" },
                 { label: "Is this job proposed with sustainability options?", value: "N/A" },
@@ -127,7 +140,7 @@ const Review = () => {
                 { label: "Material Used", value: "-" },
                 { label: "Catalogue Usage", value: "N/A" },
                 { label: "Is this an Innovative Solution?", value: "No" },
-                { label: "Quote Type", value: formDataList.lineItems.quoteType},
+                { label: "Quote Type", value: formDataList.lineItems.quoteType },
                 { label: "Quantity", value: "100" },
                 { label: "Attachment", value: "No Files" },
                 { label: "No of version", value: "1" },
@@ -147,26 +160,14 @@ const Review = () => {
                         {/*Client Info*/}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
-                                title="Step 1: Client Information"
+                                title={`Step 1: ${getLabel("lbl25")}`}
                                 icon={<PersonIcon />}
                                 color={CommonColors.blue.dark}
-                                rightAction={<PButton
-                                    label="Edit"
-                                    variant="outlined"
-                                    size="small"              // 👈 like btn-sm
-                                    startIcon={<EditIcon />}  // 👈 icon instead of <i class="fas fa-edit">
+                                rightAction={<PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
                                     //onClick={(e) => handleExitDraft(e)}
-                                    sx={{
-                                        color: "#fff",
-                                        borderColor: "#fff",
-                                        "&:hover": {
-                                            borderColor: "#fff",
-                                            backgroundColor: "rgba(255,255,255,0.1)"
-                                        }
-                                    }}
+                                    sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
-                                }
-                            >
+                                }>
                                 <PGrid container className="g-4">
 
                                     {data.map((item, i) => (
@@ -193,28 +194,15 @@ const Review = () => {
 
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
-                                title="Step 2: Enquiry Details"
+                                title={`Step 2: ${getLabel("lbl21")}`}
                                 icon={<AssignmentIcon />}
                                 color={CommonColors.blue.main}
-                                rightAction={<PButton
-                                    label="Edit"
-                                    variant="outlined"
-                                    size="small"              // 👈 like btn-sm
-                                    startIcon={<EditIcon />}  // 👈 icon instead of <i class="fas fa-edit">
+                                rightAction={<PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
                                     //onClick={(e) => handleExitDraft(e)}
-                                    sx={{
-                                        color: "#fff",
-                                        borderColor: "#fff",
-                                        "&:hover": {
-                                            borderColor: "#fff",
-                                            backgroundColor: "rgba(255,255,255,0.1)"
-                                        }
-                                    }}
+                                    sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
-                                }
-                            >
+                                }>
                                 <PGrid container className="g-4">
-
                                     {enquiryDetails.map((item, i) => (
                                         <PGrid item xs={12} md={6} xl={3} key={i}>
                                             <PGrid className={`bg-light p-3 rounded border-start border-${item.color}`} style={{ borderLeftWidth: "6px" }}>
@@ -230,35 +218,21 @@ const Review = () => {
                                             </PGrid>
                                         </PGrid>
                                     ))}
-
                                 </PGrid>
                             </PCard>
-
                         </PGrid>
 
                         {/*Line items*/}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
-                                title="Step 3: Line Items"
+                                title={`Step 3: ${getLabel("lbl22")}`}
                                 icon={< ListAltIcon />}
                                 color={CommonColors.green.main}
-                                rightAction={<PButton
-                                    label="Add"
-                                    variant="outlined"
-                                    size="small"              // 👈 like btn-sm
-                                    startIcon={<AddIcon />}  // 👈 icon instead of <i class="fas fa-edit">
+                                rightAction={<PButton label="Add" variant="outlined" size="small" startIcon={<AddIcon />}
                                     //onClick={(e) => handleExitDraft(e)}
-                                    sx={{
-                                        color: "#fff",
-                                        borderColor: "#fff",
-                                        "&:hover": {
-                                            borderColor: "#fff",
-                                            backgroundColor: "rgba(255,255,255,0.1)"
-                                        }
-                                    }}
+                                    sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
-                                }
-                            >
+                                }>
                                 {lineItems.map((item, index) => (
                                     <PCard
                                         className="bg-light mt-3"
@@ -267,30 +241,16 @@ const Review = () => {
                                         icon={<Inventory2Icon />}
                                         color={CommonColors.yellow.main}
                                         rightAction={
-                                            <PButton
-                                                label="Edit"
-                                                variant="outlined"
-                                                size="small"
-                                                startIcon={<EditIcon />}
-                                                sx={{
-                                                    color: "#fff",
-                                                    borderColor: "#fff",
-                                                    "&:hover": {
-                                                        borderColor: "#fff",
-                                                        backgroundColor: "rgba(255,255,255,0.1)"
-                                                    }
-                                                }}
+                                            <PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
+                                                //onClick={(e) => handleExitDraft(e)}
+                                                sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                             />
-                                        }
-                                    >
+                                        }>
                                         <PGrid container className="g-4">
 
                                             {item.data.map((field, i) => (
                                                 <PGrid item xs={12} md={6} xl={3} key={i}>
-                                                    <PGrid
-                                                        className="p-2 border rounded"
-                                                    //style={{ borderLeft: "6px solid #ccc" }} // 👈 you can make dynamic later
-                                                    >
+                                                    <PGrid className="p-2 border rounded">
                                                         <PTypography
                                                             labelText={field.label}
                                                             weight={FontWeight.bold}
@@ -310,35 +270,23 @@ const Review = () => {
                             </PCard>
 
                         </PGrid>
+
+                        {/* Suppliers */}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
-                                title="Step 4: Suppliers"
+                                title={`Step 4: ${getLabel("lbl23")}`}
                                 icon={<LocalShippingIcon />}
                                 color={CommonColors.yellow.main}
-                                rightAction={<PButton
-                                    label="Edit"
-                                    variant="outlined"
-                                    size="small"
-                                    startIcon={<EditIcon />}
+                                rightAction={<PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
                                     //onClick={(e) => handleExitDraft(e)}
-                                    sx={{
-                                        color: "#fff",
-                                        borderColor: "#fff",
-                                        "&:hover": {
-                                            borderColor: "#fff",
-                                            backgroundColor: "rgba(255,255,255,0.1)"
-                                        }
-                                    }}
+                                    sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
-                                }
-                            >
+                                }>
                                 <PGrid container className="g-3">
                                     {formDataList.suppliers.map((item, index) => (
                                         <PGrid item xs={6} md={3} key={index}>
                                             <PGrid className={`border border-${item.color} shadow-sm text-center p-3 rounded`}>
-                                                <BusinessIcon
-                                                    className={`text-${item.color} mb-2`}
-                                                />
+                                                <BusinessIcon className={`text-${item.color} mb-2`} />
                                                 <PTypography
                                                     labelText={item.name}
                                                     color={CommonColors.grey.main}
@@ -349,10 +297,7 @@ const Review = () => {
                                     ))}
                                 </PGrid>
                             </PCard>
-
                         </PGrid>
-
-
 
                         <PGrid container className="d-flex align-items-center justify-content-between">
                             <PGrid item xs={12} sm={6} md={6}>

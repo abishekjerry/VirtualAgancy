@@ -128,7 +128,7 @@ const Suppliers = () => {
                     navigate(labelRoutes.review, {
                         state: { id: response.data.enqId }
                     });
-                })
+                }, 500);
             } else {
                 toast(Labels.status.failure, response.data.message);
             }
