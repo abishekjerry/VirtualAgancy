@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -14,29 +14,24 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false , onValidationChange}) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange }) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRows, setSelectedRows] = useState([]);
-  const isPageLoad = useRef(false); // track first interaction
-  
-  useEffect(() => {
-    if (isPageLoad.current && onValidationChange) {
-      onValidationChange(selectedRows);
-    }
-  }, [selectedRows, onValidationChange]);
-  
-  // Parent Select All
-  const handleRowSelect = (index) => {
-    isPageLoad.current = true
-    setSelectedRows((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
-    );
-  };
+  const isPageLoad = useRef(false);
 
+  // Parent Select All
+  const handleRowSelect = (row, index) => {
+    const supplierId = row.supplierId;
+    setSelectedRows((prev) => {
+      const exists = prev.some(item => item.index === index);
+      const update = exists ? prev.filter(item => item.index !== index) : [...prev, { index, supplierId }];
+      onValidationChange?.(update);
+      return update;
+    });
+  };
+  
   // Pagination
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -48,9 +43,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   };
 
   // Show only selected rows when global checkbox checked
-  const filteredRows = isChecked
-    ? rows.filter((_, index) => selectedRows.includes(index))
-    : rows;
+  const filteredRows = isChecked ? rows.filter((_, index) => selectedRows.some(item => item.index === index)) : rows;
 
   return (
     <Paper
@@ -137,8 +130,8 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                             >
                               <Checkbox
                                 size="small"
-                                checked={selectedRows.includes(originalIndex)}
-                                onChange={() => handleRowSelect(originalIndex)}
+                                checked={selectedRows.some(item => item.index === originalIndex)}
+                                onChange={() => handleRowSelect(row, originalIndex)}
                                 sx={{ p: 0.5 }}
                               />
 

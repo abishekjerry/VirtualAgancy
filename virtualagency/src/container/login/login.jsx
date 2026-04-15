@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PTypography from "../../component/PTypography/PTypography";
 import PTextField from "../../component/PTextField/PTextField";
 import PersonIcon from "@mui/icons-material/Person";
@@ -22,20 +22,35 @@ import { labelRoutes } from "../../navigations/labelRoutes";
 import Logo from "../../utils/assets/Navbar/Logo.svg";
 import { PostApi } from "../../utils/api/networking";
 import { Account_API, Dashboard_API } from "../../utils/api/apiUrl";
+import PGrid from "../../component/PGrid/PGrid";
 
 function Login(props) {
   const { navigate } = props;
   const [isLogin, setIsLogin] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
   const [openRecover, setOpenRecover] = useState(false);
-  const [resetUsername, setResetUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [isForgetPassword, setIsForgetPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+  // ✅ Refs for focus
+  const userNameRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const [formData, setFormData] = useState({
+    userName: "",
+    password: "",
+    resetUsername: "",
+    newPassword: "",
+    confirmPassword: ""
+  })
+
+  const [errors, setErrors] = useState({
+    userName: "",
+    password: "",
+    resetUsername: "",
+    newPassword: "",
+    confirmPassword: ""
+  })
 
   useEffect(() => {
+    userNameRef.current?.focus();
     navigate(labelRoutes.home);
   }, []);
 
@@ -54,208 +69,226 @@ function Login(props) {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    switch (name) {
-      case Labels.loginPage.userName:
-        const nameValue = value;
-        setUserName(nameValue);
-        setErrors((prev) => ({
-          ...prev,
-          userName: nameValue ? validateName(nameValue) : "",
-        }));
-        break;
+    // Update form data
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
-      case Labels.loginPage.password:
-        setPassword(value);
-        setErrors((prev) => ({
-          ...prev,
-          password: "",
-        }));
-        break;
+    // Validation
+    setErrors((prev) => {
+      let errorMsg = "";
 
-      case Labels.loginPage.newPassword:
-        setNewPassword(value);
-        setErrors((prev) => ({
-          ...prev,
-          newPassword: value ? validatePassword(value) : "",
-          confirmPassword:
-            confirmPassword && value !== confirmPassword
-              ? Labels.loginPage.passwordDoNotMatch
-              : "",
-        }));
-        break;
+      if (name === Labels.login.userName) {
+        errorMsg = value ? validateName(value) : "";
+      }
 
-      case Labels.loginPage.confirmPassword:
-        setConfirmPassword(value);
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword:
-            value !== newPassword ? Labels.loginPage.passwordDoNotMatch : "",
-        }));
-        break;
+      if (name === Labels.login.newPassword) {
+        errorMsg = value ? validatePassword(value) : "";
 
-      default:
-        break;
-    }
+        // also validate confirm password
+        if (formData.confirmPassword && value !== formData.confirmPassword) {
+          return {
+            ...prev,
+            newPassword: errorMsg,
+            confirmPassword: Labels.loginPage.passwordDoNotMatch,
+          };
+        }
+      }
+
+      if (name === Labels.login.confirmPassword) {
+        errorMsg =
+          value !== formData.newPassword
+            ? Labels.loginPage.passwordDoNotMatch
+            : "";
+      }
+
+      return {
+        ...prev,
+        [name]: errorMsg,
+      };
+    });
   };
 
   const handleLogin = async (e, isLogin) => {
     e.preventDefault();
-    if (!loginValidation()) return;
-    const res = await PostApi(Account_API.Login, {
-      userName: userName,
-      password: password,
-    });
-    if (isLogin) {
-      if (isSuccess(res)) {
-        localStorage.setItem("user", res?.data?.username);
-        localStorage.setItem("email", res?.data?.email);
-        localStorage.setItem("agancyUserID", res?.data?.fkID);
-        localStorage.setItem("userID", res?.data?.userID);
-        localStorage.setItem("countryID", res?.data?.countryId);
-        localStorage.setItem("role", res?.data?.role);
-        navigate(labelRoutes.dashboard);
+    const isValid = loginValidation();
+    if (isValid) {
+      const res = await PostApi(Account_API.Login, {
+        userName: formData.userName,
+        password: formData.password,
+      });
+      if (isLogin) {
+        if (isSuccess(res)) {
+          localStorage.setItem("user", res?.data?.username);
+          localStorage.setItem("email", res?.data?.email);
+          localStorage.setItem("agancyUserID", res?.data?.fkID);
+          localStorage.setItem("userID", res?.data?.userID);
+          localStorage.setItem("countryID", res?.data?.countryId);
+          localStorage.setItem("role", res?.data?.role);
+          localStorage.setItem("currency", res?.data?.currency);
+          localStorage.setItem("country", res?.data?.country);
+          navigate(labelRoutes.dashboard);
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            password: res?.data || "Login failed",
+          }));
+        }
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          password: res?.data || "Login failed",
-        }));
-      }
-    } else {
-      if (isSuccess(res)) {
-        setIsLogin(true);
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          password: res?.data || "Login failed",
-        }));
+        if (isSuccess(res)) {
+          setIsLogin(true);
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            password: res?.data || "Login failed",
+          }));
+        }
       }
     }
   };
 
   const loginValidation = () => {
-    let errors = {};
-    if (!userName) errors.userName = Labels.commonLabel.required;
-    if (!password) errors.password = Labels.commonLabel.required;
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
+    const requiredFields = [
+      Labels.login.userName,
+      Labels.login.password
+    ];
+
+    let newErrors = {};
+
+    requiredFields.forEach((field) => {
+      const value = formData[field];
+      if (!value || value.trim() === "") {
+        newErrors[field] = Labels.commonLabel.required;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   return (
     <>
-      <div className="login-container">
-        <div className="login-right">
-          <img src={LoginImg} alt="Login" className="login-image" />
-        </div>
-
-        {isForgetPassword ? (
-          <div className="login-left">
-            <div className="login-box">
-              <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
-
-              <PTextField
-                name={Labels.loginPage.newPassword}
-                label={Labels.loginPage.newPassword}
-                value={newPassword}
-                helperText={errors?.newPassword}
-                startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                flag={Labels.flag.password}
-                onChange={handleChange}
-              />
-
-              <PTextField
-                name={Labels.loginPage.confirmPassword}
-                label={Labels.loginPage.confirmPassword}
-                value={confirmPassword}
-                helperText={errors?.confirmPassword}
-                startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                flag={Labels.flag.password}
-                onChange={handleChange}
-              />
-
-              <PButton
-                type="submit"
-                label={Labels.buttonLabel.changePassword}
-                fullWidth
-                onClick={(e) => handleLogin(e, true)}
-              />
-            </div>
+      <form onSubmit={(e) => handleLogin(e, true)} noValidate>
+        <div className="login-container">
+          <div className="login-right">
+            <img src={LoginImg} alt="Login" className="login-image" />
           </div>
-        ) : (
 
-          <div className="login-left">
-            <div className="login-box">
-              <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
+          {isForgetPassword ? (
+            <div className="login-left">
+              <div className="login-box">
+                <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
 
-              <PTextField
-                name={Labels.loginPage.userName}
-                label={Labels.loginPage.userName}
-                value={userName}
-                helperText={errors?.userName}
-                startIcon={<PersonIcon sx={{ color: "#9CA3AF" }} />}
-                onChange={handleChange}
-              />
+                <PTextField
+                  name={Labels.login.newPassword}
+                  label={Labels.loginPage.newPassword}
+                  value={formData.newPassword}
+                  helperText={errors?.newPassword}
+                  startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
+                  flag={Labels.flag.password}
+                  onChange={handleChange}
+                />
 
-              <PTextField
-                name={Labels.loginPage.password}
-                label={Labels.loginPage.password}
-                value={password}
-                helperText={errors?.password}
-                startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
-                flag={Labels.flag.password}
-                onChange={handleChange}
-              />
+                <PTextField
+                  name={Labels.login.confirmPassword}
+                  label={Labels.loginPage.confirmPassword}
+                  value={formData.confirmPassword}
+                  helperText={errors?.confirmPassword}
+                  startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
+                  flag={Labels.flag.password}
+                  onChange={handleChange}
+                />
 
-              <div className="forgot-password">
-                <PTypography
-                  labelText={Labels.loginPage.forgotPassword}
-                  color={CommonColors.primary}
-                  flag={Labels.xs}
-                  onClick={handleOpenRecover}
+                <PButton
+                  type="submit"
+                  label={Labels.buttonLabel.changePassword}
+                  fullWidth
+                //onClick={(e) => handleLogin(e, true)}
                 />
               </div>
-
-              <PButton
-                type="submit"
-                label={Labels.buttonLabel.login}
-                fullWidth
-                onClick={(e) => handleLogin(e, true)}
-              />
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
 
-      <PDialog
+            <div className="login-left">
+              <div className="login-box">
+                <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
+
+                <PTextField
+                  name={Labels.login.userName}
+                  label={Labels.loginPage.userName}
+                  value={formData.userName}
+                  helperText={errors?.userName}
+                  startIcon={<PersonIcon sx={{ color: "#9CA3AF" }} />}
+                  onChange={handleChange}
+                  inputRef={userNameRef}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault(); // stop form submit
+                      passwordRef.current?.focus();
+                    }
+                  }}
+                />
+
+                <PTextField
+                  name={Labels.login.password}
+                  label={Labels.loginPage.password}
+                  value={formData.password}
+                  helperText={errors?.password}
+                  startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
+                  flag={Labels.flag.password}
+                  onChange={handleChange}
+                  inputRef={passwordRef}
+                />
+
+                <div className="forgot-password">
+                  <PTypography
+                    labelText={Labels.loginPage.forgotPassword}
+                    color={CommonColors.primary}
+                    flag={Labels.xs}
+                    onClick={handleOpenRecover}
+                  />
+                </div>
+
+                <PButton
+                  type="submit"
+                  label={Labels.buttonLabel.login}
+                  fullWidth
+                // onClick={(e) => handleLogin(e, true)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </form>
+
+      < PDialog
         open={openRecover}
         onClose={handleCloseRecover}
         title={Labels.recoverPassword}
+        showCloseIcon={true}
         actions={
-          <>
+          < PGrid className="d-flex align-items-center justify-content-end gap-2" >
             <PButton
               fullWidth
               label={Labels.buttonLabel.backToLogin}
-              variant="text"
+              variant="outlined"
               onClick={handleCloseRecover}
+              color={CommonColors.grey.main}
+              width={120}
             />
-
             <PButton
               fullWidth
               label={Labels.buttonLabel.submit}
               variant={Labels.contained}
-              onClick={handleSendRecover}
+              onClick={handleOpenRecover}
+              color={CommonColors.green.main}
+              width={120}
             />
-          </>
+          </PGrid >
         }
       >
-        <PContainer>
-          <PTextField
-            name={Labels.loginPage.userName}
-            label={Labels.loginPage.userName}
-            value={resetUsername}
-            onChange={(e) => setResetUsername(e.target.value)}
-          />
-        </PContainer>
-      </PDialog>
+      </PDialog >
     </>
   );
 }

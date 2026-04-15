@@ -25,7 +25,6 @@ const PPieChart = ({ data = [], onSliceClick }) => {
 
   const handleSliceClick = (data) => {
     if (!data || !data.payload) return;
-    console.log("Slice clicked:", data.payload);
     if (onSliceClick) {
       onSliceClick({ ...data.payload }); // send new object reference
     }

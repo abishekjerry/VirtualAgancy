@@ -11,7 +11,7 @@ import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
-import { formatDate, getEnquirySteps, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
+import { formatDate, getEnquirySteps, getOptionLabel, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -38,8 +38,8 @@ const EnquiryDetails = () => {
         hybrid: 2,
         projectAttribute: "",
         slaTemplate: "",
-        projectAttributeValue: "",
-        yearValue: "",
+        // projectAttributeValue: "",
+        // yearValue: "",
     });
 
     // Single state for all errors
@@ -144,22 +144,11 @@ const EnquiryDetails = () => {
     }, [slaTemplateData]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        const label = e.target.label || "";
-        setFormData((prev) => {
-            const data = {
-                ...prev,
-                [name]: value
-            };
-            // Extra mappings
-            if (name === Labels.enquiryDetails.projectAttribute) {
-                data.projectAttributeValue = label;
-            }
-            if (name === Labels.enquiryDetails.year) {
-                data.yearValue = label;
-            }
-            return data;
-        });
+        const { name, value, label } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
         setErrors((prev) => ({
             ...prev,
             [name]: ""   // clear only that field error
@@ -187,14 +176,18 @@ const EnquiryDetails = () => {
                     slaId: formData.slaTemplate,
                     managementfeetypeId: formData.managementFeeType,
                     hybridModel: formData.hybrid == 1 ? "Yes" : "No",
-                    attribute: formData.projectAttributeValue,
-                    year: formData.yearValue,
+                    attribute: getOptionLabel(formDataList.projectAttribute, formData.projectAttribute),
+                    year: getOptionLabel(formDataList.year, formData.year),
                     ...dynamicData
                 });
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
-                    navigate(labelRoutes.lineItems);
+                    setTimeout(() => {
+                        navigate(labelRoutes.lineItems, {
+                            state: { id: response.data.enqId }
+                        });
+                    })
                 } else {
                     setErrors((prev) => ({
                         ...prev,
@@ -204,7 +197,6 @@ const EnquiryDetails = () => {
                 }
 
             } catch (error) {
-                console.log(error);
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
                 setLoading(false);
@@ -247,7 +239,7 @@ const EnquiryDetails = () => {
             navigate(labelRoutes.home); // fallback route
         }
     };
-    
+
     const handleExitDraft = () => {
         setOpen(true);
     };

@@ -3,129 +3,140 @@ import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { getEnquirySteps } from "../../utils/commonFunction/common";
+import { getEnquirySteps, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import PSearch from "../../component/PSearch/PSearch";
 import PTable from "../../component/PTable/PTable";
 import { labelRoutes } from "../../navigations/labelRoutes";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
+import { PostApi } from "../../utils/api/networking";
+import { Dashboard_API, Suppliers_API } from "../../utils/api/apiUrl";
 const Suppliers = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
     const navigate = useNavigate();
+    const { state } = useLocation();
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [showSelected, setShowSelected] = useState(false);
-    const [isValidation, setIsValidation] = useState(false);
+    const [isValidation, setIsValidation] = useState(true);
     const [country, setCountry] = useState("");
     const [print, setPrint] = useState("");
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
-    const printList = [
-        { value: 0, label: "All" },
-        { value: 1, label: "Print" },
-        { value: 2, label: "POSM" },
-        { value: 3, label: "Promo" },
-        { value: 4, label: "Print and POSM" },
-        { value: 5, label: "Print and Premium" },
-        { value: 6, label: "POSM and Premium" }
-    ];
-    const counties = [
-        { value: 1, label: "Singapore" },
-        { value: 2, label: "Janpen" },
-        { value: 3, label: "China" }
-    ]
-    const tableData = [
-        {
-            supplierName: "A & D Printhub Pte Ltd",
-            country: "Singapore",
-            supplierCode: "",
-            countryID: 1,
-            capabilityID: 1,
-        },
-        {
-            supplierName: "Advance Printing",
-            country: "Singapore",
-            supplierCode: "",
-            countryID: 1,
-            capabilityID: 1,
-        },
-        {
-            supplierName: "ARC Glassware (China) Co., Ltd.",
-            country: "China",
-            supplierCode: "",
-            countryID: 3,
-            capabilityID: 1,
-        },
-        {
-            supplierName: "Beijing Xinrui Yucheng Technology and Culture Co.,Ltd",
-            country: "China",
-            supplierCode: "",
-            countryID: 3,
-            capabilityID: 1,
-        },
-        {
-            supplierName: "BusAds Pte Ltd",
-            country: "Singapore",
-            supplierCode: "",
-            countryID: 1,
-            capabilityID: 1,
-        },
-        {
-            supplierName: "Chin Long Printing",
-            country: "Singapore",
-            supplierCode: "1002297",
-            countryID: 1,
-            capabilityID: 2,
-        }
-    ]
+    const [loading, setLoading] = useState(true);
+
+    const currency = localStorage.getItem("currency");
+    const countryName = localStorage.getItem("country");
+    const [formDataList, setFormDataList] = useState({
+        country: [],
+        print: [],
+        suppiers: [],
+        selectedRows: []
+    });
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const response = await PostApi(Dashboard_API.Master, {});
+                const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
+                    currency: currency,
+                    Country: countryName
+                });
+                setFormDataList(prev => ({
+                    ...prev,
+                    country: response.country,
+                    print: response.printcapabilities,
+                    suppiers: supplierResponse,
+                }));
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
     const tableHeader = [
-        { field: "supplierName", header: "Supplier's Name" },
+        { field: "suppliername", header: "Supplier's Name" },
         { field: "country", header: "Country" },
-        { field: "supplierCode", header: "Supplier Code" },
+        { field: "suppliercode", header: "Supplier Code" },
     ];
 
-    let filteredData = tableData;
+    let filteredData = formDataList.suppiers;
 
     // Country filter
     if (country) {
         filteredData = filteredData.filter(
-            (item) => item.countryID === country
+            (item) => item.countryId === country
         );
     }
 
     // Print Capability filter
     if (print) {
         filteredData = filteredData.filter(
-            (item) => item.capabilityID === print
+            (item) => item.printCapability === print
         );
     }
     // Search filter
     if (search.trim() !== "") {
         filteredData = filteredData.filter((item) =>
-            item.supplierName.toLowerCase().includes(search.toLowerCase())
+            item.suppliername.toLowerCase().includes(search.toLowerCase())
         );
     }
     const data = filteredData;
 
     const handleValidationChange = (rows) => {
-        setIsValidation(rows.length === 0);
+        const isValid = rows.length > 0;
+        setFormDataList(prev => ({
+            ...prev,
+            selectedRows: rows,
+        }));
+        setIsValidation(isValid);
     };
-    const handleSubmit = () => {
-        if (!isValidation) {
-            setAllowRedirect(true);
-            setIsValidation(isValidation);
-            navigate(labelRoutes.review); //review`
-        }
-        else {
+    const handleSubmit = async () => {
+        const rows = formDataList.selectedRows || [];
+        const isValid = rows.length > 0;
+        setIsValidation(isValid);
+        if (!isValid) {
             setAllowRedirect(false);
-            setIsValidation(isValidation);
+            return;
+        }
+        const supplierIds = rows.map(r => r.supplierId).join(",");
+        const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+        const id = state?.id > 0 ? state.id : 0;
+        try {
+            setLoading(true);
+            const payload = {
+                EnqId: id,
+                SelectedSuppliers: supplierIds,
+                ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+            };
+            console.log(payload, rows);
+            const response = await PostApi(Suppliers_API.AddUpdateSuppliers, payload);
+            if (isSuccess(response)) {
+                setAllowRedirect(true);
+                toast(Labels.status.success, response.data.message);
+                setTimeout(() => {
+                    navigate(labelRoutes.review, {
+                        state: { id: response.data.enqId }
+                    });
+                })
+            } else {
+                toast(Labels.status.failure, response.data.message);
+            }
+
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
         }
     };
     const handleBack = () => {
@@ -171,7 +182,7 @@ const Suppliers = () => {
                                         label={getLabel("lbl09")}
                                         value={country}
                                         onChange={(e) => setCountry(e.target.value)}
-                                        options={counties}
+                                        options={formDataList.country}
                                         width={Labels.fontSize.xxxxl}
                                         flag={Labels.flag.auto}
                                     />
@@ -181,7 +192,7 @@ const Suppliers = () => {
                                         label={getLabel("lbl122")}
                                         value={print}
                                         onChange={(e) => setPrint(e.target.value)}
-                                        options={printList}
+                                        options={formDataList.print}
                                         width={Labels.fontSize.xxxxl}
                                         flag={Labels.flag.auto}
                                     />
@@ -197,7 +208,7 @@ const Suppliers = () => {
                                     />
 
                                     <PTypography
-                                        labelText= {getLabel("lbl148")}
+                                        labelText={getLabel("lbl148")}
                                         flag={Labels.fontFlags.smallText}
                                         color={CommonColors.grey.main}
                                         weight={FontWeight.bold}
@@ -210,7 +221,7 @@ const Suppliers = () => {
                                     <PTable columns={tableHeader} rows={data} showCheckbox={true} isChecked={showSelected} onValidationChange={handleValidationChange} />
                                 </PGrid>
                             </PGrid>
-                            {isValidation && (
+                            {!isValidation && (
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12}>
                                         <PTypography

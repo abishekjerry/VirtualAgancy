@@ -4,15 +4,15 @@ import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { getEnquirySteps } from "../../utils/commonFunction/common";
+import { getEnquirySteps, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -23,18 +23,49 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import SendIcon from "@mui/icons-material/Send";
 import BusinessIcon from "@mui/icons-material/Business";
 import SaveIcon from "@mui/icons-material/Save";
+import { Dashboard_API } from "../../utils/api/apiUrl";
+import { PostApi } from "../../utils/api/networking";
 
 const Review = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
+    const { state } = useLocation();
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
-    const [showSelected, setShowSelected] = useState(false);
-    const [isValidation, setIsValidation] = useState(false);
-    const [country, setCountry] = useState("");
-    const [print, setPrint] = useState("");
-    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [formDataList, setFormDataList] = useState({
+        suppliers: [],
+        lineItems :[],
+    });
 
+    useEffect(() => {
+        const id = state?.id > 0 ? state.id : 0;
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const response = await PostApi(Dashboard_API.GetDetails, {
+                    Enquiryid: id,
+                });
+                const supplierColor = ["success", "info", "primary", "warning"];
+                const suppliers = response.supplierinfo.map((item, index) => ({
+                    name: item.suppliername,
+                    color: supplierColor[index % supplierColor.length]
+                }));
+
+                setFormDataList(prev => ({
+                    ...prev,
+                    suppliers: suppliers,
+                    lineItems : response.enqlineItems,
+                }));
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
     const data = [
         { label: "Division", value: "UAT SG Customer 1 > Singapore", color: "primary" },
         { label: "Client Name", value: "UAT SG Customer 1", color: "success" },
@@ -78,8 +109,9 @@ const Review = () => {
                 { label: "Urgent/Non-Urgent Job", value: "Urgent" },
                 { label: "Dictated Job", value: "Yes" },
                 { label: "Item Type", value: "New Item" },
-                { label: "Rate Card", value: "Yes" },
+                { label: "Rate Card", value: formDataList.lineItems.rateCard },
                 { label: "Item Name", value: "Testing" },
+
                 { label: "Item Description", value: "Testing" },
                 { label: "Is the item produced on FSC or PEFC material?", value: "N/A" },
                 { label: "Is the item recyclable?", value: "N/A" },
@@ -95,32 +127,13 @@ const Review = () => {
                 { label: "Material Used", value: "-" },
                 { label: "Catalogue Usage", value: "N/A" },
                 { label: "Is this an Innovative Solution?", value: "No" },
-                { label: "Quote Type", value: "Quote by Quantity" },
+                { label: "Quote Type", value: formDataList.lineItems.quoteType},
                 { label: "Quantity", value: "100" },
                 { label: "Attachment", value: "No Files" },
                 { label: "No of version", value: "1" },
                 { label: "Specifications", value: "Testing" },
                 { label: "Notes/Comments", value: "-" }
             ]
-        }
-    ];
-
-    const suppliers = [
-        {
-            name: "Alliance Graphics Pte Ltd",
-            color: "success"
-        },
-        {
-            name: "Hakuhodo Integrated Comm. Group",
-            color: "info"
-        },
-        {
-            name: "ABC Printing Solutions",
-            color: "primary"
-        },
-        {
-            name: "Global Media Works",
-            color: "warning"
         }
     ];
     return (
@@ -320,7 +333,7 @@ const Review = () => {
                                 }
                             >
                                 <PGrid container className="g-3">
-                                    {suppliers.map((item, index) => (
+                                    {formDataList.suppliers.map((item, index) => (
                                         <PGrid item xs={6} md={3} key={index}>
                                             <PGrid className={`border border-${item.color} shadow-sm text-center p-3 rounded`}>
                                                 <BusinessIcon

@@ -256,8 +256,6 @@ const EqDashboard = () => {
         return req >= start && req <= end;
       });
     }
-
-    console.log(formData.startDate, formData.endDate, result, "date");
     // search filter
     if (formData.search?.trim()) {
       const search = formData.search.toLowerCase();

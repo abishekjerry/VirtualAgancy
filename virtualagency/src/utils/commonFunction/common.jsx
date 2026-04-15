@@ -7,29 +7,11 @@ export const validateName = (name) => {
   return "";
 };
 
-export const checkPasswordStrength = (password) => {
-  return {
-    hasUpperLower: /(?=.*[a-z])(?=.*[A-Z])/.test(password),
-    hasNumber: /(?=.*\d)/.test(password),
-    hasSpecialChar: /(?=.*[!@#$%^&*])/.test(password),
-    hasMinLength: password.length >= 8,
-  };
-};
 export const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 };
 export const isValidMobile = (mobile) => {
   return /^[6-9]\d{9}$/.test(mobile.trim());
-};
-
-//return error message
-export const emailValidation = (email) => {
-  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  if (valid) {
-    return "";
-  } else {
-    return "Enter a valid email";
-  }
 };
 
 export const validatePassword = (password) => {
@@ -44,53 +26,21 @@ export const validatePassword = (password) => {
   if (password.length < 8) return "Password must be at least 8 characters";
   return "";
 };
-export const validNumber = (mobile) => {
-  const isValid = /^[6-9]/.test(mobile.trim());
-  return isValid ? "" : "Enter a valid number";
+
+export const allowOnlyNumbers = (value, min = 0, max = 9) => {
+  const regex = new RegExp(`[^${min}-${max}]`, "g");
+  return value.replace(regex, "").slice(0, 10);
 };
-export const allowOnlyNumbers = (value) => {
-  return value.replace(/\D/g, "").slice(0, 10);
+
+export const allowDecimal = (value = "") => {
+  return value.replace(/[^0-9.]/g, "").replace(/(\..*?)\..*/g, "$1").slice(0, 10);
 };
 
 export function allowOnlyAlphabets(value = "") {
-  return value
-    .replace(/[^A-Za-z ]+/g, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
+  return value.replace(/[^A-Za-z ]+/g, "").replace(/\s{2,}/g, " ").trim();
 }
-
-export const getfield = (fieldName) => {
-  // Your logic here
-  return fieldName;
-};
 
 export const isSuccess = (a) => a?.status === Labels.flag.status;
-
-export function getErrorKey(name = "") {
-  return name.replace(/^(txt_|dd_|ddl_|cb_)/, "");
-}
-
-export const isValidWebsite = (url) => {
-  const pattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9\-]+\.[a-z]{2,}(\/.*)?$/i;
-  return pattern.test(url);
-};
-
-//to prevent values using onkeypress
-
-export const allowAlphaSpace = (e) => {
-  const regex = /^[A-Za-z\s]*$/;
-  if (!regex.test(e.key)) {
-    e.preventDefault();
-  }
-};
-
-export const allowEmailCharsOnly = (e) => {
-  const allowedChars = /^[a-zA-Z0-9@._-]+$/;
-  if (!allowedChars.test(e.key)) {
-    e.preventDefault();
-  }
-};
-
 
 export const formatDate = (date) => {
   const d = new Date(date);
@@ -114,12 +64,17 @@ export function isNotEmpty(value) {
   return true;
 }
 
+export const getOptionLabel = (options = [], value) => {
+  const map = Object.fromEntries(options.map(o => [o.value, o.label]));
+  return map[value] || "";
+};
+
 export const getEnquirySteps = (getLabel) => [
   { text: getLabel("lbl20"), url: labelRoutes.clientInfo },
   { text: getLabel("lbl21"), url: labelRoutes.enquiryDetails },
   { text: getLabel("lbl22"), url: labelRoutes.lineItems },
   { text: getLabel("lbl23"), url: labelRoutes.suppliers },
-  { text: getLabel("lbl24"), url: "/clientInfo" }
+  { text: getLabel("lbl24"), url: labelRoutes.review }
 ];
 
 export const API_HEADERS = {

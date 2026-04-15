@@ -33,7 +33,8 @@ export default function PTextField({
     inputProps = {},
     startIcon,
     width = "",
-    maxLength = 5,
+    maxLength,
+    minLength,
     multiple = false,
     defaultFileUrl = "",
     onBlur,
@@ -189,49 +190,49 @@ export default function PTextField({
     if (isFile) {
         return (
             <>
-                    <TextField
-                        name={name}
-                        label={label}
-                        variant={variant}
-                        fullWidth
-                        disabled={disabled}
-                        onBlur={onBlur}
-                        inputRef={textFieldRef}
-                        placeholder="Choose file"
-                        error={!!fileError}
-                        helperText={fileError}
-                        value=""
-                        inputProps={{ readOnly: true }}
-                        sx={baseSx}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <UploadFileIcon />
-                                </InputAdornment>
-                            ),
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <input
-                                        hidden
-                                        type="file"
-                                        name={name}
-                                        multiple={multiple}
-                                        disabled={disabled}
-                                        onChange={handleFileChange}
-                                        id={`upload-${name}`}
-                                        accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
-                                    />
-                                    <label htmlFor={`upload-${name}`}>
-                                        <Tooltip title="Upload">
-                                            <IconButton component="span">
-                                                <InsertDriveFileIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </label>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                <TextField
+                    name={name}
+                    label={label}
+                    variant={variant}
+                    fullWidth
+                    disabled={disabled}
+                    onBlur={onBlur}
+                    inputRef={textFieldRef}
+                    placeholder="Choose file"
+                    error={!!fileError}
+                    helperText={fileError}
+                    value=""
+                    inputProps={{ readOnly: true }}
+                    sx={baseSx}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <UploadFileIcon />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <input
+                                    hidden
+                                    type="file"
+                                    name={name}
+                                    multiple={multiple}
+                                    disabled={disabled}
+                                    onChange={handleFileChange}
+                                    id={`upload-${name}`}
+                                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                />
+                                <label htmlFor={`upload-${name}`}>
+                                    <Tooltip title="Upload">
+                                        <IconButton component="span">
+                                            <InsertDriveFileIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </label>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
             </>
         );
     }
@@ -250,6 +251,7 @@ export default function PTextField({
                     ? Labels.flag.password
                     : type
             }
+            inputRef={textFieldRef}
             multiline={multiline}
             rows={rows}
             disabled={disabled}
@@ -257,7 +259,11 @@ export default function PTextField({
             error={!!helperText}
             variant={variant}
             sx={baseSx}
-            inputProps={inputProps}
+            inputProps={{
+                ...inputProps,
+                maxLength: maxLength,
+                minLength: minLength
+            }}
             InputProps={{
                 startAdornment: startIcon && (
                     <InputAdornment position="start">{startIcon}</InputAdornment>

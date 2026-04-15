@@ -1,14 +1,21 @@
 export const Labels = {
 
   loginPage: {
-    userName: "UserName",
+    userName: "User Name",
     password: "Password",
-    forgotPassword: "Forgot Password ?",
+    forgotPassword: "Forgot Password",
     signInToVirtualAgency: "Sign in to Virtual Agency",
     recoverPasswordByYourUserName: "Recover password by your user name",
     newPassword: "New Password",
     confirmPassword: "Confirm Password",
     passwordDoNotMatch: "Password do not match"
+  },
+
+  login: {
+    userName: "userName",
+    password: "password",
+    newPassword: "newPassword",
+    confirmPassword: "confirmPassword",
   },
 
   dashboard: {
@@ -23,7 +30,7 @@ export const Labels = {
     clientContact: "clientContact",
     pmgEntity: "pmgEntity",
     aboveAtMarket: "aboveAtMarket",
-    globalBUMapping :"globalBUMapping",
+    globalBUMapping: "globalBUMapping",
 
     firstName: "firstName",
     lastName: "lastName",
@@ -64,12 +71,13 @@ export const Labels = {
     tcoApproved: "tcoApproved",
     dictatedJob: "dictatedJob",
     itemType: "itemType",
+    incoterm: "incoterm",
     itemName: "itemName",
     itemNameDescription: "itemNameDescription",
 
     // Sustainability Information
     fscOrPefcMaterial: "fscOrPefcMaterial",
-    taxCertification:"taxCertification",
+    taxCertification: "taxCertification",
     recyclable: "recyclable",
     sustainabilityOption: "sustainabilityOption",
     recycledMaterial: "recycledMaterial",
@@ -84,6 +92,7 @@ export const Labels = {
     regionalOrderWindowCatalogue: "regionalOrderWindowCatalogue",
     localCatalogueName: "localCatalogueName",
     eAuction: "eAuction",
+    competitiveBiddingWinningSupplierCost : "competitiveBiddingWinningSupplierCost",
     printingMethod: "printingMethod",
     typeOfItem: "typeOfItem",
     noOfMaterials: "noOfMaterials",
@@ -105,11 +114,11 @@ export const Labels = {
     length: "length",
     width: "width",
     depth: "depth",
-    files : "files" 
+    files: "files"
   },
 
-  suppiers : {
-    required : "Please select at least one supplier to proceed."
+  suppiers: {
+    required: "Please select at least one supplier to proceed."
   },
 
   commonLabel: {
@@ -159,7 +168,7 @@ export const Labels = {
     status: true,
     Insert: "Insert",
     Update: "Update",
-    file : "File",
+    file: "File",
   },
 
   reportName: {

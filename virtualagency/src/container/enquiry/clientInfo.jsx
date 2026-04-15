@@ -9,7 +9,7 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { allowOnlyNumbers, getEnquirySteps, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common"
+import { allowOnlyNumbers, getEnquirySteps, getOptionLabel, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common"
 import AddIcon from "@mui/icons-material/Add"
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
@@ -39,9 +39,9 @@ const ClientInfo = () => {
         pmgEntity: "",
         aboveAtMarket: "",
         globalBUMapping: "",
-        brandValue: "",
-        aboveAtMarketValue: "",
-        jobPosition: "",
+        // brandValue: "",
+        // aboveAtMarketValue: "",
+        // jobPosition: "",
 
 
         firstName: "",
@@ -168,7 +168,6 @@ const ClientInfo = () => {
                 //     const division = response.division?.find(d => d.value === data.enqClientinfo.divisionid)?.label || " - ";
                 //     handleDivisionSelection(data.enqClientinfo.divisionid, division);
                 //     const brandValue = formDataList.brand?.find(b => b.label === data.enqClientinfo.brand)?.value || "";
-                //     console.log(brandValue);
                 //     const aboveAtMarketValue = formDataList.aboveAtMarket?.find(a => a.label === data.enqClientinfo.aboveorAtmarket)?.value || "";
 
                 //     // Update state
@@ -207,26 +206,11 @@ const ClientInfo = () => {
     }, [formDataList.pmgEntity, formDataList.brand, formDataList.clientContact]); // separate effect, only does auto-select
 
     const handleChange = async (e) => {
-        const { name, value } = e.target;
-        const label = e.target.label || "";
-        setFormData((prev) => {
-            const data = {
-                ...prev,
-                [name]: value
-            };
-            // Extra mappings
-            if (name === Labels.clientInfo.brand) {
-                data.brandValue = label;
-            }
-            if (name === Labels.clientInfo.aboveAtMarket) {
-                data.aboveAtMarketValue = label;
-            }
-            if (name === Labels.clientInfo.jobRole) {
-                data.jobPosition = label;
-            }
-
-            return data;
-        });
+        const { name, value, label } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
 
         // Clear errors
         setErrors((prev) => ({
@@ -309,18 +293,20 @@ const ClientInfo = () => {
                     clientContactId: formData.clientContact,
                     createdBy: parseInt(localStorage.getItem("userID")),
                     modifiedBy: parseInt(localStorage.getItem("agancyUserID")),
-                    brand: formData.brandValue,
+                    brand: getOptionLabel(formDataList.brand, formData.brand),
                     deliveryCountryId: formData.deliveryCountry,
                     pMGEntity: formData.pmgEntity,
-                    aboveorAtmarket: formData.aboveAtMarketValue,
+                    aboveorAtmarket: getOptionLabel(formDataList.aboveAtMarket, formData.aboveAtMarket),
                     Action: flag,
                     Enqid: id
                 });
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
-                    navigate(labelRoutes.enquiryDetails, {
-                        state: { id: response.data.enqId }
+                    setTimeout(() => {
+                        navigate(labelRoutes.enquiryDetails, {
+                            state: { id: response.data.enqId }
+                        });
                     });
                 } else {
                     setErrors((prev) => ({
@@ -436,7 +422,7 @@ const ClientInfo = () => {
                         jobtitle: formData.jobTitle,
                         email: formData.email,
                         phone: formData.phone,
-                        jobposition: formData.jobPosition,
+                        jobposition: getOptionLabel(formDataList.jobRole, formData.jobRole),
                         receivenotification: formData.receiveNotification == 1 ? true : false,
                         divisionid: formData.globalBUMapping //formData.division
                     });
@@ -924,7 +910,7 @@ const ClientInfo = () => {
             < PDialog
                 open={brandOpenFilter}
                 onClose={handleCloseChoose}
-                title= {getLabel("lbl138")}
+                title={getLabel("lbl138")}
                 showCloseIcon={true}
                 actions={
                     < PGrid className="d-flex align-items-center justify-content-end gap-2" >
