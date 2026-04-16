@@ -899,6 +899,7 @@ const LineItems = () => {
                                         helperText={errors?.containsRecycledPlastic}
                                         name={Labels.lineItems.containsRecycledPlastic}
                                         options={formDataList.yesNoNa}
+                                        readOnly={formData.recycledMaterial == 1 ? false : true}
 
                                     />
                                 </PGrid>
@@ -909,7 +910,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.recycledMaterialWeightKg}
                                         name={Labels.lineItems.recycledMaterialWeightKg}
-                                        disabled={formData.containsRecycledPlastic == 1 ? false : true}
+                                        disabled={formData.recycledMaterial == 1 ? false : true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -919,8 +920,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.designedToBeReused}
                                         name={Labels.lineItems.designedToBeReused}
-                                        options={formDataList.yesNoNa}
-                                        readOnly={formData.containsRecycledPlastic == 1 ? false : true}
+                                        options={formDataList.yesNoNa}                                        
                                     />
                                 </PGrid>
                             </PGrid>

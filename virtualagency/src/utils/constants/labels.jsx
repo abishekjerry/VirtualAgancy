@@ -40,7 +40,9 @@ export const Labels = {
     phone: "phone",
     receiveNotification: "receiveNotification",
     jobRole: "jobRole",
-    brandName: "brandName"
+    brandName: "brandName",
+
+    summary:"Summary"
   },
 
   enquiryDetails: {

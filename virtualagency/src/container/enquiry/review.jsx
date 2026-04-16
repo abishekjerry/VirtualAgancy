@@ -36,6 +36,8 @@ const Review = () => {
     const [formDataList, setFormDataList] = useState({
         suppliers: [],
         lineItems: [],
+        clientInfo: [],
+        enquiryDetails : []
     });
 
     useEffect(() => {
@@ -56,6 +58,8 @@ const Review = () => {
                     ...prev,
                     suppliers: suppliers,
                     lineItems: response.enqlineItems,
+                    clientInfo: response.enqClientinfo,
+                    enquiryDetails : response.enqProjectinfo
                 }));
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -68,87 +72,102 @@ const Review = () => {
     }, []);
     const data = [
         { label: getLabel("lbl27"), value: "UAT SG Customer 1 > Singapore", color: "primary" },
-        { label: getLabel("lbl28"), value: "UAT SG Customer 1", color: "success" },
+        { label: getLabel("lbl28"), value: formDataList.clientInfo.createdByUser, color: "success" },
         { label: getLabel("lbl09"), value: "Singapore", color: "info" },
-        { label: getLabel("lbl29"), value: "test(uatsgclient)", color: "warning" },
+        { label: getLabel("lbl29"), value: formDataList.clientInfo.entityname, color: "warning" },
 
-        { label: getLabel("lbl30"), value: "UAT SG Customer 1", color: "danger" },
-        { label: getLabel("lbl91"), value: "Singapore", color: "secondary" },
-        { label: getLabel("lbl92"), value: "Cross Media Singapore Business Div Ltd", color: "dark" },
-        { label: getLabel("lbl33"), value: "Cross Media Singapore Business Div Ltd", color: "primary" },
+        { label: getLabel("lbl30"), value: formDataList.clientInfo.bussinessUnit , color: "danger" },
+        { label: getLabel("lbl91"), value: formDataList.clientInfo.globalBussinessUnit, color: "secondary" },
+        { label: getLabel("lbl92"), value: formDataList.clientInfo.aboveorAtmarket, color: "dark" },
+        { label: getLabel("lbl33"), value: formDataList.clientInfo.brand, color: "primary" },
 
         { label: getLabel("lbl34"), value: "Data Marketing", color: "success" },
-        { label: getLabel("lbl35"), value: "N/A", color: "info" },
+        { label: getLabel("lbl35"), value: formDataList.clientInfo.clientContact, color: "info" },
         { label: getLabel("lbl36"), value: "testmanjeet91", color: "warning" },
 
     ];
 
     const enquiryDetails = [
-        { label: getLabel("lbl42"), value: "Test", color: "primary" },
-        { label: getLabel("lbl43"), value: "18/02/2026", color: "warning" },
-        { label: getLabel("lbl44"), value: "18/02/2026", color: "danger" },
-        { label: getLabel("lbl45"), value: "TestProject", color: "success" },
-        { label: getLabel("lbl46"), value: "Y2", color: "info" },
-        { label: getLabel("lbl47"), value: "Quote By Total Price", color: "secondary" },
-        { label: getLabel("lbl93"), value: "Cost Reduction V1", color: "warning" },
-        { label: getLabel("lbl94"), value: "No", color: "danger" },
-        { label: getLabel("lbl95"), value: "Regular Job", color: "info" },
-        { label: getLabel("lbl49"), value: "PRINT Complex - SG", color: "dark" },
+        { label: getLabel("lbl42"), value: formDataList.enquiryDetails.projectNo , color: "primary" },
+        { label: getLabel("lbl43"), value: formDataList.enquiryDetails.estdate, color: "warning" },
+        { label: getLabel("lbl44"), value: formDataList.enquiryDetails.briefdate , color: "danger" },
+        { label: getLabel("lbl45"), value: formDataList.enquiryDetails.projectDesc , color: "success" },
+        { label: getLabel("lbl46"), value: "Y1", color: "info" },
+        { label: getLabel("lbl47"), value: formDataList.enquiryDetails.year , color: "secondary" },
+        { label: getLabel("lbl93"), value: formDataList.enquiryDetails.managementFeetype, color: "warning" },
+        { label: getLabel("lbl94"), value: formDataList.enquiryDetails.hybridModel , color: "danger" },
+        { label: getLabel("lbl95"), value: formDataList.enquiryDetails.attribute, color: "info" },
+        { label: getLabel("lbl49"), value: formDataList.enquiryDetails.slaTemplatename, color: "dark" },
 
 
-        { label: getLabel("lbl54"), value: "18/02/2026 - 23/02/2026", color: "primary" },
-        { label: getLabel("lbl55"), value: "23/02/2026 - 25/02/2026", color: "success" },
-        { label: getLabel("lbl56"), value: "25/02/2026 - 04/03/2026", color: "warning" },
-        { label: getLabel("lbl57"), value: "04/03/2026 - 11/03/2026", color: "danger" },
-        { label: getLabel("lbl58"), value: "11/03/2026 - 25/03/2026", color: "info" }
+        { label: getLabel("lbl54"), value: `${formDataList.enquiryDetails.quotestartdate} - ${formDataList.enquiryDetails.quoteenddate}`, color: "primary" },
+        { label: getLabel("lbl55"), value: `${formDataList.enquiryDetails.proofstartdate} - ${formDataList.enquiryDetails.proofenddate}`, color: "success" },
+        { label: getLabel("lbl56"), value: `${formDataList.enquiryDetails.productionstartdate} - ${formDataList.enquiryDetails.productionenddate}`, color: "warning" },
+        { label: getLabel("lbl57"), value: `${formDataList.enquiryDetails.filecopiesstartdate} - ${formDataList.enquiryDetails.filecopiesenddate}`, color: "danger" },
+        { label: getLabel("lbl58"), value: `${formDataList.enquiryDetails.invoicestartdate} - ${formDataList.enquiryDetails.invoiceenddate}`, color: "info" }
     ];
 
-    const lineItems = [
-        {
-            itemTitle: "Item 1",
-            itemColor: "warning", // header color
-            data: [
-                { label: getLabel("lbl62"), value: "Print" },
-                { label: getLabel("lbl60"), value: "Brochures/Manuals" },
-                { label: getLabel("lbl65"), value: "Urgent" },
-                { label: getLabel("lbl96"), value: "Yes" },
-                { label: getLabel("lbl97"), value: "Yes" },
-                { label: getLabel("lbl98"), value: "Yes" },
-                { label: getLabel("lbl99"), value: "Testing" },
-                { label: getLabel("lbl61"), value: "Yes" },
-                { label: getLabel("lbl100"), value: "Yes" },
-                { label: getLabel("lbl101"), value: "Yes" },
-                { label: getLabel("lbl102"), value: "Yes" },
-                { label: getLabel("lbl103"), value: "Yes" },
-                { label: getLabel("lbl63"), value: "New Item" },
-                { label: getLabel("lbl64"), value: "New Item Values" },
-                { label: getLabel("lbl152"), value: "Others" },
-                { label: getLabel("lbl66"), value: "Testing" },
-                { label: getLabel("lbl67"), value: "Testing" },
+    const lineItemMapping = [
+        { label: "lbl62", value: "Print" },
+        { key: "tojabc", label: "lbl60" },
+        { key: "rateCard", label: "lbl65" },
+        { key: "competbidmandate", label: "lbl96" },
+        { key: "competbidcomplaint", label: "lbl97" },
+        { key: "competbidexception", label: "lbl98" },
+        { key: "exceptionreason", label: "lbl99" },
 
-                { label: "Is the item produced on FSC or PEFC material?", value: "N/A" },
-                { label: "Is the item recyclable?", value: "N/A" },
-                { label: "Is this job proposed with sustainability options?", value: "N/A" },
-                { label: "Does the item contain recycled material?", value: "N/A" },
-                { label: "Is the item designed to be reused?", value: "N/A" },
-                { label: "Does the item contain plastic?", value: "No" },
-                { label: "Does the item contain recycled plastic?", value: "No" },
-                { label: "Weightage of plastic in Kg", value: "-" },
-                { label: "Weightage of recycled plastic in Kg", value: "-" },
-                { label: "Weightage of recycled material in Kg", value: "1" },
-                { label: "Printing Method", value: "Continuous" },
-                { label: "Material Used", value: "-" },
-                { label: "Catalogue Usage", value: "N/A" },
-                { label: "Is this an Innovative Solution?", value: "No" },
-                { label: "Quote Type", value: formDataList.lineItems.quoteType },
-                { label: "Quantity", value: "100" },
-                { label: "Attachment", value: "No Files" },
-                { label: "No of version", value: "1" },
-                { label: "Specifications", value: "Testing" },
-                { label: "Notes/Comments", value: "-" }
-            ]
-        }
+        { key: "productcategory", label: "lbl61" },
+        { label: "lbl100", value: "Yes" },
+        { key: "simplex", label: "lbl101" },
+        { key: "tcOapproval", label: "lbl102" },
+        { key: "tcOapproved", label: "lbl103" },
+
+        { label: "lbl63", value: "New Item" },
+        { label: "lbl64", value: "New Item Values" },
+        { label: "lbl152", value: "Others" },
+        { key: "itemName",  label: "lbl66" },
+        { label: "lbl67", value: "Testing" },
+
+        { key: "usingFSCMaterial",  label: "lbl70"  },
+        { key: "oekotexCertification", label: "lbl151" },
+        { key: "isthisitemdesignedtobereused", label: "lbl71" },
+        { key: "isthisitemdesignedtobereused", label: "lbl75"  },
+        { key: "sustainableOptionthatwasrejected", label: "lbl72" },
+        { key: "containrecycledmaterial", label: "lbl73" },
+        { key: "containrecycledplastic", label: "lbl76" },
+        { key: "weightageofrecycledmaterial", label: "lbl79" },
+        { key: "isthisitemdesignedtobereused",  label: "lbl74" },
+
+        { label: "lbl106", value: "Yes" },
+        { key: "eauction", label: "lbl110" },
+        { key: "promoOSSOrderWindows", label: "lbl107" },
+        { key: "regionalname", label: "lbl108" },
+        { key: "catalogueUsage", label: "lbl109" },
+        { label: "lbl111", value: "Continuous" },
+        { key: "typeofitem", label: "lbl112" },
+        { key: "noofmaterials", label: "lbl113" },
+        { key: "digitalInnovation", label: "lbl114" },
+        { key: "innovation", label: "lbl115" },
+        { key: "sourcinglocation", label: "lbl116" },
+        { key: "savingstype", label: "lbl117" },
+        { key: "savingsreason", label: "lbl118" },
+        { key: "oWlink", label: "lbl119" },
+
+        { key: "quoteType", label: "lbl89" },
+        { key: "quoteQtyOrSize", label: "lbl87" },
+        { label: "Attachment", value: "No Files" },
+        { key: "version", label: "lbl85" },
+        { key: "specNote", label: "lbl83" },
+        { key: "sNote", label: "lbl86" }
     ];
+    const lineItems = formDataList.lineItems.map((item, index) => ({
+        itemTitle: `Item ${index + 1}`,
+        itemColor: "warning",
+        data: lineItemMapping.map(field => ({
+            label: field.label === "Attachment" ? field.label : getLabel(field.label),
+            value: field.key ? (item[field.key] ? item[field.key] : "-") : field.value
+        }))
+    }));
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -171,6 +190,7 @@ const Review = () => {
                                 <PGrid container className="g-4">
 
                                     {data.map((item, i) => (
+
                                         <PGrid item xs={12} md={6} xl={3} key={i}>
                                             <PGrid className={`border-start border-${item.color} ps-2 mt-2`}>
                                                 <PTypography

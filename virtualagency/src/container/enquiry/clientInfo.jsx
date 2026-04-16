@@ -19,6 +19,8 @@ import { PostApi } from "../../utils/api/networking";
 import PDialog from "../../component/PDialog/PDialog";
 import PTextField from "../../component/PTextField/PTextField";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
+import { PSummary } from "../../component/PSumary/PSummary";
+
 const ClientInfo = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -31,6 +33,7 @@ const ClientInfo = () => {
     const [open, setOpen] = useState(false);
     const [disible, setDisible] = useState(true);
     const [type, setType] = useState("");
+    const [openSummary, setOpenSummary] = useState(true);
     const [formData, setFormData] = useState({
         division: "",
         brand: "",
@@ -99,11 +102,37 @@ const ClientInfo = () => {
         jobRole: [{ label: "Procurement", value: 1 }, { label: "Marketing & Sales", value: 2 }, { label: "Team Lead", value: 3 }, { label: "Reg_Proc_PBI", value: 4 }, { label: "Others", value: 5 }],
 
         reason: [{ label: "Entry is stale/expired", value: 1 }, { label: "Wrongly input", value: 2 }, { label: "Others", value: 3 }],
+
+
     });
 
     const role = localStorage.getItem("role");
     const countryID = parseInt(localStorage.getItem("countryID"))
+    const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+    const id = state?.id > 0 ? state.id : 0;
 
+    const summaryData = [
+        { label: getLabel("lbl27"), value: getOptionLabel(formDataList.division, formData.division) },
+        { label: getLabel("lbl28"), value: fields.clientName },
+        { label: getLabel("lbl09"), value: fields.country },
+        { label: getLabel("lbl29"), value: fields.entityName },
+        { label: getLabel("lbl30"), value: fields.businessUnit },
+        { label: getLabel("lbl91"), value: getOptionLabel(formDataList.globalBUMapping, formData.globalBUMapping) },
+        { label: getLabel("lbl92"), value: getOptionLabel(formDataList.aboveAtMarket, formData.aboveAtMarket) },
+        { label: getLabel("lbl33"), value: getOptionLabel(formDataList.brand, formData.brand) },
+        { label: getLabel("lbl35"), value: getOptionLabel(formDataList.clientContact, formData.clientContact) },
+        { label: getLabel("lbl34"), value: getOptionLabel(formDataList.deliveryCountry, formData.deliveryCountry) },
+        { label: getLabel("lbl36"), value: getOptionLabel(formDataList.pmgEntity, formData.pmgEntity) },
+    ];
+
+    const sections = [{
+        step: 1,
+        title: getLabel("lbl25"),
+        items: summaryData,
+        showEdit: "",
+        onEdit: () => console.log("Edit Client"),
+    },]
+    
     const GlobalBuMappingMaster = async (division) => {
         try {
             setLoading(false);
@@ -123,6 +152,7 @@ const ClientInfo = () => {
             setLoading(false);
         }
     };
+
     const ClientInfoMaster = async (globalBUMapping) => {
         try {
             setLoading(false);
@@ -141,6 +171,7 @@ const ClientInfo = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -155,7 +186,6 @@ const ClientInfo = () => {
                     pmgEntity: (role === "Admin" ? response.country : response.country.filter((c) => c.value === countryID)),
                     deliveryCountry: response.country,
                 }));
-                const id = state?.id > 0 ? state.id : 0;
 
                 // if (id !== 0) {
                 //     const data = await PostApi(Dashboard_API.GetDetails, {
@@ -277,10 +307,9 @@ const ClientInfo = () => {
         });
         GlobalBuMappingMaster(divisionId);
     };
+
     const handleSubmit = async () => {
         const isValid = ClientInfoValidation();
-        const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
-        const id = state?.id > 0 ? state.id : 0;
         if (isValid) {
             try {
                 setLoading(true);
@@ -472,6 +501,7 @@ const ClientInfo = () => {
             }
         }
     };
+    
     const handleOpenChoose = (e, name) => {
         setType(name);
         if (name === "Contant") {
@@ -481,16 +511,18 @@ const ClientInfo = () => {
         }
     };
 
-    const handleBack = () => {
-        if (window.history.length > 1) {
-            navigate(labelRoutes.eqDashboard);
-        } else {
-            navigate(labelRoutes.home); // fallback route
-        }
-    };
+    // const handleBack = () => {
+    //     if (window.history.length > 1) {
+    //         navigate(labelRoutes.eqDashboard);
+    //     } else {
+    //         navigate(labelRoutes.home); // fallback route
+    //     }
+    // };
+
     const handleExitDraft = () => {
         setOpen(true);
     };
+
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -763,27 +795,7 @@ const ClientInfo = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        {/* <PCard>
-                            <PGrid container>
-                                <PTypography
-                                    labelText={Labels.clientInfo.summary}
-                                    flag={Labels.fontFlags.subHeader}
-                                    color={CommonColors.grey.main}
-                                    weight={FontWeight.bold}
-                                />
-                                <hr className="my-4" />
-                            </PGrid>
-
-                            <PGrid container>
-                                <PTypography
-                                    labelText={Labels.clientInfo.clientInformation}
-                                    flag={Labels.fontFlags.subHeader}
-                                    color={CommonColors.grey.main}
-                                    weight={FontWeight.bold}
-                                
-                                />
-                            </PGrid>
-                        </PCard> */}
+                        <PSummary sections={sections} />
                     </PGrid>
                 </PGrid >
             </Box >

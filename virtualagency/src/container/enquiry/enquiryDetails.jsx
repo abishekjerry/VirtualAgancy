@@ -11,13 +11,14 @@ import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
-import { formatDate, getEnquirySteps, getOptionLabel, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
+import { formatDate, getEnquirySteps, getOptionLabel, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Dashboard_API, EnquiryDetails_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
+import { PSummary } from "../../component/PSumary/PSummary";
 const EnquiryDetails = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -68,8 +69,47 @@ const EnquiryDetails = () => {
             { label: "No", value: 2 }
         ],
     });
+
+    const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+    const id = state?.id > 0 ? state.id : 0;
+
+    const enquiryDetails = [
+        { label: getLabel("lbl42"), value: formData.projectNo },
+        { label: getLabel("lbl43"), value: formData.estdate},
+        { label: getLabel("lbl44"), value: formData.briefdate },
+        { label: getLabel("lbl45"), value: formData.projectDesc},
+        { label: getLabel("lbl46"), value: "Y1"},
+        { label: getLabel("lbl47"), value: formData.year },
+        { label: getLabel("lbl93"), value: formData.managementFeeType},
+        { label: getLabel("lbl94"), value: formData.hybrid == 1 ? "Yes" : "No" },
+        { label: getLabel("lbl95"), value: formData.attribute},
+        { label: getLabel("lbl49"), value: getOptionLabel(formDataList.slaTemplate,formData.slaTemplate) },
+
+
+        { label: getLabel("lbl54"), value: `${""} - ${""}` },
+        { label: getLabel("lbl55"), value: `${""} - ${""}`},
+        { label: getLabel("lbl56"), value: `${""} - ${""}`},
+        { label: getLabel("lbl57"), value: `${""} - ${""}` },
+        { label: getLabel("lbl58"), value: `${""} - ${""}`}
+    ];
+    const sections = [{
+        step: 1,
+        title: getLabel("lbl25"),
+        items: formDataList.quoteType,
+        showEdit: "",
+        onEdit: () => console.log("Edit Client"),
+    },
+    {
+        step: 2,
+        title: getLabel("lbl21"),
+        items: enquiryDetails,
+        showEdit: id > 0,
+        onEdit: () => console.log("Edit Client"),
+    },]
+
     const [slaTemplateData, setSlaTemplateData] = useState(null)
     const [phaseDates, setPhaseDates] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -127,6 +167,7 @@ const EnquiryDetails = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         if (!slaTemplateData) return;
         const slaData = slaTemplateData;
@@ -151,7 +192,7 @@ const EnquiryDetails = () => {
             ...prev,
             [name]: ""   // clear only that field error
         }));
-        if (name === Labels.enquiryDetails.slaTemplate) {
+        if (name === Labels.slaTemplate) {
             slaTemplateData(value);
         }
 
@@ -159,7 +200,6 @@ const EnquiryDetails = () => {
 
     const handleSubmit = async () => {
         const isValid = EnquiryDetailsValidation();
-        const id = state?.id > 0 ? state.id : 0;
         if (isValid) {
             try {
                 setLoading(true);
@@ -206,16 +246,16 @@ const EnquiryDetails = () => {
 
     const EnquiryDetailsValidation = () => {
         const requiredFields = [
-            Labels.enquiryDetails.projectNo,
-            Labels.enquiryDetails.projectDescription,
-            Labels.enquiryDetails.briefReceivedDate,
-            Labels.enquiryDetails.estdeliveryDate,
-            Labels.enquiryDetails.year,
-            Labels.enquiryDetails.managementFeeType,
-            Labels.enquiryDetails.hybrid,
-            Labels.enquiryDetails.projectAttribute,
-            Labels.enquiryDetails.slaTemplate,
-            Labels.enquiryDetails.projectQuoteType
+            Labels.projectNo,
+            Labels.projectDescription,
+            Labels.briefReceivedDate,
+            Labels.estdeliveryDate,
+            Labels.year,
+            Labels.managementFeeType,
+            Labels.hybrid,
+            Labels.projectAttribute,
+            Labels.slaTemplate,
+            Labels.projectQuoteType
         ];
 
         let newErrors = {};
@@ -312,6 +352,7 @@ const EnquiryDetails = () => {
         setPhaseDates(updated);
         calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
     };
+
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -338,14 +379,14 @@ const EnquiryDetails = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
-                                        name={Labels.enquiryDetails.projectNo}
+                                        name={Labels.projectNo}
                                         label={`${getLabel("lbl42")} ${Labels.symbols.required}`}
                                         value={formData.projectNo}
                                         onChange={handleChange}
                                         helperText={errors?.projectNo}
                                     />
                                     <PDatepicker
-                                        name={Labels.enquiryDetails.estdeliveryDate}
+                                        name={Labels.estdeliveryDate}
                                         label={`${getLabel("lbl43")} ${Labels.symbols.required}`}
                                         value={formData.estdeliveryDate}
                                         onChange={handleChange}
@@ -356,7 +397,7 @@ const EnquiryDetails = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTextField
-                                        name={Labels.enquiryDetails.projectDescription}
+                                        name={Labels.projectDescription}
                                         label={`${getLabel("lbl45")} ${Labels.symbols.required}`}
                                         value={formData.projectDescription}
                                         onChange={handleChange}
@@ -370,7 +411,7 @@ const EnquiryDetails = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDatepicker
-                                        name={Labels.enquiryDetails.briefReceivedDate}
+                                        name={Labels.briefReceivedDate}
                                         label={`${getLabel("lbl44")} ${Labels.symbols.required}`}
                                         value={formData.briefReceivedDate}
                                         onChange={handleChange}
@@ -381,7 +422,7 @@ const EnquiryDetails = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={Labels.enquiryDetails.projectQuoteType}
+                                        name={Labels.projectQuoteType}
                                         label={`${getLabel("lbl46")} ${Labels.symbols.required}`}
                                         value={formData.projectQuoteType}
                                         onChange={handleChange}
@@ -393,7 +434,7 @@ const EnquiryDetails = () => {
 
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={Labels.enquiryDetails.year}
+                                        name={Labels.year}
                                         label={`${getLabel("lbl47")} ${Labels.symbols.required}`}
                                         value={formData.year}
                                         onChange={handleChange}
@@ -407,7 +448,7 @@ const EnquiryDetails = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={Labels.enquiryDetails.managementFeeType}
+                                        name={Labels.managementFeeType}
                                         label={`${getLabel("lbl93")} ${Labels.symbols.required}`}
                                         value={formData.managementFeeType}
                                         onChange={handleChange}
@@ -419,7 +460,7 @@ const EnquiryDetails = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={Labels.enquiryDetails.hybrid}
+                                        name={Labels.hybrid}
                                         label={`${getLabel("lbl94")} ${Labels.symbols.required}`}
                                         value={formData.hybrid}
                                         onChange={handleChange}
@@ -431,7 +472,7 @@ const EnquiryDetails = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        name={Labels.enquiryDetails.projectAttribute}
+                                        name={Labels.projectAttribute}
                                         label={`${getLabel("lbl95")} ${Labels.symbols.required}`}
                                         value={formData.projectAttribute}
                                         onChange={handleChange}
@@ -455,7 +496,7 @@ const EnquiryDetails = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={12} md={8}>
                                     <PDropdown
-                                        name={Labels.enquiryDetails.slaTemplate}
+                                        name={Labels.slaTemplate}
                                         label={`${getLabel("lbl49")} ${Labels.symbols.required}`}
                                         value={formData.slaTemplate}
                                         onChange={handleChange}
@@ -570,6 +611,7 @@ const EnquiryDetails = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
+                        <PSummary sections={sections} />
                     </PGrid>
                 </PGrid>
             </Box>
