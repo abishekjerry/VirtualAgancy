@@ -383,6 +383,7 @@ const LineItems = () => {
                 setLoading(true);
                 const payload = {
                     //lineItems
+                    EnqdetailsId: 0,
                     EnqId: id,
                     Printornonprint: getOptionLabel(formDataList.category, formData.category),
                     TOJABC: getOptionLabel(formDataList.typeOfJob, formData.typeOfJob),
@@ -400,13 +401,13 @@ const LineItems = () => {
                     Itemtype: getOptionLabel(formDataList.itemType, formData.itemType),
                     Incoterm: getOptionLabel(formDataList.incoterm, formData.incoterm),
                     ItemName: formData.itemName,
-                    ItemName: formData.itemNameDescription,
+                    ItemDescription: formData.itemNameDescription,
 
 
                     // ✅ Sustainability
                     usingFSCMaterial: getOptionLabel(formDataList.yesNoNa, formData.fscOrPefcMaterial),
                     OEKOTEXCertification: getOptionLabel(formDataList.yesNoNa, formData.taxCertification),
-                    //:formData.recyclable,
+                    Recycled: formData.recyclable,
                     SustainableOptionthatwasrejected: getOptionLabel(formDataList.yesNoNa, formData.sustainabilityOption),
                     WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
                     Isthisitemdesignedtobereused: getOptionLabel(formDataList.yesNoNa, formData.designedToBeReused),
@@ -421,7 +422,7 @@ const LineItems = () => {
                     Regionalname: getOptionLabel(formDataList.regionalOrder, formData.regionalOrderWindowCatalogue),
                     CatalogueUsage: getOptionLabel(formDataList.localCatalog, formData.localCatalogueName),
                     Eauction: getOptionLabel(formDataList.yesOrNo, formData.eAuction),
-                    //:formData.printingMethod,
+                    printingmethod: formData.printingMethod,
                     Typeofitem: getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
                     Noofmaterials: formData.noOfMaterials,
                     DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
@@ -430,6 +431,7 @@ const LineItems = () => {
                     savingstype: getOptionLabel(formDataList.savingsType, formData.savingsType),
                     savingsreason: getOptionLabel(formDataList.savingsReason, formData.savingsReason),
                     OWlink: getOptionLabel(formDataList.yesNoNa, formData.owWithLink),
+                    CompetetiveWinningSupplier: formData.competitiveBiddingWinningSupplierCost,
                     // Specifications
                     Version: formData.noOfVersion,
                     SpecNote: formData.specifications,
@@ -471,7 +473,9 @@ const LineItems = () => {
     };
     const handleBack = () => {
         if (window.history.length > 1) {
-            navigate(labelRoutes.enquiryDetails);
+            navigate(labelRoutes.enquiryDetails, {
+                state: { id: id }
+            });
         } else {
             navigate(labelRoutes.home); // fallback route
         }
@@ -920,7 +924,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.designedToBeReused}
                                         name={Labels.lineItems.designedToBeReused}
-                                        options={formDataList.yesNoNa}                                        
+                                        options={formDataList.yesNoNa}
                                     />
                                 </PGrid>
                             </PGrid>

@@ -10,8 +10,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useState, Fragment } from "react";
 import PButton from "../PButton/PButton";
 
-export const PSummary = ({ sections = [] }) => {
-    const [activeStep, setActiveStep] = useState(null);
+export const PSummary = ({ sections = [], currentStep = 1 }) => {
+
+    const [activeStep, setActiveStep] = useState(currentStep);
+
+    // 🔥 Show only required steps
+    const visibleSections = sections.filter(
+        (section) => section.step <= currentStep
+    );
 
     const SummaryItem = ({ label, value }) => (
         <PGrid container className={Labels.margin.mb3}>
@@ -19,13 +25,18 @@ export const PSummary = ({ sections = [] }) => {
                 <PTypography labelText={label} weight={FontWeight.bold} />
             </PGrid>
             <PGrid item xs={12} sm={12} md={6}>
-                <PTypography labelText={value || "-"} weight={FontWeight.bold} color={CommonColors.grey.main} />
+                <PTypography
+                    labelText={value || "-"}
+                    weight={FontWeight.bold}
+                    color={CommonColors.grey.main}
+                />
             </PGrid>
         </PGrid>
     );
 
     return (
         <PCard>
+
             {/* HEADER */}
             <PGrid container className="justify-content-center">
                 <PTypography
@@ -35,15 +46,23 @@ export const PSummary = ({ sections = [] }) => {
                     color={CommonColors.blue.main}
                 />
             </PGrid>
+
             {/* SECTIONS */}
-            {sections.map((section, index) => {
+            {visibleSections.map((section) => {
                 const isOpen = activeStep === section.step;
+
                 return (
                     <Fragment key={section.step}>
-                        {/* ROW */}
                         <hr className="my-2" />
-                        <PGrid container className="d-flex align-items-center justify-content-between"
-                            onClick={() => setActiveStep(isOpen ? null : section.step)} style={{ cursor: "pointer" }}
+
+                        {/* STEP HEADER */}
+                        <PGrid
+                            container
+                            className="d-flex align-items-center justify-content-between"
+                            onClick={() =>
+                                setActiveStep(isOpen ? null : section.step)
+                            }
+                            style={{ cursor: "pointer" }}
                         >
                             <PGrid item xs={12} sm={6} md={8}>
                                 <PTypography
@@ -53,7 +72,13 @@ export const PSummary = ({ sections = [] }) => {
                                 />
                             </PGrid>
 
-                            <PGrid item xs={12} sm={6} md={4} className="d-flex justify-content-end align-items-center" >
+                            <PGrid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={4}
+                                className="d-flex justify-content-end align-items-center"
+                            >
                                 {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                             </PGrid>
                         </PGrid>
@@ -62,7 +87,7 @@ export const PSummary = ({ sections = [] }) => {
                         {isOpen && (
                             <>
                                 <PGrid container className={Labels.margin.mt3}>
-                                    {section.items.map((item, i) => (
+                                    {section.items?.map((item, i) => (
                                         <SummaryItem
                                             key={i}
                                             label={item.label}
@@ -71,16 +96,17 @@ export const PSummary = ({ sections = [] }) => {
                                     ))}
                                 </PGrid>
 
-
-                                {section.showEdit && (
+                                {section.step < currentStep && (
                                     <PGrid container>
-                                        <PGrid item xs={12} className="d-flex justify-content-end align-items-center">
+                                        <PGrid item xs={12} className="d-flex justify-content-end">
                                             <PButton
                                                 label={"Edit"}
                                                 variant="contained"
                                                 color={CommonColors.grey.main}
                                                 startIcon={<EditIcon />}
-                                                width={80} />
+                                                width={80}
+                                                onClick={section.onEdit}
+                                            />
                                         </PGrid>
                                     </PGrid>
                                 )}
@@ -89,6 +115,6 @@ export const PSummary = ({ sections = [] }) => {
                     </Fragment>
                 );
             })}
-        </PCard >
+        </PCard>
     );
 };

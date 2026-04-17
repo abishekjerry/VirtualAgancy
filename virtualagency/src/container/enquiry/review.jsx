@@ -71,9 +71,9 @@ const Review = () => {
         fetchData();
     }, []);
     const data = [
-        { label: getLabel("lbl27"), value: "UAT SG Customer 1 > Singapore", color: "primary" },
+        { label: getLabel("lbl27"), value: formDataList.clientInfo.entityname , color: "primary" },
         { label: getLabel("lbl28"), value: formDataList.clientInfo.createdByUser, color: "success" },
-        { label: getLabel("lbl09"), value: "Singapore", color: "info" },
+        { label: getLabel("lbl09"), value: formDataList.clientInfo.country, color: "info" },
         { label: getLabel("lbl29"), value: formDataList.clientInfo.entityname, color: "warning" },
 
         { label: getLabel("lbl30"), value: formDataList.clientInfo.bussinessUnit , color: "danger" },
@@ -81,9 +81,9 @@ const Review = () => {
         { label: getLabel("lbl92"), value: formDataList.clientInfo.aboveorAtmarket, color: "dark" },
         { label: getLabel("lbl33"), value: formDataList.clientInfo.brand, color: "primary" },
 
-        { label: getLabel("lbl34"), value: "Data Marketing", color: "success" },
+        { label: getLabel("lbl34"), value: formDataList.clientInfo.deliveryCountryname, color: "success" },
         { label: getLabel("lbl35"), value: formDataList.clientInfo.clientContact, color: "info" },
-        { label: getLabel("lbl36"), value: "testmanjeet91", color: "warning" },
+        { label: getLabel("lbl36"), value: formDataList.clientInfo.pmgEntityname, color: "warning" },
 
     ];
 
@@ -92,7 +92,7 @@ const Review = () => {
         { label: getLabel("lbl43"), value: formDataList.enquiryDetails.estdate, color: "warning" },
         { label: getLabel("lbl44"), value: formDataList.enquiryDetails.briefdate , color: "danger" },
         { label: getLabel("lbl45"), value: formDataList.enquiryDetails.projectDesc , color: "success" },
-        { label: getLabel("lbl46"), value: "Y1", color: "info" },
+        { label: getLabel("lbl46"), value: formDataList.enquiryDetails.projectQuotetype, color: "info" },
         { label: getLabel("lbl47"), value: formDataList.enquiryDetails.year , color: "secondary" },
         { label: getLabel("lbl93"), value: formDataList.enquiryDetails.managementFeetype, color: "warning" },
         { label: getLabel("lbl94"), value: formDataList.enquiryDetails.hybridModel , color: "danger" },
@@ -168,6 +168,7 @@ const Review = () => {
             value: field.key ? (item[field.key] ? item[field.key] : "-") : field.value
         }))
     }));
+    
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>

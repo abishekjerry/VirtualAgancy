@@ -20,6 +20,7 @@ import PDialog from "../../component/PDialog/PDialog";
 import PTextField from "../../component/PTextField/PTextField";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import { PSummary } from "../../component/PSumary/PSummary";
+import { getClientInfo, getSummarySections } from "../../utils/constants/summary";
 
 const ClientInfo = () => {
     const { state } = useLocation();
@@ -103,7 +104,7 @@ const ClientInfo = () => {
 
         reason: [{ label: "Entry is stale/expired", value: 1 }, { label: "Wrongly input", value: 2 }, { label: "Others", value: 3 }],
 
-
+        clientInfo: []
     });
 
     const role = localStorage.getItem("role");
@@ -111,28 +112,9 @@ const ClientInfo = () => {
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
 
-    const summaryData = [
-        { label: getLabel("lbl27"), value: getOptionLabel(formDataList.division, formData.division) },
-        { label: getLabel("lbl28"), value: fields.clientName },
-        { label: getLabel("lbl09"), value: fields.country },
-        { label: getLabel("lbl29"), value: fields.entityName },
-        { label: getLabel("lbl30"), value: fields.businessUnit },
-        { label: getLabel("lbl91"), value: getOptionLabel(formDataList.globalBUMapping, formData.globalBUMapping) },
-        { label: getLabel("lbl92"), value: getOptionLabel(formDataList.aboveAtMarket, formData.aboveAtMarket) },
-        { label: getLabel("lbl33"), value: getOptionLabel(formDataList.brand, formData.brand) },
-        { label: getLabel("lbl35"), value: getOptionLabel(formDataList.clientContact, formData.clientContact) },
-        { label: getLabel("lbl34"), value: getOptionLabel(formDataList.deliveryCountry, formData.deliveryCountry) },
-        { label: getLabel("lbl36"), value: getOptionLabel(formDataList.pmgEntity, formData.pmgEntity) },
-    ];
+    const clientInfo = getClientInfo(fields, formData, formDataList, getLabel, getOptionLabel, id ? formDataList.clientInfo : null);
+    const sections = getSummarySections({ clientInfo, getLabel });
 
-    const sections = [{
-        step: 1,
-        title: getLabel("lbl25"),
-        items: summaryData,
-        showEdit: "",
-        onEdit: () => console.log("Edit Client"),
-    },]
-    
     const GlobalBuMappingMaster = async (division) => {
         try {
             setLoading(false);
@@ -187,30 +169,32 @@ const ClientInfo = () => {
                     deliveryCountry: response.country,
                 }));
 
-                // if (id !== 0) {
-                //     const data = await PostApi(Dashboard_API.GetDetails, {
-                //         Enquiryid: id,
-                //     });
-                //     const division = response.division?.find(d => d.value === data.enqClientinfo.divisionid)?.label || " - ";
-                //     handleDivisionSelection(data.enqClientinfo.divisionid, division);
-                //     const brandValue = formDataList.brand?.find(b => b.label === data.enqClientinfo.brand)?.value || "";
-                //     const aboveAtMarketValue = formDataList.aboveAtMarket?.find(a => a.label === data.enqClientinfo.aboveorAtmarket)?.value || "";
+                if (id !== 0) {
+                    const data = await PostApi(Dashboard_API.GetDetails, {
+                        Enquiryid: id,
+                    });
+                    setFormDataList(prev => ({
+                        ...prev,
+                        clientInfo : data.enqClientinfo
+                    }))
+                    // const division = response.division?.find(d => d.value === data.enqClientinfo.divisionid)?.label || " - ";
+                    // handleDivisionSelection(data.enqClientinfo.divisionid, division);
+                    // const brandValue = formDataList.brand?.find(b => b.label === data.enqClientinfo.brand)?.value || "";
+                    // const aboveAtMarketValue = formDataList.aboveAtMarket?.find(a => a.label === data.enqClientinfo.aboveorAtmarket)?.value || "";
 
-                //     // Update state
-                //     setFormData(prev => ({
-                //         ...prev,
-                //         division: data.enqClientinfo.divisionid,
-                //         clientContact: data.enqClientinfo.clientContactId,
-                //         pmgEntity: data.enqClientinfo.pmgEntity,
-                //         deliveryCountry: data.enqClientinfo.deliveryCountryId,
-                //         brand: brandValue,
-                //         aboveAtMarket: aboveAtMarketValue,
-                //         brandValue: data.enqClientinfo.brand,
-                //         aboveAtMarketValue: data.enqClientinfo.aboveorAtmarket
-                //     }));
-
-
-                // }
+                    // // Update state
+                    // setFormData(prev => ({
+                    //     ...prev,
+                    //     division: data.enqClientinfo.divisionid,
+                    //     clientContact: data.enqClientinfo.clientContactId,
+                    //     pmgEntity: data.enqClientinfo.pmgEntity,
+                    //     deliveryCountry: data.enqClientinfo.deliveryCountryId,
+                    //     brand: brandValue,
+                    //     aboveAtMarket: aboveAtMarketValue,
+                    //     brandValue: data.enqClientinfo.brand,
+                    //     aboveAtMarketValue: data.enqClientinfo.aboveorAtmarket
+                    // }));
+                }
 
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -330,7 +314,7 @@ const ClientInfo = () => {
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
                         navigate(labelRoutes.enquiryDetails, {
-                            state: { id: response.data.enqId }
+                            state: { id: response.data.enqId, clientInfo: clientInfo }
                         });
                     }, 500);
                 } else {
@@ -501,7 +485,7 @@ const ClientInfo = () => {
             }
         }
     };
-    
+
     const handleOpenChoose = (e, name) => {
         setType(name);
         if (name === "Contant") {
@@ -795,7 +779,7 @@ const ClientInfo = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} />
+                        <PSummary sections={sections} currentStep={1} />
                     </PGrid>
                 </PGrid >
             </Box >
