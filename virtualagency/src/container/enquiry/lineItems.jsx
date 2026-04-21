@@ -116,7 +116,7 @@ const LineItems = () => {
         owWithLink: "",
 
         // Specifications
-        noOfVersion: "",
+        noOfVersion: 1,
         specifications: "",
         notesComments: "",
 
@@ -195,13 +195,13 @@ const LineItems = () => {
     const totalSize = flatSize * (+formData.quantity || 0);
 
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const rawLineItems = getLineneItems(formData, formDataList, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
         items: item.data
     }));
-    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel});
+    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -350,11 +350,12 @@ const LineItems = () => {
     const fieldConfig = {
         [Labels.lineItems.noOfMaterials]: { type: "number", min: 1, max: 5 },
         [Labels.lineItems.noOfVersion]: { type: "number" },
-        [Labels.lineItems.quantity]: { type: "number" },
-        [Labels.lineItems.width]: { type: "number" },
-        [Labels.lineItems.length]: { type: "number" },
-        [Labels.lineItems.depth]: { type: "number" },
+        [Labels.lineItems.quantity]: { type: "number", min: 1, max: 1000000000 },
 
+
+        [Labels.lineItems.width]: { type: "decimal" },
+        [Labels.lineItems.length]: { type: "decimal" },
+        [Labels.lineItems.depth]: { type: "decimal" },
         [Labels.lineItems.recycledMaterialWeightKg]: { type: "decimal" },
         [Labels.lineItems.competitiveBiddingWinningSupplierCost]: { type: "decimal" }
     };
@@ -381,15 +382,15 @@ const LineItems = () => {
         let data = {
             [name]: files ? files : formattedValue
         };
-
-        // Conditional override for typeOfJob
-        if (name === Labels.lineItems.typeOfJob && formattedValue == 4) {
+        console.log(name, value);
+        if (name === Labels.lineItems.typeOfJob) {
+            const isType4 = formattedValue == 4;
             data = {
                 ...data,
-                competitiveBiddingCompliant: 3,
-                competitiveBiddingExceptionFormSigned: 3,
-                competitiveBiddingMandatory: 3,
-                exceptionsReasonCode: 8,
+                competitiveBiddingCompliant: isType4 ? 3 : "",
+                competitiveBiddingExceptionFormSigned: isType4 ? 3 : "",
+                competitiveBiddingMandatory: isType4 ? 3 : "",
+                exceptionsReasonCode: isType4 ? 8 : "",
             };
         }
 

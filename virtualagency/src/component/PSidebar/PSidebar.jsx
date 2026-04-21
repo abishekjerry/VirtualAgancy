@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-
+import Tooltip from "@mui/material/Tooltip";
 function PSidebar({
   sidebarOpen,
   menuItems,
@@ -14,36 +14,36 @@ function PSidebar({
 
   return (
     <div className={`sidebar ${sidebarOpen ? "" : "collapsed"}`}>
-      {/* Header */}
-      {/* <div className="sidebar-header">
-        {sidebarOpen && (
-          <img src={Logo} alt="Logo" style={{ height: 35 }} />
-        )}
-      </div> */}
-
       {/* Menu */}
       <nav className="sidebar-nav">
         <div className="menu-section">
           {menuItems.map((item) => (
             <div key={item.name}>
-              
+
               {/* Main Menu */}
-              <div
-                className={`nav-item ${
-                  location.pathname === item.route ? "active" : ""
-                }`}
-                onClick={() => {
-                //   if (item.children) {
-                //     setOpenMenu(openMenu === item.name ? null : item.name);
-                //   } else {
+              <Tooltip
+                title={!sidebarOpen ? item.name : ""}
+                placement="right"
+                arrow
+              >
+                <div
+                  className={`nav-item ${location.pathname === item.route ? "active" : ""
+                    }`}
+                  onClick={() => {
+                    //   if (item.children) {
+                    //     setOpenMenu(openMenu === item.name ? null : item.name);
+                    //   } else {
                     navigate(item.route);
                     setIsDashborad(item.name === "Dashboard");
-                  //}
-                }}
-              >
-                {item.icon}
-                {sidebarOpen && <span>{item.name}</span>}
-              </div>
+                    //}
+                  }}
+                >
+
+                  {item.icon}
+                  {sidebarOpen && <span>{item.name}</span>}
+                </div>
+              </Tooltip>
+
 
               {/* Submenu */}
               {item.children && openMenu === item.name && (

@@ -57,7 +57,6 @@ export const GetApi = (url, headers = {}, isDashboard = false) => {
   })
     .then(async (response) => {
       if (response.status === 401) {
-        console.error("Unauthorized - JWT missing/invalid");
         localStorage.removeItem("token");
         localStorage.setItem("unAuthorized", true)
         if (isDashboard) return

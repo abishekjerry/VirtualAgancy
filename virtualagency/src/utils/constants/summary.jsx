@@ -41,24 +41,24 @@ export const getClientInfo = (fields = {}, formData = {}, formDataList = {}, get
     { label: getLabel("lbl36"), value: response ? source.pmgEntityname : getOptionLabel(formDataList.pmgEntity, source.pmgEntity) }
   ];
 };
-export const getEnquiryDetails = (formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
+export const getEnquiryDetails = (formData = {}, dynamicData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
   const source = response || formData;
   return [
-    { label: getLabel("lbl42"), value: response ? source.projectNo : source.projectNo },
+    { label: getLabel("lbl42"), value: `${source.projectNo || source.projectNo || "-"}` },
     { label: getLabel("lbl43"), value: response ? source.estdate : source.estdate },
     { label: getLabel("lbl44"), value: response ? source.briefdate : source.briefdate },
     { label: getLabel("lbl45"), value: response ? source.projectDesc : source.projectDesc },
     { label: getLabel("lbl46"), value: response ? source.projectQuotetype : source.projectQuoteType },
     { label: getLabel("lbl47"), value: response ? source.year : source.year },
     { label: getLabel("lbl93"), value: response ? source.managementFeetype : source.managementFeetype },
-    { label: getLabel("lbl94"), value: response ? source.hybridModel : source.hybrid == 1 ? "Yes" : "No" },
+    { label: getLabel("lbl94"), value: `${source.hybridModel || source.hybrid == 1 ? "Yes" : "No" || "-"}` },
     { label: getLabel("lbl95"), value: response ? source.attribute : source.attribute },
-    { label: getLabel("lbl49"), value: response ? source.slaTemplatename : getOptionLabel(formDataList.slaTemplate, source.slaTemplate) },
-    { label: getLabel("lbl54"), value: response ? `${source.quotestartdate} - ${source.quoteenddate}` : `${""} - ${""}` },
-    { label: getLabel("lbl55"), value: response ? `${source.proofstartdate} - ${source.proofenddate}` : `${""} - ${""}` },
-    { label: getLabel("lbl56"), value: response ? `${source.productionstartdate} - ${source.productionenddate}` : `${""} - ${""}` },
-    { label: getLabel("lbl57"), value: response ? `${source.filecopiesstartdate} - ${source.filecopiesenddate}` : `${""} - ${""}` },
-    { label: getLabel("lbl58"), value: response ? `${source.invoicestartdate} - ${source.invoiceenddate}` : `${""} - ${""}` }
+    { label: getLabel("lbl49"), value: `${source.slaTemplatename || getOptionLabel(formDataList.slaTemplate, source.slaTemplate) || "-"}` },
+    { label: getLabel("lbl54"), value: `${source.quotestartdate || dynamicData?.quotestartdate || "-"} - ${source.quoteenddate || dynamicData?.quoteenddate || "-"}` },
+    { label: getLabel("lbl55"), value: `${source.proofstartdate || dynamicData?.proofstartdate || "-"} - ${source.proofenddate || dynamicData?.proofenddate || "-"}` },
+    { label: getLabel("lbl56"), value: `${source.productionstartdate || dynamicData?.productionstartdate || "-"} - ${source.productionenddate || dynamicData?.productionenddate || "-"}` },
+    { label: getLabel("lbl57"), value: `${source.filecopiesstartdate || dynamicData?.filecopiesstartdate || "-"} - ${source.filecopiesenddate || dynamicData?.filecopiesenddate || "-"}` },
+    { label: getLabel("lbl58"), value: `${source.invoicestartdate || dynamicData?.invoicestartdate || "-"} - ${source.invoiceenddate || dynamicData?.invoiceenddate || "-"}` }
   ];
 };
 

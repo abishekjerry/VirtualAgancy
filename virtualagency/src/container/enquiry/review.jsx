@@ -36,14 +36,13 @@ const Review = () => {
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(0); // first item open by default
     const [formDataList, setFormDataList] = useState({
-        suppliers: [],
-        lineItems: [],
         clientInfo: [],
-        enquiryDetails: []
+        enquiryDetails: [],
+        lineItems: [],
+        suppliers: [],
     });
-
+    const id = state?.id > 0 ? state.id : 0;
     useEffect(() => {
-        const id = state?.id > 0 ? state.id : 0;
         const fetchData = async () => {
             try {
                 setLoading(true);
@@ -73,8 +72,10 @@ const Review = () => {
         fetchData();
     }, []);
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const enquiryDetails = getEnquiryDetails({}, {},{}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
+
+
 
     return (
         <>
@@ -120,7 +121,6 @@ const Review = () => {
                         </PGrid>
 
                         {/*Enquiry Details*/}
-
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
                                 title={`Step 2: ${getLabel("lbl21")}`}
@@ -153,15 +153,9 @@ const Review = () => {
 
                         {/*Line items*/}
                         {lineItems.map((item, index) => (
-                            <PCard
-                                key={index}
-                                className="bg-light mt-3"
-                                title={item.itemTitle}
-                                icon={<Inventory2Icon />}
-                                color={CommonColors.yellow.main}
-                                collapsible
-                                isOpen={open === index}
-                                onToggle={() => setOpen(index)}
+                            <PCard key={index} className="bg-light mt-3" title={item.itemTitle}
+                                icon={<Inventory2Icon />} color={CommonColors.yellow.main} collapsible
+                                isOpen={open === index} onToggle={() => setOpen(index)}
                                 rightAction={
                                     <PButton
                                         label="Edit"
@@ -199,7 +193,7 @@ const Review = () => {
                                 </PGrid>
                             </PCard>
                         ))}
-                        
+
                         {/* Suppliers */}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard

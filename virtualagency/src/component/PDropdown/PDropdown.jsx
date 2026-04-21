@@ -89,10 +89,6 @@ const PDropdown = ({
         borderWidth: "1.5px",
         boxShadow: "0 0 0 3px rgba(98,188,216,0.15)"
       },
-
-      // "&.Mui-error fieldset": {
-      //   borderColor: "#d32f2f"
-      // }
     },
 
     "& .MuiFormHelperText-root": {
@@ -120,7 +116,9 @@ const PDropdown = ({
       <Autocomplete
         options={options}
         value={selectedOption}
-        disableClearable={!selectedOption}
+        disableClearable
+        disabled={readOnly}
+        //disableClearable={!selectedOption}
         getOptionLabel={(option) => option?.label || ""}
         isOptionEqualToValue={(option, value) => option.value === value?.value}
         renderOption={(props, option) => (

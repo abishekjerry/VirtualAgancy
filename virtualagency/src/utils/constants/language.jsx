@@ -22,7 +22,6 @@ export const LanguageProvider = ({ children }) => {
         localStorage.removeItem("lang");
       }
     } catch (error) {
-      console.error(error);
       setLabels({});
       localStorage.removeItem("lang");
     }

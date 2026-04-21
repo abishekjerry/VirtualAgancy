@@ -39,7 +39,7 @@ const Suppliers = () => {
     const [formDataList, setFormDataList] = useState({
         country: [],
         print: [],
-        suppiers: [],
+        suppliers: [],
         selectedRows: [],
 
         //editable states
@@ -61,7 +61,7 @@ const Suppliers = () => {
                     ...prev,
                     country: response.country,
                     print: response.printcapabilities,
-                    suppiers: supplierResponse,
+                    suppliers: supplierResponse,
                 }));
 
                 if (id !== 0) {
@@ -75,6 +75,7 @@ const Suppliers = () => {
                         lineItems: data.enqlineItems,
                         supplier: data.supplierinfo,
                     }))
+
                 }
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -91,8 +92,7 @@ const Suppliers = () => {
         { field: "suppliercode", header: "Supplier Code" },
     ];
 
-    let filteredData = formDataList.suppiers;
-
+    let filteredData = formDataList.suppliers;
     // Country filter
     if (country) {
         filteredData = filteredData.filter(
@@ -113,7 +113,6 @@ const Suppliers = () => {
         );
     }
     const data = filteredData;
-
     const handleValidationChange = (rows) => {
         const isValid = rows.length > 0;
         setFormDataList(prev => ({
@@ -126,14 +125,14 @@ const Suppliers = () => {
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const rawLineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
         items: item.data
     }));
     const suppliers = getSuppliers(formDataList.suppiers, formDataList.supplier)
-    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel});
+    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel });
 
 
     const handleSubmit = async () => {
@@ -152,7 +151,6 @@ const Suppliers = () => {
                 SelectedSuppliers: supplierIds,
                 ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
             };
-            console.log(payload, rows);
             const response = await PostApi(Suppliers_API.AddUpdateSuppliers, payload);
             if (isSuccess(response)) {
                 setAllowRedirect(true);
@@ -165,7 +163,6 @@ const Suppliers = () => {
             } else {
                 toast(Labels.status.failure, response.data.message);
             }
-
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {

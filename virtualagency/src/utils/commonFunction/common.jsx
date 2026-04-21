@@ -33,7 +33,7 @@ export const allowOnlyNumbers = (value, min = 0, max = 9) => {
 };
 
 export const allowDecimal = (value = "") => {
-  return value.replace(/[^0-9.]/g, "").replace(/(\..*?)\..*/g, "$1").slice(0, 10);
+  return  value.replace(/[^0-9.]/g, "").replace(/^0(\.|$)/, "").replace(/(\..*?)\..*/g, "$1").replace(/^(\d+)(\.\d{0,2}).*$/, "$1$2").slice(0, 10);
 };
 
 export function allowOnlyAlphabets(value = "") {

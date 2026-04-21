@@ -76,10 +76,6 @@ const EnquiryDetails = () => {
 
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
-    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails(formData, formDataList, getLabel, getOptionLabel, id ? formDataList.enquiryDetails : null);
-    const sections = getSummarySections({ clientInfo, enquiryDetails, getLabel });
-
 
     const [slaTemplateData, setSlaTemplateData] = useState(null)
     const [phaseDates, setPhaseDates] = useState([]);
@@ -176,7 +172,7 @@ const EnquiryDetails = () => {
             [name]: ""   // clear only that field error
         }));
         if (name === Labels.enquiryDetails.slaTemplate) {
-            slaTemplateData(value);
+            slaTemplate(value);
         }
 
     };
@@ -338,6 +334,9 @@ const EnquiryDetails = () => {
         calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
     };
 
+    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
+    const enquiryDetails = getEnquiryDetails(formData, dynamicData, formDataList, getLabel, getOptionLabel, id ? formDataList.enquiryDetails : null);
+    const sections = getSummarySections({ clientInfo, enquiryDetails, getLabel });
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>

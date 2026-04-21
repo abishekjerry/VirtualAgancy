@@ -118,7 +118,7 @@ const EqDashboard = () => {
           setChartOrginalData(formattedChartData);
         }
       } catch (error) {
-        console.error("API Error", error);
+        toast(Labels.status.failure, response.data.message);
       } finally {
         setLoading(false);
       }
@@ -318,7 +318,6 @@ const EqDashboard = () => {
       ...prev,
       startDate: "",
       endDate: "",
-      country: "",
       user: "",
       search: "",
       status: ""
@@ -475,6 +474,7 @@ const EqDashboard = () => {
                     options={country}
                     width={Labels.fontSize.xxxxl}
                     flag={Labels.flag.auto}
+                    readOnly={role === "Admin" ? false : true}
                   />
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={3}>
