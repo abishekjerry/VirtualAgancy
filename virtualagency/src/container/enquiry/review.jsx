@@ -75,104 +75,6 @@ const Review = () => {
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
-    // const data = [
-    //     { label: getLabel("lbl27"), value: formDataList.clientInfo.entityname, color: "primary" },
-    //     { label: getLabel("lbl28"), value: formDataList.clientInfo.createdByUser, color: "success" },
-    //     { label: getLabel("lbl09"), value: formDataList.clientInfo.country, color: "info" },
-    //     { label: getLabel("lbl29"), value: formDataList.clientInfo.entityname, color: "warning" },
-
-    //     { label: getLabel("lbl30"), value: formDataList.clientInfo.bussinessUnit, color: "danger" },
-    //     { label: getLabel("lbl91"), value: formDataList.clientInfo.globalBussinessUnit, color: "secondary" },
-    //     { label: getLabel("lbl92"), value: formDataList.clientInfo.aboveorAtmarket, color: "dark" },
-    //     { label: getLabel("lbl33"), value: formDataList.clientInfo.brand, color: "primary" },
-
-    //     { label: getLabel("lbl34"), value: formDataList.clientInfo.deliveryCountryname, color: "success" },
-    //     { label: getLabel("lbl35"), value: formDataList.clientInfo.clientContact, color: "info" },
-    //     { label: getLabel("lbl36"), value: formDataList.clientInfo.pmgEntityname, color: "warning" },
-
-    // ];
-
-    // const enquiryDetails = [
-    //     { label: getLabel("lbl42"), value: formDataList.enquiryDetails.projectNo, color: "primary" },
-    //     { label: getLabel("lbl43"), value: formDataList.enquiryDetails.estdate, color: "warning" },
-    //     { label: getLabel("lbl44"), value: formDataList.enquiryDetails.briefdate, color: "danger" },
-    //     { label: getLabel("lbl45"), value: formDataList.enquiryDetails.projectDesc, color: "success" },
-    //     { label: getLabel("lbl46"), value: formDataList.enquiryDetails.projectQuotetype, color: "info" },
-    //     { label: getLabel("lbl47"), value: formDataList.enquiryDetails.year, color: "secondary" },
-    //     { label: getLabel("lbl93"), value: formDataList.enquiryDetails.managementFeetype, color: "warning" },
-    //     { label: getLabel("lbl94"), value: formDataList.enquiryDetails.hybridModel, color: "danger" },
-    //     { label: getLabel("lbl95"), value: formDataList.enquiryDetails.attribute, color: "info" },
-    //     { label: getLabel("lbl49"), value: formDataList.enquiryDetails.slaTemplatename, color: "dark" },
-
-
-    //     { label: getLabel("lbl54"), value: `${formDataList.enquiryDetails.quotestartdate} - ${formDataList.enquiryDetails.quoteenddate}`, color: "primary" },
-    //     { label: getLabel("lbl55"), value: `${formDataList.enquiryDetails.proofstartdate} - ${formDataList.enquiryDetails.proofenddate}`, color: "success" },
-    //     { label: getLabel("lbl56"), value: `${formDataList.enquiryDetails.productionstartdate} - ${formDataList.enquiryDetails.productionenddate}`, color: "warning" },
-    //     { label: getLabel("lbl57"), value: `${formDataList.enquiryDetails.filecopiesstartdate} - ${formDataList.enquiryDetails.filecopiesenddate}`, color: "danger" },
-    //     { label: getLabel("lbl58"), value: `${formDataList.enquiryDetails.invoicestartdate} - ${formDataList.enquiryDetails.invoiceenddate}`, color: "info" }
-    // ];
-
-    // const lineItemMapping = [
-    //     { key: "printornonprint", label: "lbl62" },
-    //     { key: "tojabc", label: "lbl60" },
-    //     { key: "localRateCard", label: "lbl65" },
-    //     { key: "competbidmandate", label: "lbl96" },
-    //     { key: "competbidcomplaint", label: "lbl97" },
-    //     { key: "competbidexception", label: "lbl98" },
-    //     { key: "exceptionreason", label: "lbl99" },
-
-    //     { key: "productcategory", label: "lbl61" },
-    //     { key: "subCategory", label: "lbl100" },
-    //     { key: "simplex", label: "lbl101" },
-    //     { key: "tcOapproval", label: "lbl102" },
-    //     { key: "tcOapproved", label: "lbl103" },
-
-    //     { key: "dictatedJob", label: "lbl63" },
-    //     { key: "itemtype", label: "lbl64" },
-    //     { key: "incoterm", label: "lbl152" },
-    //     { key: "itemName", label: "lbl66" },
-    //     { key: "itemDescription", label: "lbl67" },
-
-    //     { key: "usingFSCMaterial", label: "lbl70" },
-    //     { key: "oekotexCertification", label: "lbl151" },
-    //     { key: "designedforrecycling", label: "lbl71" },
-    //     { key: "plasticapartfromPLA", label: "lbl75" },
-    //     { key: "proposedwithsustainabilityoption", label: "lbl72" },
-    //     { key: "containrecycledmaterial", label: "lbl73" },
-    //     { key: "containrecycledplastic", label: "lbl76" },
-    //     { key: "weightageofrecycledmaterial", label: "lbl79" },
-    //     { key: "isthisitemdesignedtobereused", label: "lbl74" },
-
-    //     { key: "rateCard", label: "lbl106" },
-    //     { key: "eauction", label: "lbl110" },
-    //     { key: "promoOSSOrderWindows", label: "lbl107" },
-    //     { key: "regionalname", label: "lbl108" },
-    //     { key: "catalogueUsage", label: "lbl109" },
-    //     { key: "printingMethod", label: "lbl111" },
-    //     { key: "typeofitem", label: "lbl112" },
-    //     { key: "noofmaterials", label: "lbl113" },
-    //     { key: "digitalInnovation", label: "lbl114" },
-    //     { key: "innovation", label: "lbl115" },
-    //     { key: "sourcinglocation", label: "lbl116" },
-    //     { key: "savingstype", label: "lbl117" },
-    //     { key: "savingsreason", label: "lbl118" },
-    //     { key: "oWlink", label: "lbl119" },
-
-    //     { key: "quoteType", label: "lbl89" },
-    //     { key: "quoteQtyOrSize", label: "lbl87" },
-    //     { label: "Attachment", value: "No Files" },
-    //     { key: "version", label: "lbl85" },
-    //     { key: "specNote", label: "lbl83" },
-    //     { key: "sNote", label: "lbl86" }
-    // ];
-    // const lineItems = formDataList.lineItems.map((item, index) => ({
-    //     itemTitle: `Item ${index + 1}`,
-    //     itemColor: "warning",
-    //     data: lineItemMapping.map(field => ({
-    //         label: field.label === "Attachment" ? field.label : getLabel(field.label),
-    //         value: field.key ? (item[field.key] ? item[field.key] : "-") : field.value
-    //     }))
-    // }));
 
     return (
         <>
@@ -182,6 +84,7 @@ const Review = () => {
                 </PGrid>
                 <PGrid container className={Labels.margin.mb4} >
                     <PGrid item xs={12} sm={12} md={12}>
+
                         {/*Client Info*/}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
@@ -296,6 +199,7 @@ const Review = () => {
                                 </PGrid>
                             </PCard>
                         ))}
+                        
                         {/* Suppliers */}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
