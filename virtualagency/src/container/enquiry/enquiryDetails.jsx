@@ -77,7 +77,7 @@ const EnquiryDetails = () => {
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails(formData, formDataList, getLabel, getOptionLabel, id ? formDataList.clientInfo : null);
+    const enquiryDetails = getEnquiryDetails(formData, formDataList, getLabel, getOptionLabel, id ? formDataList.enquiryDetails : null);
     const sections = getSummarySections({ clientInfo, enquiryDetails, getLabel });
 
 

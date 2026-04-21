@@ -11,14 +11,24 @@ export default function PCard({
   onBackClick,
   children,
   className = "",
-  color
+  color,
+  collapsible = false,   // 👈 new
+  isOpen = true,         // 👈 new
+  onToggle
 }) {
   return (
     <div className={`pcard-container ${className}`}>
 
       {title && (
-        <div className={`pcard-header ${icon || rightAction ? "text-white px-3 py-2 d-flex justify-content-between align-items-center" : ""}`}
-          style={icon || rightAction ? { margin: "-15px -15px 10px -15px", backgroundColor: color || "#1565C0" } : {}} >
+        <div
+          className={`pcard-header ${icon || rightAction ? "text-white px-3 py-2 d-flex justify-content-between align-items-center" : ""}`}
+          style={
+            icon || rightAction
+              ? { margin: "-15px -15px 10px -15px", backgroundColor: color || "#1565C0", cursor: collapsible ? "pointer" : "default" }
+              : {}
+          }
+          onClick={collapsible ? onToggle : undefined}
+        >
           <div className="d-flex align-items-center gap-2">
             {!icon && <div className="pcard-side" />}
             {icon && icon}
@@ -27,9 +37,16 @@ export default function PCard({
           {(rightAction || onBackClick) ? (
             <div className="pcard-side pcard-back-button-wrapper">
               {rightAction ? (
-                rightAction
+                <div onClick={(e) => e.stopPropagation()}>
+                  {rightAction}
+                </div>
               ) : onBackClick ? (
-                <IconButton onClick={onBackClick} className={icon || rightAction ? "text-white" : "pcard-back-button"}>
+                <IconButton
+                  onClick={(e) => { e.stopPropagation();
+                    onBackClick();
+                  }}
+                  className={icon || rightAction ? "text-white" : "pcard-back-button"}
+                >
                   <ArrowBackIcon />
                 </IconButton>
               ) : null}
@@ -40,7 +57,7 @@ export default function PCard({
         </div>
       )}
       <div className="pcard-content">
-        {children}
+        {collapsible ? isOpen && children : children}
       </div>
     </div>
   );

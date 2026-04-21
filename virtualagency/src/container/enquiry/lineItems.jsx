@@ -25,6 +25,8 @@ import { Dashboard_API, LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import PreviewDialog from "../../component/PDialog/PPreviewDialog";
+import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
+import { PSummary } from "../../component/PSumary/PSummary";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -51,6 +53,7 @@ const LineItems = () => {
         sourcingLocation: [],
         savingsType: [],
         savingsReason: [],
+        printingMethod: [],
         yesNoNa: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "N/A", value: 3, selected: true }],
         yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
         tcoYesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
@@ -58,6 +61,11 @@ const LineItems = () => {
         competitiveBiddingExceptionFormSigned: [],
         simplex: [{ label: "Non-Simplex", value: 1 }, { label: "Simplex", value: 2 }, { label: "Not Applicable", value: 3 }],
         quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 }, { label: "Quote of Quantity & Size 3D", value: 3 }],
+
+        //editable states
+        clientInfo: [],
+        enquiryDetails: [],
+        lineItems: [],
     });
 
     const [formData, setFormData] = useState({
@@ -186,6 +194,15 @@ const LineItems = () => {
     const flatSize = type === 3 ? (+formData.length || 0) * (+formData.width || 0) * (+formData.depth || 0) : (+formData.length || 0) * (+formData.width || 0);
     const totalSize = flatSize * (+formData.quantity || 0);
 
+    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
+    const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const rawLineItems = getLineneItems(formData, formDataList, getLabel, getOptionLabel, formDataList.lineItems);
+    const lineItems = rawLineItems.map((item, index) => ({
+        subTitle: `${item.itemTitle}`,
+        items: item.data
+    }));
+    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel});
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -195,6 +212,18 @@ const LineItems = () => {
                     ...prev,
                     category: response.typeofJob,
                 }));
+
+                if (id !== 0) {
+                    const data = await PostApi(Dashboard_API.GetDetails, {
+                        Enquiryid: id,
+                    });
+                    setFormDataList(prev => ({
+                        ...prev,
+                        clientInfo: data.enqClientinfo,
+                        enquiryDetails: data.enqProjectinfo,
+                        lineItems: data.enqlineItems,
+                    }))
+                }
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -230,13 +259,14 @@ const LineItems = () => {
         localCatalog: getSelectedValue(formDataList.localCatalog),
         regionalOrder: getSelectedValue(formDataList.regionalOrder),
         typeOfItem: getSelectedValue(formDataList.typeOfItem),
+        printingMethod: getSelectedValue(formDataList.printingMethod),
     }), [formDataList]);
 
     useEffect(() => {
-        const { yesOrNo, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem } = selectedValues;
+        const { yesOrNo, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem, printingMethod } = selectedValues;
         setFormData(prev => {
             if (prev.incoterm === incoterm && prev.globalOrderWindowCatalogueName === globalOrder && prev.localCatalogueName === localCatalog &&
-                prev.regionalOrderWindowCatalogue === regionalOrder && prev.typeOfItem === typeOfItem
+                prev.regionalOrderWindowCatalogue === regionalOrder && prev.typeOfItem === typeOfItem, prev.printingMethod === printingMethod
             ) {
                 return prev;
             }
@@ -259,7 +289,6 @@ const LineItems = () => {
                     eAuction: yesOrNo,
                     owWithLink: yesOrNo,
                     dictatedJob: yesOrNo,
-                    printingMethod: yesOrNo,
                     rateCard: yesOrNo,
                 }),
                 ...(incoterm && { incoterm: incoterm }),
@@ -267,6 +296,7 @@ const LineItems = () => {
                 ...(regionalOrder && { regionalOrderWindowCatalogue: regionalOrder }),
                 ...(localCatalog && { localCatalogueName: localCatalog }),
                 ...(typeOfItem && { typeOfItem: typeOfItem }),
+                ...(printingMethod && { printingMethod: printingMethod })
             };
         });
 
@@ -289,6 +319,7 @@ const LineItems = () => {
                 regionalOrder: response.regionalOrder,
                 sourcingLocation: response.sourcingLocation,
                 savingsType: response.savingsType,
+                printingMethod: response.printingMethod,
             }));
 
         } catch (error) {
@@ -374,10 +405,10 @@ const LineItems = () => {
         }));
     };
 
+    const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+    const id = state?.id > 0 ? state.id : 0;
     const handleSubmit = async () => {
         const isValid = LineItemsValidation();
-        const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
-        const id = state?.id > 0 ? state.id : 0;
         if (isValid) {
             try {
                 setLoading(true);
@@ -471,6 +502,7 @@ const LineItems = () => {
             setAllowRedirect(false);
         }
     };
+
     const handleBack = () => {
         if (window.history.length > 1) {
             navigate(labelRoutes.enquiryDetails, {
@@ -480,6 +512,7 @@ const LineItems = () => {
             navigate(labelRoutes.home); // fallback route
         }
     };
+
     const LineItemsValidation = () => {
         const requiredFields = [
             Labels.lineItems.category,
@@ -567,10 +600,10 @@ const LineItems = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-
     const handleExitDraft = () => {
         setOpen(true);
     };
+
     const handlePreview = (index) => {
         setCurrentIndex(index);
         setPreviewOpen(true);
@@ -1012,7 +1045,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.printingMethod}
                                         name={Labels.lineItems.printingMethod}
-                                        options={formDataList.yesOrNo}
+                                        options={formDataList.printingMethod}
 
                                     />
                                 </PGrid>
@@ -1429,6 +1462,7 @@ const LineItems = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
+                        <PSummary sections={sections} currentStep={3} />
                     </PGrid>
                 </PGrid>
             </Box>

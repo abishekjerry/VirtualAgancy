@@ -9,7 +9,7 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { getEnquirySteps, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
+import { getEnquirySteps, getOptionLabel, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import PSearch from "../../component/PSearch/PSearch";
 import PTable from "../../component/PTable/PTable";
@@ -18,6 +18,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import { PostApi } from "../../utils/api/networking";
 import { Dashboard_API, Suppliers_API } from "../../utils/api/apiUrl";
+import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections, getSuppliers } from "../../utils/constants/summary";
+import { PSummary } from "../../component/PSumary/PSummary";
 const Suppliers = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
@@ -38,7 +40,13 @@ const Suppliers = () => {
         country: [],
         print: [],
         suppiers: [],
-        selectedRows: []
+        selectedRows: [],
+
+        //editable states
+        clientInfo: [],
+        enquiryDetails: [],
+        lineItems: [],
+        supplier: []
     });
     useEffect(() => {
         const fetchData = async () => {
@@ -55,6 +63,19 @@ const Suppliers = () => {
                     print: response.printcapabilities,
                     suppiers: supplierResponse,
                 }));
+
+                if (id !== 0) {
+                    const data = await PostApi(Dashboard_API.GetDetails, {
+                        Enquiryid: id,
+                    });
+                    setFormDataList(prev => ({
+                        ...prev,
+                        clientInfo: data.enqClientinfo,
+                        enquiryDetails: data.enqProjectinfo,
+                        lineItems: data.enqlineItems,
+                        supplier: data.supplierinfo,
+                    }))
+                }
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -101,6 +122,20 @@ const Suppliers = () => {
         }));
         setIsValidation(isValid);
     };
+
+    const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+    const id = state?.id > 0 ? state.id : 0;
+    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
+    const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const rawLineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
+    const lineItems = rawLineItems.map((item, index) => ({
+        subTitle: `${item.itemTitle}`,
+        items: item.data
+    }));
+    const suppliers = getSuppliers(formDataList.suppiers, formDataList.supplier)
+    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel});
+
+
     const handleSubmit = async () => {
         const rows = formDataList.selectedRows || [];
         const isValid = rows.length > 0;
@@ -110,8 +145,6 @@ const Suppliers = () => {
             return;
         }
         const supplierIds = rows.map(r => r.supplierId).join(",");
-        const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
-        const id = state?.id > 0 ? state.id : 0;
         try {
             setLoading(true);
             const payload = {
@@ -141,7 +174,9 @@ const Suppliers = () => {
     };
     const handleBack = () => {
         if (window.history.length > 1) {
-            navigate(labelRoutes.lineItems);
+            navigate(labelRoutes.lineItems, {
+                state: { id: id }
+            });
         } else {
             navigate(labelRoutes.home); // fallback route
         }
@@ -269,7 +304,7 @@ const Suppliers = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-
+                        <PSummary sections={sections} currentStep={4} />
                     </PGrid>
                 </PGrid>
             </Box>

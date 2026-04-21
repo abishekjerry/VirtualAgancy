@@ -10,7 +10,7 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { getEnquirySteps, toast } from "../../utils/commonFunction/common";
+import { getEnquirySteps, getOptionLabel, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { useNavigate, useLocation } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
@@ -25,6 +25,7 @@ import BusinessIcon from "@mui/icons-material/Business";
 import SaveIcon from "@mui/icons-material/Save";
 import { Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
+import { getClientInfo, getEnquiryDetails, getLineneItems } from "../../utils/constants/summary";
 
 const Review = () => {
     const { getLabel } = useLanguage();
@@ -33,11 +34,12 @@ const Review = () => {
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [open, setOpen] = useState(0); // first item open by default
     const [formDataList, setFormDataList] = useState({
         suppliers: [],
         lineItems: [],
         clientInfo: [],
-        enquiryDetails : []
+        enquiryDetails: []
     });
 
     useEffect(() => {
@@ -59,7 +61,7 @@ const Review = () => {
                     suppliers: suppliers,
                     lineItems: response.enqlineItems,
                     clientInfo: response.enqClientinfo,
-                    enquiryDetails : response.enqProjectinfo
+                    enquiryDetails: response.enqProjectinfo
                 }));
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -70,105 +72,108 @@ const Review = () => {
 
         fetchData();
     }, []);
-    const data = [
-        { label: getLabel("lbl27"), value: formDataList.clientInfo.entityname , color: "primary" },
-        { label: getLabel("lbl28"), value: formDataList.clientInfo.createdByUser, color: "success" },
-        { label: getLabel("lbl09"), value: formDataList.clientInfo.country, color: "info" },
-        { label: getLabel("lbl29"), value: formDataList.clientInfo.entityname, color: "warning" },
+    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
+    const enquiryDetails = getEnquiryDetails({}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
+    // const data = [
+    //     { label: getLabel("lbl27"), value: formDataList.clientInfo.entityname, color: "primary" },
+    //     { label: getLabel("lbl28"), value: formDataList.clientInfo.createdByUser, color: "success" },
+    //     { label: getLabel("lbl09"), value: formDataList.clientInfo.country, color: "info" },
+    //     { label: getLabel("lbl29"), value: formDataList.clientInfo.entityname, color: "warning" },
 
-        { label: getLabel("lbl30"), value: formDataList.clientInfo.bussinessUnit , color: "danger" },
-        { label: getLabel("lbl91"), value: formDataList.clientInfo.globalBussinessUnit, color: "secondary" },
-        { label: getLabel("lbl92"), value: formDataList.clientInfo.aboveorAtmarket, color: "dark" },
-        { label: getLabel("lbl33"), value: formDataList.clientInfo.brand, color: "primary" },
+    //     { label: getLabel("lbl30"), value: formDataList.clientInfo.bussinessUnit, color: "danger" },
+    //     { label: getLabel("lbl91"), value: formDataList.clientInfo.globalBussinessUnit, color: "secondary" },
+    //     { label: getLabel("lbl92"), value: formDataList.clientInfo.aboveorAtmarket, color: "dark" },
+    //     { label: getLabel("lbl33"), value: formDataList.clientInfo.brand, color: "primary" },
 
-        { label: getLabel("lbl34"), value: formDataList.clientInfo.deliveryCountryname, color: "success" },
-        { label: getLabel("lbl35"), value: formDataList.clientInfo.clientContact, color: "info" },
-        { label: getLabel("lbl36"), value: formDataList.clientInfo.pmgEntityname, color: "warning" },
+    //     { label: getLabel("lbl34"), value: formDataList.clientInfo.deliveryCountryname, color: "success" },
+    //     { label: getLabel("lbl35"), value: formDataList.clientInfo.clientContact, color: "info" },
+    //     { label: getLabel("lbl36"), value: formDataList.clientInfo.pmgEntityname, color: "warning" },
 
-    ];
+    // ];
 
-    const enquiryDetails = [
-        { label: getLabel("lbl42"), value: formDataList.enquiryDetails.projectNo , color: "primary" },
-        { label: getLabel("lbl43"), value: formDataList.enquiryDetails.estdate, color: "warning" },
-        { label: getLabel("lbl44"), value: formDataList.enquiryDetails.briefdate , color: "danger" },
-        { label: getLabel("lbl45"), value: formDataList.enquiryDetails.projectDesc , color: "success" },
-        { label: getLabel("lbl46"), value: formDataList.enquiryDetails.projectQuotetype, color: "info" },
-        { label: getLabel("lbl47"), value: formDataList.enquiryDetails.year , color: "secondary" },
-        { label: getLabel("lbl93"), value: formDataList.enquiryDetails.managementFeetype, color: "warning" },
-        { label: getLabel("lbl94"), value: formDataList.enquiryDetails.hybridModel , color: "danger" },
-        { label: getLabel("lbl95"), value: formDataList.enquiryDetails.attribute, color: "info" },
-        { label: getLabel("lbl49"), value: formDataList.enquiryDetails.slaTemplatename, color: "dark" },
+    // const enquiryDetails = [
+    //     { label: getLabel("lbl42"), value: formDataList.enquiryDetails.projectNo, color: "primary" },
+    //     { label: getLabel("lbl43"), value: formDataList.enquiryDetails.estdate, color: "warning" },
+    //     { label: getLabel("lbl44"), value: formDataList.enquiryDetails.briefdate, color: "danger" },
+    //     { label: getLabel("lbl45"), value: formDataList.enquiryDetails.projectDesc, color: "success" },
+    //     { label: getLabel("lbl46"), value: formDataList.enquiryDetails.projectQuotetype, color: "info" },
+    //     { label: getLabel("lbl47"), value: formDataList.enquiryDetails.year, color: "secondary" },
+    //     { label: getLabel("lbl93"), value: formDataList.enquiryDetails.managementFeetype, color: "warning" },
+    //     { label: getLabel("lbl94"), value: formDataList.enquiryDetails.hybridModel, color: "danger" },
+    //     { label: getLabel("lbl95"), value: formDataList.enquiryDetails.attribute, color: "info" },
+    //     { label: getLabel("lbl49"), value: formDataList.enquiryDetails.slaTemplatename, color: "dark" },
 
 
-        { label: getLabel("lbl54"), value: `${formDataList.enquiryDetails.quotestartdate} - ${formDataList.enquiryDetails.quoteenddate}`, color: "primary" },
-        { label: getLabel("lbl55"), value: `${formDataList.enquiryDetails.proofstartdate} - ${formDataList.enquiryDetails.proofenddate}`, color: "success" },
-        { label: getLabel("lbl56"), value: `${formDataList.enquiryDetails.productionstartdate} - ${formDataList.enquiryDetails.productionenddate}`, color: "warning" },
-        { label: getLabel("lbl57"), value: `${formDataList.enquiryDetails.filecopiesstartdate} - ${formDataList.enquiryDetails.filecopiesenddate}`, color: "danger" },
-        { label: getLabel("lbl58"), value: `${formDataList.enquiryDetails.invoicestartdate} - ${formDataList.enquiryDetails.invoiceenddate}`, color: "info" }
-    ];
+    //     { label: getLabel("lbl54"), value: `${formDataList.enquiryDetails.quotestartdate} - ${formDataList.enquiryDetails.quoteenddate}`, color: "primary" },
+    //     { label: getLabel("lbl55"), value: `${formDataList.enquiryDetails.proofstartdate} - ${formDataList.enquiryDetails.proofenddate}`, color: "success" },
+    //     { label: getLabel("lbl56"), value: `${formDataList.enquiryDetails.productionstartdate} - ${formDataList.enquiryDetails.productionenddate}`, color: "warning" },
+    //     { label: getLabel("lbl57"), value: `${formDataList.enquiryDetails.filecopiesstartdate} - ${formDataList.enquiryDetails.filecopiesenddate}`, color: "danger" },
+    //     { label: getLabel("lbl58"), value: `${formDataList.enquiryDetails.invoicestartdate} - ${formDataList.enquiryDetails.invoiceenddate}`, color: "info" }
+    // ];
 
-    const lineItemMapping = [
-        { label: "lbl62", value: "Print" },
-        { key: "tojabc", label: "lbl60" },
-        { key: "rateCard", label: "lbl65" },
-        { key: "competbidmandate", label: "lbl96" },
-        { key: "competbidcomplaint", label: "lbl97" },
-        { key: "competbidexception", label: "lbl98" },
-        { key: "exceptionreason", label: "lbl99" },
+    // const lineItemMapping = [
+    //     { key: "printornonprint", label: "lbl62" },
+    //     { key: "tojabc", label: "lbl60" },
+    //     { key: "localRateCard", label: "lbl65" },
+    //     { key: "competbidmandate", label: "lbl96" },
+    //     { key: "competbidcomplaint", label: "lbl97" },
+    //     { key: "competbidexception", label: "lbl98" },
+    //     { key: "exceptionreason", label: "lbl99" },
 
-        { key: "productcategory", label: "lbl61" },
-        { label: "lbl100", value: "Yes" },
-        { key: "simplex", label: "lbl101" },
-        { key: "tcOapproval", label: "lbl102" },
-        { key: "tcOapproved", label: "lbl103" },
+    //     { key: "productcategory", label: "lbl61" },
+    //     { key: "subCategory", label: "lbl100" },
+    //     { key: "simplex", label: "lbl101" },
+    //     { key: "tcOapproval", label: "lbl102" },
+    //     { key: "tcOapproved", label: "lbl103" },
 
-        { label: "lbl63", value: "New Item" },
-        { label: "lbl64", value: "New Item Values" },
-        { label: "lbl152", value: "Others" },
-        { key: "itemName",  label: "lbl66" },
-        { label: "lbl67", value: "Testing" },
+    //     { key: "dictatedJob", label: "lbl63" },
+    //     { key: "itemtype", label: "lbl64" },
+    //     { key: "incoterm", label: "lbl152" },
+    //     { key: "itemName", label: "lbl66" },
+    //     { key: "itemDescription", label: "lbl67" },
 
-        { key: "usingFSCMaterial",  label: "lbl70"  },
-        { key: "oekotexCertification", label: "lbl151" },
-        { key: "isthisitemdesignedtobereused", label: "lbl71" },
-        { key: "isthisitemdesignedtobereused", label: "lbl75"  },
-        { key: "sustainableOptionthatwasrejected", label: "lbl72" },
-        { key: "containrecycledmaterial", label: "lbl73" },
-        { key: "containrecycledplastic", label: "lbl76" },
-        { key: "weightageofrecycledmaterial", label: "lbl79" },
-        { key: "isthisitemdesignedtobereused",  label: "lbl74" },
+    //     { key: "usingFSCMaterial", label: "lbl70" },
+    //     { key: "oekotexCertification", label: "lbl151" },
+    //     { key: "designedforrecycling", label: "lbl71" },
+    //     { key: "plasticapartfromPLA", label: "lbl75" },
+    //     { key: "proposedwithsustainabilityoption", label: "lbl72" },
+    //     { key: "containrecycledmaterial", label: "lbl73" },
+    //     { key: "containrecycledplastic", label: "lbl76" },
+    //     { key: "weightageofrecycledmaterial", label: "lbl79" },
+    //     { key: "isthisitemdesignedtobereused", label: "lbl74" },
 
-        { label: "lbl106", value: "Yes" },
-        { key: "eauction", label: "lbl110" },
-        { key: "promoOSSOrderWindows", label: "lbl107" },
-        { key: "regionalname", label: "lbl108" },
-        { key: "catalogueUsage", label: "lbl109" },
-        { label: "lbl111", value: "Continuous" },
-        { key: "typeofitem", label: "lbl112" },
-        { key: "noofmaterials", label: "lbl113" },
-        { key: "digitalInnovation", label: "lbl114" },
-        { key: "innovation", label: "lbl115" },
-        { key: "sourcinglocation", label: "lbl116" },
-        { key: "savingstype", label: "lbl117" },
-        { key: "savingsreason", label: "lbl118" },
-        { key: "oWlink", label: "lbl119" },
+    //     { key: "rateCard", label: "lbl106" },
+    //     { key: "eauction", label: "lbl110" },
+    //     { key: "promoOSSOrderWindows", label: "lbl107" },
+    //     { key: "regionalname", label: "lbl108" },
+    //     { key: "catalogueUsage", label: "lbl109" },
+    //     { key: "printingMethod", label: "lbl111" },
+    //     { key: "typeofitem", label: "lbl112" },
+    //     { key: "noofmaterials", label: "lbl113" },
+    //     { key: "digitalInnovation", label: "lbl114" },
+    //     { key: "innovation", label: "lbl115" },
+    //     { key: "sourcinglocation", label: "lbl116" },
+    //     { key: "savingstype", label: "lbl117" },
+    //     { key: "savingsreason", label: "lbl118" },
+    //     { key: "oWlink", label: "lbl119" },
 
-        { key: "quoteType", label: "lbl89" },
-        { key: "quoteQtyOrSize", label: "lbl87" },
-        { label: "Attachment", value: "No Files" },
-        { key: "version", label: "lbl85" },
-        { key: "specNote", label: "lbl83" },
-        { key: "sNote", label: "lbl86" }
-    ];
-    const lineItems = formDataList.lineItems.map((item, index) => ({
-        itemTitle: `Item ${index + 1}`,
-        itemColor: "warning",
-        data: lineItemMapping.map(field => ({
-            label: field.label === "Attachment" ? field.label : getLabel(field.label),
-            value: field.key ? (item[field.key] ? item[field.key] : "-") : field.value
-        }))
-    }));
-    
+    //     { key: "quoteType", label: "lbl89" },
+    //     { key: "quoteQtyOrSize", label: "lbl87" },
+    //     { label: "Attachment", value: "No Files" },
+    //     { key: "version", label: "lbl85" },
+    //     { key: "specNote", label: "lbl83" },
+    //     { key: "sNote", label: "lbl86" }
+    // ];
+    // const lineItems = formDataList.lineItems.map((item, index) => ({
+    //     itemTitle: `Item ${index + 1}`,
+    //     itemColor: "warning",
+    //     data: lineItemMapping.map(field => ({
+    //         label: field.label === "Attachment" ? field.label : getLabel(field.label),
+    //         value: field.key ? (item[field.key] ? item[field.key] : "-") : field.value
+    //     }))
+    // }));
+
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -190,7 +195,7 @@ const Review = () => {
                                 }>
                                 <PGrid container className="g-4">
 
-                                    {data.map((item, i) => (
+                                    {clientInfo.map((item, i) => (
 
                                         <PGrid item xs={12} md={6} xl={3} key={i}>
                                             <PGrid className={`border-start border-${item.color} ps-2 mt-2`}>
@@ -244,54 +249,53 @@ const Review = () => {
                         </PGrid>
 
                         {/*Line items*/}
-                        <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
+                        {lineItems.map((item, index) => (
                             <PCard
-                                title={`Step 3: ${getLabel("lbl22")}`}
-                                icon={< ListAltIcon />}
-                                color={CommonColors.green.main}
-                                rightAction={<PButton label="Add" variant="outlined" size="small" startIcon={<AddIcon />}
-                                    //onClick={(e) => handleExitDraft(e)}
-                                    sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
-                                />
-                                }>
-                                {lineItems.map((item, index) => (
-                                    <PCard
-                                        className="bg-light mt-3"
-                                        key={index}
-                                        title={item.itemTitle}
-                                        icon={<Inventory2Icon />}
-                                        color={CommonColors.yellow.main}
-                                        rightAction={
-                                            <PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
-                                                //onClick={(e) => handleExitDraft(e)}
-                                                sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
-                                            />
-                                        }>
-                                        <PGrid container className="g-4">
+                                key={index}
+                                className="bg-light mt-3"
+                                title={item.itemTitle}
+                                icon={<Inventory2Icon />}
+                                color={CommonColors.yellow.main}
+                                collapsible
+                                isOpen={open === index}
+                                onToggle={() => setOpen(index)}
+                                rightAction={
+                                    <PButton
+                                        label="Edit"
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<EditIcon />}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        sx={{
+                                            color: "#fff",
+                                            borderColor: "#fff",
+                                            "&:hover": {
+                                                borderColor: "#fff",
+                                                backgroundColor: "rgba(255,255,255,0.1)"
+                                            }
+                                        }}
 
-                                            {item.data.map((field, i) => (
-                                                <PGrid item xs={12} md={6} xl={3} key={i}>
-                                                    <PGrid className="p-2 border rounded">
-                                                        <PTypography
-                                                            labelText={field.label}
-                                                            weight={FontWeight.bold}
-                                                        />
-                                                        <PTypography
-                                                            labelText={field.value}
-                                                            color={CommonColors.grey.main}
-                                                            weight={FontWeight.bold}
-                                                        />
-                                                    </PGrid>
-                                                </PGrid>
-                                            ))}
-
+                                    />
+                                }
+                            >
+                                <PGrid container className="g-4">
+                                    {item.data.map((field, i) => (
+                                        <PGrid item xs={12} md={6} xl={3} key={i}>
+                                            <PGrid className="p-2 border rounded">
+                                                <PTypography labelText={field.label} weight={FontWeight.bold} />
+                                                <PTypography
+                                                    labelText={field.value}
+                                                    color={CommonColors.grey.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
                                         </PGrid>
-                                    </PCard>
-                                ))}
+                                    ))}
+                                </PGrid>
                             </PCard>
-
-                        </PGrid>
-
+                        ))}
                         {/* Suppliers */}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard

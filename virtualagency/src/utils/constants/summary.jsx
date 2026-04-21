@@ -1,5 +1,5 @@
 
-export const getSummarySections = ({ clientInfo = [], enquiryDetails = [], lineItems = [] , suppiers = [], getLabel}) => {
+export const getSummarySections = ({ clientInfo = [], enquiryDetails = [], lineItems = [], suppliers = [], getLabel }) => {
   return [
     clientInfo.length > 0 && {
       step: 1,
@@ -12,53 +12,130 @@ export const getSummarySections = ({ clientInfo = [], enquiryDetails = [], lineI
       title: getLabel("lbl21"),
       items: enquiryDetails
     },
-
-    lineItems.length > 0 && {
+    {
       step: 3,
-      title: "Line Items",
+      title: getLabel("lbl22"),
       items: lineItems
     },
-    suppiers.length > 0 && {
+    {
       step: 4,
-      title: "Line Items",
-      items: lineItems
+      title: getLabel("lbl23"),
+      items: suppliers
     }
   ].filter(Boolean);
 };
 
 export const getClientInfo = (fields = {}, formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
-    const source = response || formData;
-    return [
-        { label: getLabel("lbl27"), value: response ? source.entityname : getOptionLabel(formDataList.division, source.division)},
-        { label: getLabel("lbl28"), value: response ? source.createdByUser : fields.clientName },
-        { label: getLabel("lbl09"), value: response ? source.country : fields.country },
-        { label: getLabel("lbl29"), value: response ? source.entityname : fields.entityName },
-        { label: getLabel("lbl30"), value: response ? source.bussinessUnit : fields.businessUnit },
-        { label: getLabel("lbl91"), value: response ? source.globalBussinessUnit : getOptionLabel(formDataList.globalBUMapping, source.globalBUMapping) },
-        { label: getLabel("lbl92"), value: response ? source.aboveorAtmarket : getOptionLabel(formDataList.aboveAtMarket, source.aboveAtMarket)},
-        { label: getLabel("lbl33"), value: response ? source.brand : getOptionLabel(formDataList.brand, source.brand) },
-        { label: getLabel("lbl35"), value: response ? source.clientContact : getOptionLabel(formDataList.clientContact, source.clientContact)},
-        { label: getLabel("lbl34"), value: response ? source.deliveryCountryname : getOptionLabel(formDataList.deliveryCountry, source.deliveryCountry) },
-        { label: getLabel("lbl36"), value: response ? source.pmgEntityname : getOptionLabel(formDataList.pmgEntity, source.pmgEntity)}
-    ];
+  const source = response || formData;
+  return [
+    { label: getLabel("lbl27"), value: response ? source.entityname : getOptionLabel(formDataList.division, source.division) },
+    { label: getLabel("lbl28"), value: response ? source.createdByUser : fields.clientName },
+    { label: getLabel("lbl09"), value: response ? source.country : fields.country },
+    { label: getLabel("lbl29"), value: response ? source.entityname : fields.entityName },
+    { label: getLabel("lbl30"), value: response ? source.bussinessUnit : fields.businessUnit },
+    { label: getLabel("lbl91"), value: response ? source.globalBussinessUnit : getOptionLabel(formDataList.globalBUMapping, source.globalBUMapping) },
+    { label: getLabel("lbl92"), value: response ? source.aboveorAtmarket : getOptionLabel(formDataList.aboveAtMarket, source.aboveAtMarket) },
+    { label: getLabel("lbl33"), value: response ? source.brand : getOptionLabel(formDataList.brand, source.brand) },
+    { label: getLabel("lbl35"), value: response ? source.clientContact : getOptionLabel(formDataList.clientContact, source.clientContact) },
+    { label: getLabel("lbl34"), value: response ? source.deliveryCountryname : getOptionLabel(formDataList.deliveryCountry, source.deliveryCountry) },
+    { label: getLabel("lbl36"), value: response ? source.pmgEntityname : getOptionLabel(formDataList.pmgEntity, source.pmgEntity) }
+  ];
 };
-export const getEnquiryDetails = ( formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
-    const source = response || formData;
-    return [
-        { label: getLabel("lbl42"), value: source.projectNo},
-        { label: getLabel("lbl43"), value: source.estdate },
-        { label: getLabel("lbl44"), value: source.briefdate },
-        { label: getLabel("lbl45"), value: source.projectDesc },
-        { label: getLabel("lbl46"), value: source.projectQuoteType },
-        { label: getLabel("lbl47"), value: source.year },
-        { label: getLabel("lbl93"), value: source.managementFeeType },
-        { label: getLabel("lbl94"), value: source.hybrid == 1 ? "Yes" : "No" },
-        { label: getLabel("lbl95"), value: source.attribute },
-        { label: getLabel("lbl49"), value: getOptionLabel(formDataList.slaTemplate, source.slaTemplate) },
-        { label: getLabel("lbl54"), value: `${""} - ${""}` },
-        { label: getLabel("lbl55"), value: `${""} - ${""}` },
-        { label: getLabel("lbl56"), value: `${""} - ${""}` },
-        { label: getLabel("lbl57"), value: `${""} - ${""}` },
-        { label: getLabel("lbl58"), value: `${""} - ${""}` }
-    ];
+export const getEnquiryDetails = (formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
+  const source = response || formData;
+  return [
+    { label: getLabel("lbl42"), value: response ? source.projectNo : source.projectNo },
+    { label: getLabel("lbl43"), value: response ? source.estdate : source.estdate },
+    { label: getLabel("lbl44"), value: response ? source.briefdate : source.briefdate },
+    { label: getLabel("lbl45"), value: response ? source.projectDesc : source.projectDesc },
+    { label: getLabel("lbl46"), value: response ? source.projectQuotetype : source.projectQuoteType },
+    { label: getLabel("lbl47"), value: response ? source.year : source.year },
+    { label: getLabel("lbl93"), value: response ? source.managementFeetype : source.managementFeetype },
+    { label: getLabel("lbl94"), value: response ? source.hybridModel : source.hybrid == 1 ? "Yes" : "No" },
+    { label: getLabel("lbl95"), value: response ? source.attribute : source.attribute },
+    { label: getLabel("lbl49"), value: response ? source.slaTemplatename : getOptionLabel(formDataList.slaTemplate, source.slaTemplate) },
+    { label: getLabel("lbl54"), value: response ? `${source.quotestartdate} - ${source.quoteenddate}` : `${""} - ${""}` },
+    { label: getLabel("lbl55"), value: response ? `${source.proofstartdate} - ${source.proofenddate}` : `${""} - ${""}` },
+    { label: getLabel("lbl56"), value: response ? `${source.productionstartdate} - ${source.productionenddate}` : `${""} - ${""}` },
+    { label: getLabel("lbl57"), value: response ? `${source.filecopiesstartdate} - ${source.filecopiesenddate}` : `${""} - ${""}` },
+    { label: getLabel("lbl58"), value: response ? `${source.invoicestartdate} - ${source.invoiceenddate}` : `${""} - ${""}` }
+  ];
+};
+
+export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
+  const source = response || formData;
+  const lineItemMapping = [
+    { key: "printornonprint", label: "lbl62" },
+    { key: "tojabc", label: "lbl60" },
+    { key: "localRateCard", label: "lbl65" },
+    { key: "competbidmandate", label: "lbl96" },
+    { key: "competbidcomplaint", label: "lbl97" },
+    { key: "competbidexception", label: "lbl98" },
+    { key: "exceptionreason", label: "lbl99" },
+
+    { key: "productcategory", label: "lbl61" },
+    { key: "subCategory", label: "lbl100" },
+    { key: "simplex", label: "lbl101" },
+    { key: "tcOapproval", label: "lbl102" },
+    { key: "tcOapproved", label: "lbl103" },
+
+    { key: "dictatedJob", label: "lbl63" },
+    { key: "itemtype", label: "lbl64" },
+    { key: "incoterm", label: "lbl152" },
+    { key: "itemName", label: "lbl66" },
+    { key: "itemDescription", label: "lbl67" },
+
+    { key: "usingFSCMaterial", label: "lbl70" },
+    { key: "oekotexCertification", label: "lbl151" },
+    { key: "designedforrecycling", label: "lbl71" },
+    { key: "plasticapartfromPLA", label: "lbl75" },
+    { key: "proposedwithsustainabilityoption", label: "lbl72" },
+    { key: "containrecycledmaterial", label: "lbl73" },
+    { key: "containrecycledplastic", label: "lbl76" },
+    { key: "weightageofrecycledmaterial", label: "lbl79" },
+    { key: "isthisitemdesignedtobereused", label: "lbl74" },
+
+    { key: "rateCard", label: "lbl106" },
+    { key: "eauction", label: "lbl110" },
+    { key: "promoOSSOrderWindows", label: "lbl107" },
+    { key: "regionalname", label: "lbl108" },
+    { key: "catalogueUsage", label: "lbl109" },
+    { key: "printingMethod", label: "lbl111" },
+    { key: "typeofitem", label: "lbl112" },
+    { key: "noofmaterials", label: "lbl113" },
+    { key: "digitalInnovation", label: "lbl114" },
+    { key: "innovation", label: "lbl115" },
+    { key: "sourcinglocation", label: "lbl116" },
+    { key: "savingstype", label: "lbl117" },
+    { key: "savingsreason", label: "lbl118" },
+    { key: "oWlink", label: "lbl119" },
+
+    { key: "quoteType", label: "lbl89" },
+    { key: "quoteQtyOrSize", label: "lbl87" },
+    { label: "Attachment", value: "No Files" },
+    { key: "version", label: "lbl85" },
+    { key: "specNote", label: "lbl83" },
+    { key: "sNote", label: "lbl86" }
+  ];
+
+  const items = formDataList?.lineItems?.length ? formDataList.lineItems : response;
+  const lineItems = items.map((item, index) => ({
+    itemTitle: `Item ${index + 1}`,
+    itemColor: "warning",
+    data: lineItemMapping.map(field => ({
+      label: field.label === "Attachment" ? field.label : getLabel(field.label),
+      value: field.key ? item[field.key] ?? "-" : field.value
+    }))
+  }));
+
+  return lineItems;
+};
+
+
+export const getSuppliers = (formData = [], response = null) => {
+  const source = response || formData;
+  return source.map(item => ({
+    label: "",
+    value: item.suppliername || "-"
+  }));
 };
