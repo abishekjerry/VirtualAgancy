@@ -55,6 +55,7 @@ const LineItems = () => {
         savingsReason: [],
         printingMethod: [],
         yesNoNa: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "N/A", value: 3, selected: true }],
+        soYesNoNa: [{ label: "Yes, Accepted", value: 1 }, { label: "Yes, Rejected", value: 2 }, { label: "No", value: 3 }, { label: "N/A", value: 4, selected: true }],
         yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
         tcoYesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }],
         yesOrNoNot: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "Not Applicable", value: 3 }],
@@ -253,6 +254,7 @@ const LineItems = () => {
     const getSelectedValue = (arr) => arr?.find(option => option.selected)?.value ?? "";
     const selectedValues = useMemo(() => ({
         yesOrNo: getSelectedValue(formDataList.yesOrNo),
+        soYesNoNa: getSelectedValue(formDataList.soYesNoNa),
         yesNoNa: getSelectedValue(formDataList.yesNoNa),
         incoterm: getSelectedValue(formDataList.incoterm),
         globalOrder: getSelectedValue(formDataList.globalOrder),
@@ -263,8 +265,7 @@ const LineItems = () => {
     }), [formDataList]);
 
     useEffect(() => {
-        const { yesOrNo, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem, printingMethod } = selectedValues;
-        console.log(selectedValues, "selectedValues");
+        const { yesOrNo, soYesNoNa, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem, printingMethod } = selectedValues;
         setFormData(prev => {
             if (prev.incoterm === incoterm && prev.globalOrderWindowCatalogueName === globalOrder && prev.localCatalogueName === localCatalog &&
                 prev.regionalOrderWindowCatalogue === regionalOrder && prev.typeOfItem === typeOfItem //, prev.printingMethod === printingMethod
@@ -274,10 +275,10 @@ const LineItems = () => {
 
             return {
                 ...prev,
-                ...(yesNoNa && {
+                ...(yesNoNa && soYesNoNa && {
                     fscOrPefcMaterial: yesNoNa,
                     recyclable: yesNoNa,
-                    sustainabilityOption: yesNoNa,
+                    sustainabilityOption: soYesNoNa,
                     recycledMaterial: yesNoNa,
                     designedToBeReused: yesNoNa,
                     containsPlastic: yesNoNa,
@@ -854,35 +855,37 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl70")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl70")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.fscOrPefcMaterial}
                                         onChange={handleChange}
                                         helperText={errors?.fscOrPefcMaterial}
                                         name={Labels.lineItems.fscOrPefcMaterial}
                                         options={formDataList.yesNoNa}
                                         readOnly={formData.category == 3 ? true : false}
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl151")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl151")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.taxCertification}
                                         onChange={handleChange}
                                         helperText={errors?.taxCertification}
                                         name={Labels.lineItems.taxCertification}
                                         options={formDataList.yesNoNa}
                                         readOnly={formData.category == 3 ? false : true}
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl71")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl71")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.recyclable}
                                         onChange={handleChange}
                                         helperText={errors?.recyclable}
                                         name={Labels.lineItems.recyclable}
                                         options={formDataList.yesNoNa}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
 
@@ -890,36 +893,36 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl75")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl75")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.containsPlastic}
                                         onChange={handleChange}
                                         helperText={errors?.containsPlastic}
                                         name={Labels.lineItems.containsPlastic}
                                         options={formDataList.yesNoNa}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
 
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl72")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl72")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.sustainabilityOption}
                                         onChange={handleChange}
                                         helperText={errors?.sustainabilityOption}
                                         name={Labels.lineItems.sustainabilityOption}
-                                        options={formDataList.yesNoNa}
-
+                                        options={formDataList.soYesNoNa}
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl73")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl73")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.recycledMaterial}
                                         onChange={handleChange}
                                         helperText={errors?.recycledMaterial}
                                         name={Labels.lineItems.recycledMaterial}
                                         options={formDataList.yesNoNa}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
 
@@ -929,34 +932,36 @@ const LineItems = () => {
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl76")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl76")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.containsRecycledPlastic}
                                         onChange={handleChange}
                                         helperText={errors?.containsRecycledPlastic}
                                         name={Labels.lineItems.containsRecycledPlastic}
                                         options={formDataList.yesNoNa}
                                         readOnly={formData.recycledMaterial == 1 ? false : true}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
-                                        label={`${getLabel("lbl79")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl79")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.recycledMaterialWeightKg}
                                         onChange={handleChange}
                                         helperText={errors?.recycledMaterialWeightKg}
                                         name={Labels.lineItems.recycledMaterialWeightKg}
                                         disabled={formData.recycledMaterial == 1 ? false : true}
+
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${getLabel("lbl74")} ${Labels.symbols.optional}`}
+                                        label={`${getLabel("lbl74")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.designedToBeReused}
                                         onChange={handleChange}
                                         helperText={errors?.designedToBeReused}
                                         name={Labels.lineItems.designedToBeReused}
                                         options={formDataList.yesNoNa}
+                                        disabled={true}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -998,7 +1003,7 @@ const LineItems = () => {
                                         helperText={errors?.eAuction}
                                         name={Labels.lineItems.eAuction}
                                         options={formDataList.yesOrNo}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1010,6 +1015,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.globalOrderWindowCatalogueName}
                                         options={formDataList.globalOrder}
                                         flag={Labels.flag.auto}
+                                        disabled={true}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -1023,7 +1029,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.regionalOrderWindowCatalogue}
                                         options={formDataList.regionalOrder}
                                         flag={Labels.flag.auto}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1035,6 +1041,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.localCatalogueName}
                                         options={formDataList.localCatalog}
                                         flag={Labels.flag.auto}
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1046,7 +1053,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.printingMethod}
                                         options={formDataList.printingMethod}
                                         flag={Labels.flag.auto}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -1060,6 +1067,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.typeOfItem}
                                         options={formDataList.typeOfItem}
                                         flag={Labels.flag.auto}
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1080,7 +1088,7 @@ const LineItems = () => {
                                         helperText={errors?.digitalInnovation}
                                         name={Labels.lineItems.digitalInnovation}
                                         options={formDataList.yesNoNa}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -1093,7 +1101,7 @@ const LineItems = () => {
                                         helperText={errors?.innovation}
                                         name={Labels.lineItems.innovation}
                                         options={formDataList.yesNoNa}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1143,7 +1151,7 @@ const LineItems = () => {
                                         helperText={errors?.owWithLink}
                                         name={Labels.lineItems.owWithLink}
                                         options={formDataList.yesOrNo}
-
+                                        disabled={true}
                                     />
                                 </PGrid>
                                 {["Not Applicable"].includes(formData.eAuction) && (

@@ -69,7 +69,6 @@ const getFileContent = () => {
 
   // 📊 OFFICE FILES
   if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) {
-    // ❌ Blob not supported
     if (isBlob) {
       return (
         <Box textAlign="center" color="#fff">
@@ -90,8 +89,6 @@ const getFileContent = () => {
       />
     );
   }
-
-  // ❌ ALL OTHER FILES
   return (
     <Box textAlign="center" color="#fff">
       <Typography>
@@ -111,7 +108,6 @@ const getFileContent = () => {
           flexDirection: "column",
         }}
       >
-        {/* 🔝 Header */}
         <Box
           sx={{
             display: "flex",
@@ -129,8 +125,6 @@ const getFileContent = () => {
             <CloseIcon />
           </IconButton>
         </Box>
-
-        {/* 📄 Content */}
         <Box
           sx={{
             flex: 1,

@@ -81,45 +81,34 @@ export default function PTextField({
         setShowPassword(!showPassword);
     };
 
-    // ✅ FILE HANDLER
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files || []);
         let errorMsg = "";
-
         let updatedFiles = [...selectedFiles];
-
-        const remainingSlots = multiple
-            ? maxLength - selectedFiles.length
-            : 1;
-
+        const remainingSlots = multiple ? maxLength - selectedFiles.length : 1;
         if (multiple && remainingSlots <= 0) {
-            setFileError(`You may upload up to ${maxLength} files only`);
+            setFileError(`You may upload up to ${maxLength} files of no more than 20 MB each`);
             e.target.value = "";
             return;
         }
-
         for (let file of files) {
             const ext = file.name.split(".").pop().toLowerCase();
-
             const isValidType = allowedExtensions.includes(ext);
-            const isValidSize =
-                file.size <= (multiple ? 20 * 1024 * 1024 : 2 * 1024 * 1024);
+            // ✅ Updated size validation (1MB to 20MB)
+            const isValidSize = file.size >= 0 * 1024 * 1024 && file.size <= 20 * 1024 * 1024;
 
             if (!isValidType) {
-                errorMsg =
-                    "Allowed types: .pdf, .png, .jpg, .jpeg, .doc, .docx, .ppt, .pptx, .xls, .xlsx";
+                errorMsg = "Allowed types: .pdf, .png, .jpg, .jpeg, .doc, .docx, .ppt, .pptx, .xls, .xlsx";
                 continue;
             }
 
             if (!isValidSize) {
-                errorMsg = multiple
-                    ? "Each file must be ≤ 20MB"
-                    : "File must be ≤ 2MB";
+                errorMsg = "Each file must be between 1 MB and 20 MB";
                 continue;
             }
 
             if (multiple && updatedFiles.length >= maxLength) {
-                errorMsg = `You may upload up to ${maxLength} files only`;
+                errorMsg = `You may upload up to ${maxLength} files of no more than 20 MB each`;
                 break;
             }
 
@@ -142,15 +131,7 @@ export default function PTextField({
         }
 
         setSelectedFiles(updatedFiles);
-
-        // 🔥 send to parent
-        onChange?.({
-            target: {
-                name,
-                files: updatedFiles,
-            },
-        });
-
+        onChange?.({ target: { name, files: updatedFiles, },});
         setFileError(errorMsg);
         e.target.value = "";
     };
