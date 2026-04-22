@@ -264,9 +264,10 @@ const LineItems = () => {
 
     useEffect(() => {
         const { yesOrNo, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem, printingMethod } = selectedValues;
+        console.log(selectedValues, "selectedValues");
         setFormData(prev => {
             if (prev.incoterm === incoterm && prev.globalOrderWindowCatalogueName === globalOrder && prev.localCatalogueName === localCatalog &&
-                prev.regionalOrderWindowCatalogue === regionalOrder && prev.typeOfItem === typeOfItem, prev.printingMethod === printingMethod
+                prev.regionalOrderWindowCatalogue === regionalOrder && prev.typeOfItem === typeOfItem //, prev.printingMethod === printingMethod
             ) {
                 return prev;
             }
@@ -348,9 +349,9 @@ const LineItems = () => {
         }
     };
     const fieldConfig = {
-        [Labels.lineItems.noOfMaterials]: { type: "number", min: 1, max: 5 },
+        [Labels.lineItems.noOfMaterials]: { type: "number", max: 5 },
         [Labels.lineItems.noOfVersion]: { type: "number" },
-        [Labels.lineItems.quantity]: { type: "number", min: 1, max: 1000000000 },
+        [Labels.lineItems.quantity]: { type: "number", max: 10000 },
 
 
         [Labels.lineItems.width]: { type: "decimal" },
@@ -362,12 +363,8 @@ const LineItems = () => {
     const handleChange = (e) => {
         const { name, value, files, label } = e.target;
         const config = fieldConfig[name];
-        let formattedValue = value;
-        if (config?.type === "number") {
-            formattedValue = allowOnlyNumbers(value, config?.min, config?.max);
-        } else if (config?.type === "decimal") {
-            formattedValue = allowDecimal(value);
-        }
+        const formattedValue = config?.type === "number"
+            ? allowOnlyNumbers(value, config?.max) : config?.type === "decimal" ? allowDecimal(value) : value;
 
         // Handle special field logic
         if (name === Labels.lineItems.category) {
@@ -408,7 +405,7 @@ const LineItems = () => {
 
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
-    const handleSubmit = async () => {
+    const handleSubmit = async (e, isSubmit) => {
         const isValid = LineItemsValidation();
         if (isValid) {
             try {
@@ -419,7 +416,7 @@ const LineItems = () => {
                     EnqId: id,
                     Printornonprint: getOptionLabel(formDataList.category, formData.category),
                     TOJABC: getOptionLabel(formDataList.typeOfJob, formData.typeOfJob),
-                    RateCard: getOptionLabel(formDataList.yesOrNo, formData.rateCard),
+                    localRateCard: getOptionLabel(formDataList.yesOrNo, formData.rateCard),
                     Competbidmandate: getOptionLabel(formDataList.yesOrNoNot, formData.competitiveBiddingMandatory),
                     Competbidcomplaint: getOptionLabel(formDataList.yesOrNoNot, formData.competitiveBiddingCompliant),
                     Competbidexception: getOptionLabel(formDataList.competitiveBiddingExceptionFormSigned, formData.competitiveBiddingExceptionFormSigned),
@@ -439,7 +436,7 @@ const LineItems = () => {
                     // ✅ Sustainability
                     usingFSCMaterial: getOptionLabel(formDataList.yesNoNa, formData.fscOrPefcMaterial),
                     OEKOTEXCertification: getOptionLabel(formDataList.yesNoNa, formData.taxCertification),
-                    Recycled: formData.recyclable,
+                    Recycled: getOptionLabel(formDataList.yesNoNa, formData.recyclable),
                     SustainableOptionthatwasrejected: getOptionLabel(formDataList.yesNoNa, formData.sustainabilityOption),
                     WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
                     Isthisitemdesignedtobereused: getOptionLabel(formDataList.yesNoNa, formData.designedToBeReused),
@@ -454,8 +451,8 @@ const LineItems = () => {
                     Regionalname: getOptionLabel(formDataList.regionalOrder, formData.regionalOrderWindowCatalogue),
                     CatalogueUsage: getOptionLabel(formDataList.localCatalog, formData.localCatalogueName),
                     Eauction: getOptionLabel(formDataList.yesOrNo, formData.eAuction),
-                    printingmethod: formData.printingMethod,
-                    Typeofitem: getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
+                    printingmethod: getOptionLabel(formDataList.printingMethod, formData.printingMethod),
+                    typeofitem: getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
                     Noofmaterials: formData.noOfMaterials,
                     DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
                     Innovation: getOptionLabel(formDataList.yesNoNa, formData.innovation),
@@ -482,10 +479,11 @@ const LineItems = () => {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
-                        navigate(labelRoutes.suppliers, {
+                        navigate(isSubmit ? labelRoutes.suppliers : labelRoutes.LineItems, {
                             state: { id: response.data.enqId }
                         });
                     }, 500);
+                    isSubmit ? '' : fetchData();
                 } else {
                     setErrors((prev) => ({
                         ...prev,
@@ -778,7 +776,7 @@ const LineItems = () => {
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={4}>
+                                {/* <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl63")} ${Labels.symbols.required}`}
                                         value={formData.dictatedJob}
@@ -787,7 +785,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.dictatedJob}
                                         options={formDataList.yesOrNo}
                                     />
-                                </PGrid>
+                                </PGrid> */}
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl64")} ${Labels.symbols.required}`}
@@ -862,7 +860,7 @@ const LineItems = () => {
                                         helperText={errors?.fscOrPefcMaterial}
                                         name={Labels.lineItems.fscOrPefcMaterial}
                                         options={formDataList.yesNoNa}
-
+                                        readOnly={formData.category == 3 ? true : false}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -873,7 +871,7 @@ const LineItems = () => {
                                         helperText={errors?.taxCertification}
                                         name={Labels.lineItems.taxCertification}
                                         options={formDataList.yesNoNa}
-
+                                        readOnly={formData.category == 3 ? false : true}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1047,6 +1045,7 @@ const LineItems = () => {
                                         helperText={errors?.printingMethod}
                                         name={Labels.lineItems.printingMethod}
                                         options={formDataList.printingMethod}
+                                        flag={Labels.flag.auto}
 
                                     />
                                 </PGrid>
@@ -1339,7 +1338,7 @@ const LineItems = () => {
                                             <PButton
                                                 label={getLabel("lbl128")}
                                                 variant="outlined"
-                                                onClick={(e) => handleSubmit(e, true)}
+                                                onClick={(e) => handleSubmit(e, false)}
                                                 width={180}
                                                 height={50}
                                                 color={CommonColors.blue.main}

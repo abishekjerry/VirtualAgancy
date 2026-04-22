@@ -178,7 +178,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                                                         color={CommonColors.grey.main}
                                                         startIcon={<EditIcon />}
                                                         width={80}
-                                                        onClick={section.onEdit}
+                                                        onClick={section.onClick}
                                                     />
                                                 </PGrid>
                                             </PGrid>

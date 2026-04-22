@@ -280,7 +280,7 @@ const EqDashboard = () => {
       ...prev,
       startDate: "",
       endDate: "",
-      country: "",
+      //country: "",
       user: "",
       search: "",
       status: ""
@@ -503,7 +503,7 @@ const EqDashboard = () => {
                       });
                     }}
                   />
-                )};
+                )}
               </div>
             </PCard>
           </PGrid>
@@ -537,7 +537,7 @@ const EqDashboard = () => {
               fullWidth
               label={getLabel("lbl123")}
               variant="outlined"
-              onClick={handleCloseChoose}
+              onClick={handleReset}
             />
 
             <PButton

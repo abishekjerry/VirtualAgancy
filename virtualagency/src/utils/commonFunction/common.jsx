@@ -27,8 +27,8 @@ export const validatePassword = (password) => {
   return "";
 };
 
-export const allowOnlyNumbers = (value, min = 0, max = 9) => {
-  const regex = new RegExp(`[^${min}-${max}]`, "g");
+export const allowOnlyNumbers = (value, max = 9) => {
+  const regex = new RegExp(`[^${1}-${max}]`, "g");
   return value.replace(regex, "").slice(0, 10);
 };
 
