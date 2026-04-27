@@ -26,6 +26,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import { Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { getClientInfo, getEnquiryDetails, getLineneItems } from "../../utils/constants/summary";
+import { labelRoutes } from "../../navigations/labelRoutes";
+import UpdateLineItems from "./updateLineItems";
 
 const Review = () => {
     const { getLabel } = useLanguage();
@@ -41,6 +43,10 @@ const Review = () => {
         lineItems: [],
         suppliers: [],
     });
+
+    const [openUpdateLineItems, setOpenUpdateLineItems] = useState(false);
+    const [formData, setFormData] = useState({});
+
     const id = state?.id > 0 ? state.id : 0;
     useEffect(() => {
         const fetchData = async () => {
@@ -72,10 +78,30 @@ const Review = () => {
         fetchData();
     }, []);
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails({}, {},{}, getLabel, getOptionLabel, formDataList.enquiryDetails);
+    const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
 
-
+    const handleOpen = (data = {}) => {
+        console.log(data, "data");
+        setFormData(data);
+        setOpenUpdateLineItems(true);
+    };
+    const handleEdit = (step, item = null) => {
+        if (step === 3 && item != null) {
+            handleOpen(item);
+            return;
+        }
+        const routeMap = {
+            1: labelRoutes.clientInfo,
+            2: labelRoutes.enquiryDetails,
+            3: labelRoutes.lineItems,
+            4: labelRoutes.suppliers
+        };
+        const route = routeMap[step] || labelRoutes.home;
+        navigate(route, {
+            state: { id: state.id }
+        });
+    };
 
     return (
         <>
@@ -93,7 +119,7 @@ const Review = () => {
                                 icon={<PersonIcon />}
                                 color={CommonColors.blue.dark}
                                 rightAction={<PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
-                                    //onClick={(e) => handleExitDraft(e)}
+                                    onClick={(e) => handleEdit(1)}
                                     sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
                                 }>
@@ -127,7 +153,7 @@ const Review = () => {
                                 icon={<AssignmentIcon />}
                                 color={CommonColors.blue.main}
                                 rightAction={<PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
-                                    //onClick={(e) => handleExitDraft(e)}
+                                    onClick={(e) => handleEdit(2)}
                                     sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
                                 }>
@@ -150,50 +176,61 @@ const Review = () => {
                                 </PGrid>
                             </PCard>
                         </PGrid>
-
                         {/*Line items*/}
-                        {lineItems.map((item, index) => (
-                            <PCard key={index} className="bg-light mt-3" title={item.itemTitle}
-                                icon={<Inventory2Icon />} color={CommonColors.yellow.main} collapsible
-                                isOpen={open === index} onToggle={() => setOpen(index)}
-                                rightAction={
-                                    <PButton
-                                        label="Edit"
-                                        variant="outlined"
-                                        size="small"
-                                        startIcon={<EditIcon />}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                        sx={{
-                                            color: "#fff",
-                                            borderColor: "#fff",
-                                            "&:hover": {
-                                                borderColor: "#fff",
-                                                backgroundColor: "rgba(255,255,255,0.1)"
-                                            }
-                                        }}
+                        <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
+                            <PCard
+                                title={`Step 3: ${getLabel("lbl22")}`}
+                                icon={< ListAltIcon />}
+                                color={CommonColors.green.main}
+                                rightAction={<PButton label="Add" variant="outlined" size="small" startIcon={<AddIcon />}
+                                    onClick={(e) => handleEdit(3)}
+                                    sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
+                                />
+                                }>
+                                {lineItems.map((item, index) => (
+                                    <PCard key={index} className="bg-light mt-3" title={item.itemTitle}
+                                        icon={<Inventory2Icon />} color={CommonColors.yellow.main} collapsible
+                                        isOpen={open === index} onToggle={() => setOpen(index)}
+                                        rightAction={
+                                            <PButton
+                                                label="Edit"
+                                                variant="outlined"
+                                                size="small"
+                                                startIcon={<EditIcon />}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(),
+                                                        handleEdit(3, item)
+                                                }}
+                                                sx={{
+                                                    color: "#fff",
+                                                    borderColor: "#fff",
+                                                    "&:hover": {
+                                                        borderColor: "#fff",
+                                                        backgroundColor: "rgba(255,255,255,0.1)"
+                                                    }
+                                                }}
 
-                                    />
-                                }
-                            >
-                                <PGrid container className="g-4">
-                                    {item.data.map((field, i) => (
-                                        <PGrid item xs={12} md={6} xl={3} key={i}>
-                                            <PGrid className="p-2 border rounded">
-                                                <PTypography labelText={field.label} weight={FontWeight.bold} />
-                                                <PTypography
-                                                    labelText={field.value}
-                                                    color={CommonColors.grey.main}
-                                                    weight={FontWeight.bold}
-                                                />
-                                            </PGrid>
+                                            />
+                                        }
+                                    >
+                                        <PGrid container className="g-4">
+                                            {item.items.map((field, i) => (
+                                                <PGrid item xs={12} md={6} xl={3} key={i}>
+                                                    <PGrid className="p-2 border rounded">
+                                                        <PTypography labelText={field.label} weight={FontWeight.bold} />
+                                                        <PTypography
+                                                            labelText={field.value}
+                                                            color={CommonColors.grey.main}
+                                                            weight={FontWeight.bold}
+                                                        />
+                                                    </PGrid>
+                                                </PGrid>
+                                            ))}
                                         </PGrid>
-                                    ))}
-                                </PGrid>
+                                    </PCard>
+                                ))}
                             </PCard>
-                        ))}
-
+                        </PGrid>
                         {/* Suppliers */}
                         <PGrid item xs={12} sm={12} md={12} className={Labels.margin.mb4}>
                             <PCard
@@ -201,7 +238,7 @@ const Review = () => {
                                 icon={<LocalShippingIcon />}
                                 color={CommonColors.yellow.main}
                                 rightAction={<PButton label="Edit" variant="outlined" size="small" startIcon={<EditIcon />}
-                                    //onClick={(e) => handleExitDraft(e)}
+                                    onClick={(e) => handleEdit(4)}
                                     sx={{ color: "#fff", borderColor: "#fff", "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.1)" } }}
                                 />
                                 }>
@@ -254,6 +291,11 @@ const Review = () => {
                 </PGrid>
             </Box >
 
+            <UpdateLineItems
+                open={openUpdateLineItems}
+                onClose={() => setOpenUpdateLineItems(false)}
+                data={formData}
+            />
         </>
     );
 };

@@ -14,24 +14,20 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange }) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [] }) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedRows, setSelectedRows] = useState([]);
   const isPageLoad = useRef(false);
 
   // Parent Select All
-  const handleRowSelect = (row, index) => {
+  const handleRowSelect = (row) => {
     const supplierId = row.supplierId;
-    setSelectedRows((prev) => {
-      const exists = prev.some(item => item.index === index);
-      const update = exists ? prev.filter(item => item.index !== index) : [...prev, { index, supplierId }];
-      onValidationChange?.(update);
-      return update;
-    });
+    const exists = selectedRows.some( item => item.supplierId === supplierId);
+    const update = exists ? selectedRows.filter(item => item.supplierId !== supplierId) : [...selectedRows, { supplierId }];
+    onValidationChange?.(update); // ✅ send to parent
   };
-  
+
   // Pagination
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -43,7 +39,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   };
 
   // Show only selected rows when global checkbox checked
-  const filteredRows = isChecked ? rows.filter((_, index) => selectedRows.some(item => item.index === index)) : rows;
+  const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : rows;
 
   return (
     <Paper
@@ -97,54 +93,51 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             ) : (
               filteredRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const originalIndex = rows.indexOf(row);
-                  return (
-                    <TableRow
-                      key={originalIndex}
-                      onClick={() => onClick && onClick(row)}
-                      sx={{
-                        transition: "0.2s ease",
-                        cursor: onClick ? "pointer" : "default",
-                        "&:hover": { backgroundColor: "#f1f5f9" },
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
-                      }}
-                    >
-                      {columns.map((col, i) => (
-                        <TableCell
-                          key={i}
-                          sx={{
-                            fontSize: Labels.fontSize.xxs,
-                            color: CommonColors.pTable.darkGrey,
-                            py: 1.8,
-                            textWrap: Labels.rap.nowrap
-                          }}
-                        >
-                          {showCheckbox && i === 0 ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1
-                              }}
-                            >
-                              <Checkbox
-                                size="small"
-                                checked={selectedRows.some(item => item.index === originalIndex)}
-                                onChange={() => handleRowSelect(row, originalIndex)}
-                                sx={{ p: 0.5 }}
-                              />
-
-                              {row[col.field]}
-                            </Box>
-                          ) : (
-                            row[col.field]
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  );
-                })
+                .map((row) => (
+                  <TableRow
+                    key={row.supplierId} // ✅ stable key
+                    onClick={() => onClick && onClick(row)}
+                    sx={{
+                      transition: "0.2s ease",
+                      cursor: onClick ? "pointer" : "default",
+                      "&:hover": { backgroundColor: "#f1f5f9" },
+                      backgroundColor:
+                        rows.indexOf(row) % 2 === 0 ? "#ffffff" : "#f9fafb",
+                    }}
+                  >
+                    {columns.map((col, i) => (
+                      <TableCell
+                        key={i}
+                        sx={{
+                          fontSize: Labels.fontSize.xxs,
+                          color: CommonColors.pTable.darkGrey,
+                          py: 1.8,
+                          textWrap: Labels.rap.nowrap
+                        }}
+                      >
+                        {showCheckbox && i === 0 ? (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1
+                            }}
+                          >
+                            <Checkbox
+                              size="small"
+                              checked={selectedRows.some(item => item.supplierId === row.supplierId)}
+                              onChange={() => handleRowSelect(row)}
+                              sx={{ p: 0.5 }}
+                            />
+                            {row[col.field]}
+                          </Box>
+                        ) : (
+                          row[col.field]
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
             )}
           </TableBody>
 

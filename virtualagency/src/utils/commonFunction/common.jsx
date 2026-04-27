@@ -29,7 +29,8 @@ export const validatePassword = (password) => {
 
 export const allowOnlyNumbers = (value, max = 9) => {
   const regex = new RegExp(`[^${1}-${max}]`, "g");
-  return value.replace(regex, "").slice(0, 10);
+  return value.replace(regex, "").replace(/^0+/, "").slice(0, 10);
+  //return value .replace(/[^0-9]/g, "").slice(0, 10);
 };
 
 export const allowDecimal = (value = "") => {
@@ -51,6 +52,7 @@ export const formatDate = (date) => {
   return `${day}/${month}/${year}`;
 };
 export const parseDate = (dateStr) => {
+  console.log(dateStr,"deweedwf");
   const p = dateStr.split(/[\/-]/);
   return p[0].length === 4 ? new Date(p[0], p[1] - 1, p[2]) : new Date(p[2], p[1] - 1, p[0]);
 };
@@ -67,6 +69,11 @@ export function isNotEmpty(value) {
 export const getOptionLabel = (options = [], value) => {
   const map = Object.fromEntries(options.map(o => [o.value, o.label]));
   return map[value] || "";
+};
+
+export const getOptionValue = (options = [], label) => {
+  const map = Object.fromEntries(options.map(o => [o.label, o.value]));
+  return map[label] || "";
 };
 
 export const getEnquirySteps = (getLabel) => [

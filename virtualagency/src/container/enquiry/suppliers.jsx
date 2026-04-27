@@ -91,6 +91,19 @@ const Suppliers = () => {
         { field: "country", header: "Country" },
         { field: "suppliercode", header: "Supplier Code" },
     ];
+    const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+    const id = state?.id > 0 ? state.id : 0;
+
+    useEffect(() => {
+        if (formDataList.supplier?.length) {
+            setFormDataList(prev => ({
+                ...prev,
+                selectedRows: formDataList.supplier.map(item => ({
+                    supplierId: item.supplierID
+                }))
+            }));
+        }
+    }, [formDataList.supplier]);
 
     let filteredData = formDataList.suppliers;
     // Country filter
@@ -122,8 +135,7 @@ const Suppliers = () => {
         setIsValidation(isValid);
     };
 
-    const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
-    const id = state?.id > 0 ? state.id : 0;
+
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const rawLineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
@@ -250,7 +262,7 @@ const Suppliers = () => {
 
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={tableHeader} rows={data} showCheckbox={true} isChecked={showSelected} onValidationChange={handleValidationChange} />
+                                    <PTable columns={tableHeader} rows={data} showCheckbox={true} isChecked={showSelected} onValidationChange={handleValidationChange} selectedRows={formDataList.selectedRows} />
                                 </PGrid>
                             </PGrid>
                             {!isValidation && (

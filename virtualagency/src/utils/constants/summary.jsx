@@ -1,5 +1,5 @@
 
-export const getSummarySections = ({ clientInfo = [], enquiryDetails = [], lineItems = [], suppliers = [], getLabel }) => {
+export const getSummarySections = ({ clientInfo = [], enquiryDetails = [], lineItems = [], suppliers = [], getLabel, handleEdit }) => {
   return [
     clientInfo.length > 0 && {
       step: 1,
@@ -79,7 +79,7 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
     { key: "tcOapproval", label: "lbl102" },
     { key: "tcOapproved", label: "lbl103" },
 
-    { key: "dictatedJob", label: "lbl63" },
+    //{ key: "dictatedJob", label: "lbl63" },
     { key: "itemtype", label: "lbl64" },
     { key: "incoterm", label: "lbl152" },
     { key: "itemName", label: "lbl66" },
@@ -122,12 +122,11 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
   const lineItems = items.map((item, index) => ({
     itemTitle: `Item ${index + 1}`,
     itemColor: "warning",
-    data: lineItemMapping.map(field => ({
+    items : lineItemMapping.map(field => ({
       label: field.label === "Attachment" ? field.label : getLabel(field.label),
       value: field.key ? item[field.key] ?? "-" : field.value
     }))
   }));
-
   return lineItems;
 };
 

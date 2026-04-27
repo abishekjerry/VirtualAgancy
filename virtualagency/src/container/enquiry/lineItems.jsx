@@ -27,6 +27,7 @@ import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import PreviewDialog from "../../component/PDialog/PPreviewDialog";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
 import { PSummary } from "../../component/PSumary/PSummary";
+import PDialog from "../../component/PDialog/PDialog";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -200,7 +201,7 @@ const LineItems = () => {
     const rawLineItems = getLineneItems(formData, formDataList, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
-        items: item.data
+        items : item.items
     }));
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
 
@@ -352,7 +353,7 @@ const LineItems = () => {
     const fieldConfig = {
         [Labels.lineItems.noOfMaterials]: { type: "number", max: 5 },
         [Labels.lineItems.noOfVersion]: { type: "number" },
-        [Labels.lineItems.quantity]: { type: "number", max: 10000 },
+        [Labels.lineItems.quantity]: { type: "number"},
 
 
         [Labels.lineItems.width]: { type: "decimal" },
@@ -380,7 +381,7 @@ const LineItems = () => {
         let data = {
             [name]: files ? files : formattedValue
         };
-        console.log(name, value);
+
         if (name === Labels.lineItems.typeOfJob) {
             const isType4 = formattedValue == 4;
             data = {
@@ -608,7 +609,11 @@ const LineItems = () => {
         setCurrentIndex(index);
         setPreviewOpen(true);
     };
+    const handleCloseChoose = () => {
 
+    };
+    const handleSendChoose = async () => {
+    };
 
     return (
         <>
@@ -654,6 +659,7 @@ const LineItems = () => {
                                         helperText={errors?.typeOfJob}
                                         name={Labels.lineItems.typeOfJob}
                                         options={formDataList.typeOfJob}
+                                        flag={Labels.flag.auto}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1474,7 +1480,6 @@ const LineItems = () => {
                     </PGrid>
                 </PGrid>
             </Box>
-
             <PDraftDialog
                 open={open}
                 onClose={() => setOpen(false)}

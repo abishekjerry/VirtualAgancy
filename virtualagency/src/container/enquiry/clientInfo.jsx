@@ -9,7 +9,7 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { allowOnlyNumbers, getEnquirySteps, getOptionLabel, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common"
+import { allowOnlyNumbers, getEnquirySteps, getOptionLabel, getOptionValue, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common"
 import AddIcon from "@mui/icons-material/Add"
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
@@ -117,7 +117,7 @@ const ClientInfo = () => {
 
     const GlobalBuMappingMaster = async (division) => {
         try {
-            setLoading(false);
+            setLoading(true);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
                 Divisionid: division
             });
@@ -137,7 +137,7 @@ const ClientInfo = () => {
 
     const ClientInfoMaster = async (globalBUMapping) => {
         try {
-            setLoading(false);
+            setLoading(true);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
                 Divisionid: globalBUMapping
             });
@@ -175,25 +175,20 @@ const ClientInfo = () => {
                     });
                     setFormDataList(prev => ({
                         ...prev,
-                        clientInfo : data.enqClientinfo
+                        clientInfo: data.enqClientinfo
                     }))
-                    // const division = response.division?.find(d => d.value === data.enqClientinfo.divisionid)?.label || " - ";
-                    // handleDivisionSelection(data.enqClientinfo.divisionid, division);
-                    // const brandValue = formDataList.brand?.find(b => b.label === data.enqClientinfo.brand)?.value || "";
-                    // const aboveAtMarketValue = formDataList.aboveAtMarket?.find(a => a.label === data.enqClientinfo.aboveorAtmarket)?.value || "";
-
+        
+                    const aboveAtMarket = getOptionValue(formDataList.aboveAtMarket, data.enqClientinfo.aboveorAtmarket)
                     // // Update state
-                    // setFormData(prev => ({
-                    //     ...prev,
-                    //     division: data.enqClientinfo.divisionid,
-                    //     clientContact: data.enqClientinfo.clientContactId,
-                    //     pmgEntity: data.enqClientinfo.pmgEntity,
-                    //     deliveryCountry: data.enqClientinfo.deliveryCountryId,
-                    //     brand: brandValue,
-                    //     aboveAtMarket: aboveAtMarketValue,
-                    //     brandValue: data.enqClientinfo.brand,
-                    //     aboveAtMarketValue: data.enqClientinfo.aboveorAtmarket
-                    // }));
+                    setFormData(prev => ({
+                        ...prev,
+                        division: data.enqClientinfo.divisionid,
+                        clientContact: data.enqClientinfo.clientContactId,
+                        pmgEntity: data.enqClientinfo.pmgEntity,
+                        deliveryCountry: data.enqClientinfo.deliveryCountryId,
+                        globalBUMapping: data.enqClientinfo.divisionid,
+                        aboveAtMarket: aboveAtMarket,
+                    }));
                 }
 
             } catch (error) {
@@ -207,13 +202,31 @@ const ClientInfo = () => {
     }, []);
 
     useEffect(() => {
+        if (formDataList.brand?.length && formDataList.clientInfo.brand) {
+            const brandId = getOptionValue( formDataList.brand, formDataList.clientInfo.brand);
+            setFormData(prev => ({
+                ...prev,
+                brand: brandId,
+            }));
+        }
+    }, [formDataList.brand]);
+
+    useEffect(() => {
+        if (formData.division) {
+            const divisionLabel = getOptionLabel(formDataList.division, formData.division);
+            handleDivisionSelection(formData.division, divisionLabel);
+        }
+    }, [formData.division, formDataList.division]);
+
+
+    useEffect(() => {
         if (formDataList.pmgEntity.length === 1) {
             setFormData(prev => ({
                 ...prev,
                 pmgEntity: formDataList.pmgEntity[0].value
             }));
         }
-    }, [formDataList.pmgEntity, formDataList.brand, formDataList.clientContact]); // separate effect, only does auto-select
+    }, [formDataList.pmgEntity]); // separate effect, only does auto-select
 
     const handleChange = async (e) => {
         const { name, value, label } = e.target;
@@ -280,6 +293,7 @@ const ClientInfo = () => {
 
     const handleDivisionSelection = (divisionId, division) => {
         if (!divisionId) return;
+        console.log(divisionId, division, "divisionId, division")
         const parts = division.split(">").map(v => v.trim());
         const keys = Object.keys(fields);
         setFieldsData(prev => {

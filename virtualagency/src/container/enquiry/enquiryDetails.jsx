@@ -11,7 +11,7 @@ import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
-import { formatDate, getEnquirySteps, getOptionLabel, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
+import { formatDate, getEnquirySteps, getOptionLabel, getOptionValue, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -62,8 +62,8 @@ const EnquiryDetails = () => {
         year: [],
         slaTemplate: [],
         quoteType: [
-            { label: "Quote of Total price", value: 1 },
-            { label: "Quote of Unit price", value: 2 }
+            { label: "Quote By Total Price", value: 1 },
+            { label: "Quote By Unit Price", value: 2 }
         ],
         hybird: [
             { label: "Yes", value: 1 },
@@ -106,6 +106,21 @@ const EnquiryDetails = () => {
                         clientInfo: data.enqClientinfo,
                         enquiryDetails: data.enqProjectinfo
                     }))
+                    console.log(data.enqProjectinfo, "data.enqProjectinfo");
+                    // Update state
+                    setFormData(prev => ({
+                        ...prev,
+                        projectNo: data.enqProjectinfo.projectNo,
+                        estdeliveryDate: data.enqProjectinfo.estdate,
+                        briefReceivedDate: data.enqProjectinfo.briefdate,
+                        projectDescription: data.enqProjectinfo.projectDesc,
+                        projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
+                        year: getOptionValue(formDataList.year, data.enqProjectinfo.year),
+                        managementFeeType: data.enqProjectinfo.managementfeetypeId,
+                        hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
+                        projectAttribute: getOptionValue(formDataList.projectAttribute, data.enqProjectinfo.attribute),
+                        slaTemplate: data.enqProjectinfo.slaId,
+                    }));
                 }
 
             } catch (error) {
@@ -116,6 +131,34 @@ const EnquiryDetails = () => {
         };
         fetchData();
     }, []);
+
+
+    useEffect(() => {
+        const { projectAttribute, year, enquiryDetails } = formDataList;
+        if (projectAttribute?.length && year?.length && enquiryDetails?.attribute && enquiryDetails?.year) {
+            setFormData(prev => ({
+                ...prev,
+                projectAttribute: getOptionValue(projectAttribute, enquiryDetails.attribute),
+                year: getOptionValue(year, enquiryDetails.year)
+            }));
+        }
+
+    }, [formDataList]);
+
+    const mapApiToPhases = (data) => {
+        const phases = [
+            { name: "Quote", key: "quote" },
+            { name: "Proof", key: "proof" },
+            { name: "Production", key: "production" },
+            { name: "File Copies", key: "filecopies" },
+            { name: "Invoice", key: "invoice" }
+        ];
+        return phases.map(({ name, key }) => ({
+            name,
+            startDate: data[`${key}startdate`],
+            endDate: data[`${key}enddate`],
+        }));
+    };
 
     useEffect(() => {
         if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
@@ -158,7 +201,8 @@ const EnquiryDetails = () => {
             { name: getLabel("lbl58"), days: slaData?.invoicing, mdays: slaData?.defInvoices }
         ];
         setPhaseDates(initialPhases);
-        calculatePlanByQuote(today, initialPhases);
+        const startDate = id !== 0 ? formDataList?.enquiryDetails?.quotestartdate : today;
+        calculatePlanByQuote(startDate, initialPhases);
     }, [slaTemplateData]);
 
     const handleChange = (e) => {
@@ -278,10 +322,7 @@ const EnquiryDetails = () => {
         setQuoteStartDate(selectedDate);
         let data = updatedPhases || phaseDates;
         let updated = [...data];
-        let startDate =
-            startIndex === 0
-                ? parseDate(selectedDate)
-                : parseDate(updated[startIndex].startDate);
+        let startDate = startIndex === 0 ? parseDate(selectedDate) : parseDate(updated[startIndex].startDate);
         // skip weekends
         while (startDate.getDay() === 0 || startDate.getDay() === 6) {
             startDate.setDate(startDate.getDate() + 1);
