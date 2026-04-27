@@ -201,6 +201,7 @@ const LineItems = () => {
     const rawLineItems = getLineneItems(formData, formDataList, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
+        enquiryId: item.enquiryId,
         items : item.items
     }));
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });

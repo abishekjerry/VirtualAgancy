@@ -52,7 +52,6 @@ export const formatDate = (date) => {
   return `${day}/${month}/${year}`;
 };
 export const parseDate = (dateStr) => {
-  console.log(dateStr,"deweedwf");
   const p = dateStr.split(/[\/-]/);
   return p[0].length === 4 ? new Date(p[0], p[1] - 1, p[2]) : new Date(p[2], p[1] - 1, p[0]);
 };

@@ -82,7 +82,6 @@ const Review = () => {
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
 
     const handleOpen = (data = {}) => {
-        console.log(data, "data");
         setFormData(data);
         setOpenUpdateLineItems(true);
     };

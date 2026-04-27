@@ -293,7 +293,6 @@ const ClientInfo = () => {
 
     const handleDivisionSelection = (divisionId, division) => {
         if (!divisionId) return;
-        console.log(divisionId, division, "divisionId, division")
         const parts = division.split(">").map(v => v.trim());
         const keys = Object.keys(fields);
         setFieldsData(prev => {

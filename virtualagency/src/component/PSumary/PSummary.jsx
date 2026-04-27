@@ -224,6 +224,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                 open={open}
                 onClose={() => setOpen(false)}
                 data={formData}
+                step = {currentStep}
             />
         </>
     );

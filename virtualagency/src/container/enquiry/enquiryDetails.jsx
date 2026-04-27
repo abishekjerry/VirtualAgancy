@@ -106,7 +106,6 @@ const EnquiryDetails = () => {
                         clientInfo: data.enqClientinfo,
                         enquiryDetails: data.enqProjectinfo
                     }))
-                    console.log(data.enqProjectinfo, "data.enqProjectinfo");
                     // Update state
                     setFormData(prev => ({
                         ...prev,

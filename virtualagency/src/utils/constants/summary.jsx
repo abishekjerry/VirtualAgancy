@@ -116,13 +116,15 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
     { key: "version", label: "lbl85" },
     { key: "specNote", label: "lbl83" },
     { key: "sNote", label: "lbl86" }
+
   ];
 
   const items = formDataList?.lineItems?.length ? formDataList.lineItems : response;
   const lineItems = items.map((item, index) => ({
     itemTitle: `Item ${index + 1}`,
     itemColor: "warning",
-    items : lineItemMapping.map(field => ({
+    enquiryId: item.enqdetailsId,
+    items: lineItemMapping.map(field => ({
       label: field.label === "Attachment" ? field.label : getLabel(field.label),
       value: field.key ? item[field.key] ?? "-" : field.value
     }))

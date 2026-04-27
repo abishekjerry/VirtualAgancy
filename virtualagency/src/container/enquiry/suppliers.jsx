@@ -141,7 +141,8 @@ const Suppliers = () => {
     const rawLineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
-        items: item.data
+        enquiryId: item.enquiryId,
+        items: item.items
     }));
     const suppliers = getSuppliers(formDataList.suppiers, formDataList.supplier)
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel });
