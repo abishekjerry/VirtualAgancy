@@ -41,29 +41,27 @@ export const getClientInfo = (fields = {}, formData = {}, formDataList = {}, get
     { label: getLabel("lbl36"), value: response ? source.pmgEntityname : getOptionLabel(formDataList.pmgEntity, source.pmgEntity) }
   ];
 };
-export const getEnquiryDetails = (formData = {}, dynamicData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
-  const source = response || formData;
+export const getEnquiryDetails = (formData = {}, dynamicData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {  
   return [
-    { label: getLabel("lbl42"), value: `${source.projectNo || source.projectNo || "-"}` },
-    { label: getLabel("lbl43"), value: response ? source.estdate : source.estdate },
-    { label: getLabel("lbl44"), value: response ? source.briefdate : source.briefdate },
-    { label: getLabel("lbl45"), value: response ? source.projectDesc : source.projectDesc },
-    { label: getLabel("lbl46"), value: response ? source.projectQuotetype : source.projectQuoteType },
-    { label: getLabel("lbl47"), value: response ? source.year : source.year },
-    { label: getLabel("lbl93"), value: response ? source.managementFeetype : source.managementFeetype },
-    { label: getLabel("lbl94"), value: response ? source.hybridModel : source.hybrid == 1 ? "Yes" : "No" },
-    { label: getLabel("lbl95"), value: response ? source.attribute : source.attribute },
-    { label: getLabel("lbl49"), value: `${source.slaTemplatename || getOptionLabel(formDataList.slaTemplate, source.slaTemplate) || "-"}` },
-    { label: getLabel("lbl54"), value: `${source.quotestartdate || dynamicData?.quotestartdate || "-"} - ${source.quoteenddate || dynamicData?.quoteenddate || "-"}` },
-    { label: getLabel("lbl55"), value: `${source.proofstartdate || dynamicData?.proofstartdate || "-"} - ${source.proofenddate || dynamicData?.proofenddate || "-"}` },
-    { label: getLabel("lbl56"), value: `${source.productionstartdate || dynamicData?.productionstartdate || "-"} - ${source.productionenddate || dynamicData?.productionenddate || "-"}` },
-    { label: getLabel("lbl57"), value: `${source.filecopiesstartdate || dynamicData?.filecopiesstartdate || "-"} - ${source.filecopiesenddate || dynamicData?.filecopiesenddate || "-"}` },
-    { label: getLabel("lbl58"), value: `${source.invoicestartdate || dynamicData?.invoicestartdate || "-"} - ${source.invoiceenddate || dynamicData?.invoiceenddate || "-"}` }
+    { label: getLabel("lbl42"), value: `${response.projectNo || formData.projectNo || "-"}` },
+    { label: getLabel("lbl43"), value: `${response.estdate || formData.estdeliveryDate || "-"}` },
+    { label: getLabel("lbl44"), value: `${response.briefdate || formData.briefReceivedDate || "-"}` },
+    { label: getLabel("lbl45"), value: `${response.projectDesc || formData.projectDescription || "-"}` },
+    { label: getLabel("lbl46"), value: `${response.projectQuotetype || getOptionLabel(formDataList.quoteType, formData.projectQuoteType) || "-"}` },
+    { label: getLabel("lbl47"), value: `${response.year || getOptionLabel(formDataList.year, formData.year) || "-"}` },
+    { label: getLabel("lbl93"), value: `${response.managementFeetype || getOptionLabel(formDataList.managementFeeType, formData.managementFeeType) || "-"}` },
+    { label: getLabel("lbl94"), value: `${response.hybridModel || getOptionLabel(formDataList.hybird, formData.hybrid) || "-"}` },
+    { label: getLabel("lbl95"), value: `${response.attribute || getOptionLabel(formDataList.projectAttribute, formData.projectAttribute) || "-"}` },
+    { label: getLabel("lbl49"), value: `${response?.slaTemplatename || getOptionLabel(formDataList.slaTemplate, formData.slaTemplate) || "-"}` },
+    { label: getLabel("lbl54"), value: `${response.quotestartdate || dynamicData?.quotestartdate || "-"} - ${response.quoteenddate || dynamicData?.quoteenddate || "-"}` },
+    { label: getLabel("lbl55"), value: `${response.proofstartdate || dynamicData?.proofstartdate || "-"} - ${response.proofenddate || dynamicData?.proofenddate || "-"}` },
+    { label: getLabel("lbl56"), value: `${response.productionstartdate || dynamicData?.productionstartdate || "-"} - ${response.productionenddate || dynamicData?.productionenddate || "-"}` },
+    { label: getLabel("lbl57"), value: `${response.filecopiesstartdate || dynamicData?.filecopiesstartdate || "-"} - ${response.filecopiesenddate || dynamicData?.filecopiesenddate || "-"}` },
+    { label: getLabel("lbl58"), value: `${response.invoicestartdate || dynamicData?.invoicestartdate || "-"} - ${response.invoiceenddate || dynamicData?.invoiceenddate || "-"}` }
   ];
 };
 
 export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
-  const source = response || formData;
   const lineItemMapping = [
     { key: "printornonprint", label: "lbl62" },
     { key: "tojabc", label: "lbl60" },

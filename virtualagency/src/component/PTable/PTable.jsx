@@ -93,9 +93,9 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             ) : (
               filteredRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
+                .map((row, index) => (
                   <TableRow
-                    key={row.supplierId} // ✅ stable key
+                    key={row.supplierId ?? `row-${index}`} // ✅ stable key
                     onClick={() => onClick && onClick(row)}
                     sx={{
                       transition: "0.2s ease",
