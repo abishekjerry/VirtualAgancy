@@ -197,8 +197,7 @@ const Review = () => {
                                                 size="small"
                                                 startIcon={<EditIcon />}
                                                 onClick={(e) => {
-                                                    e.stopPropagation(),
-                                                        handleEdit(3, item)
+                                                    e.stopPropagation() //, handleEdit(3, item)
                                                 }}
                                                 sx={{
                                                     color: "#fff",

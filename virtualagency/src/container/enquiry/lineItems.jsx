@@ -202,37 +202,37 @@ const LineItems = () => {
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
         enquiryId: item.enquiryId,
-        items : item.items
+        items: item.items
     }));
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(Dashboard_API.Master, {});
+            setFormDataList(prev => ({
+                ...prev,
+                category: response.typeofJob,
+            }));
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await PostApi(Dashboard_API.Master, {});
+            if (id !== 0) {
+                const data = await PostApi(Dashboard_API.GetDetails, {
+                    Enquiryid: id,
+                });
                 setFormDataList(prev => ({
                     ...prev,
-                    category: response.typeofJob,
-                }));
-
-                if (id !== 0) {
-                    const data = await PostApi(Dashboard_API.GetDetails, {
-                        Enquiryid: id,
-                    });
-                    setFormDataList(prev => ({
-                        ...prev,
-                        clientInfo: data.enqClientinfo,
-                        enquiryDetails: data.enqProjectinfo,
-                        lineItems: data.enqlineItems,
-                    }))
-                }
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
+                    clientInfo: data.enqClientinfo,
+                    enquiryDetails: data.enqProjectinfo,
+                    lineItems: data.enqlineItems,
+                }))
             }
-        };
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -354,7 +354,7 @@ const LineItems = () => {
     const fieldConfig = {
         [Labels.lineItems.noOfMaterials]: { type: "number", max: 5 },
         [Labels.lineItems.noOfVersion]: { type: "number" },
-        [Labels.lineItems.quantity]: { type: "number"},
+        [Labels.lineItems.quantity]: { type: "number" },
 
 
         [Labels.lineItems.width]: { type: "decimal" },
@@ -480,13 +480,14 @@ const LineItems = () => {
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
+                    console.log();
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
                         navigate(isSubmit ? labelRoutes.suppliers : labelRoutes.LineItems, {
                             state: { id: response.data.enqId }
                         });
                     }, 500);
-                    isSubmit ? '' : fetchData();
+                    if (!isSubmit) fetchData();
                 } else {
                     setErrors((prev) => ({
                         ...prev,
@@ -496,6 +497,7 @@ const LineItems = () => {
                 }
 
             } catch (error) {
+                console.log(error, "sahfjh");
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
                 setLoading(false);
@@ -581,7 +583,8 @@ const LineItems = () => {
 
         requiredFields.forEach((field) => {
             if (field === Labels.lineItems.typeOfItem) {
-                if (isNotEmpty(formData[field])) {
+                const value = getSelectedValue(formDataList.typeOfItem, formData.typeOfItem);
+                if (value === undefined) {
                     newErrors[field] = Labels.commonLabel.required;
                 }
             } else {

@@ -37,7 +37,7 @@ const EnquiryDetails = () => {
         projectQuoteType: "",
         year: "",
         managementFeeType: "",
-        hybrid: 2,
+        hybrid: "",
         projectAttribute: "",
         slaTemplate: "",
     });
@@ -67,7 +67,7 @@ const EnquiryDetails = () => {
         ],
         hybird: [
             { label: "Yes", value: 1 },
-            { label: "No", value: 2 }
+            { label: "No", value: 2 , selected: true }
         ],
 
         clientInfo: [],
@@ -116,9 +116,9 @@ const EnquiryDetails = () => {
                         projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
                         year: getOptionValue(formDataList.year, data.enqProjectinfo.year),
                         managementFeeType: data.enqProjectinfo.managementfeetypeId,
-                        hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
+                        //hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
                         projectAttribute: getOptionValue(formDataList.projectAttribute, data.enqProjectinfo.attribute),
-                        slaTemplate: data.enqProjectinfo.slaId,
+                        //slaTemplate: data.enqProjectinfo.slaId,
                     }));
                 }
 
@@ -144,44 +144,27 @@ const EnquiryDetails = () => {
 
     }, [formDataList]);
 
-    const mapApiToPhases = (data) => {
-        const phases = [
-            { name: "Quote", key: "quote" },
-            { name: "Proof", key: "proof" },
-            { name: "Production", key: "production" },
-            { name: "File Copies", key: "filecopies" },
-            { name: "Invoice", key: "invoice" }
-        ];
-        return phases.map(({ name, key }) => ({
-            name,
-            startDate: data[`${key}startdate`],
-            endDate: data[`${key}enddate`],
-        }));
-    };
-
     useEffect(() => {
         if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
-            const defaultSla = formDataList.slaTemplate[0].value;
-
+            const slaId = formDataList?.enquiryDetails?.slaId ? formDataList?.enquiryDetails?.slaId : formDataList.slaTemplate[0].value;
+            const hybrid =  formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
             setFormData(prev => ({
                 ...prev,
-                slaTemplate: defaultSla
+                slaTemplate: slaId,
+                hybrid : hybrid,
             }));
-
-            slaTemplate(defaultSla);
+            slaTemplate(slaId);
         }
     }, [formDataList.slaTemplate]);
 
     const slaTemplate = async (sla) => {
         try {
             setLoading(true);
-
             const response = await PostApi(
                 EnquiryDetails_API.GetSlatemplateMaster,
                 { SlaId: sla }
             );
             setSlaTemplateData(response);
-
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
@@ -200,7 +183,7 @@ const EnquiryDetails = () => {
             { name: getLabel("lbl58"), days: slaData?.invoicing, mdays: slaData?.defInvoices }
         ];
         setPhaseDates(initialPhases);
-        const startDate = id !== 0 ? formDataList?.enquiryDetails?.quotestartdate : today;
+        const startDate = formDataList?.enquiryDetails?.quotestartdate ? formDataList.enquiryDetails.quotestartdate : today;
         calculatePlanByQuote(startDate, initialPhases);
     }, [slaTemplateData]);
 

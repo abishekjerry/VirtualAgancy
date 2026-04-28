@@ -82,7 +82,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step }) => {
     // ✅ Load data when popup opens
     useEffect(() => {
         const category = getOptionValue(data.items, "Category");
-        LineItemsMaster(category);
+        isNotEmpty(category) ? LineItemsMaster(category) : null
         const printingMethod = getOptionValue(data.items, "Printing Method");
         const itemName = getOptionValue(data.items, "Item Name");
         const itemNameDescription = getOptionValue(data.items, "Item Name Description");

@@ -51,7 +51,7 @@ export const getEnquiryDetails = (formData = {}, dynamicData = {}, formDataList 
     { label: getLabel("lbl46"), value: response ? source.projectQuotetype : source.projectQuoteType },
     { label: getLabel("lbl47"), value: response ? source.year : source.year },
     { label: getLabel("lbl93"), value: response ? source.managementFeetype : source.managementFeetype },
-    { label: getLabel("lbl94"), value: `${source.hybridModel || source.hybrid == 1 ? "Yes" : "No" || "-"}` },
+    { label: getLabel("lbl94"), value: response ? source.hybridModel : source.hybrid == 1 ? "Yes" : "No" },
     { label: getLabel("lbl95"), value: response ? source.attribute : source.attribute },
     { label: getLabel("lbl49"), value: `${source.slaTemplatename || getOptionLabel(formDataList.slaTemplate, source.slaTemplate) || "-"}` },
     { label: getLabel("lbl54"), value: `${source.quotestartdate || dynamicData?.quotestartdate || "-"} - ${source.quoteenddate || dynamicData?.quoteenddate || "-"}` },
