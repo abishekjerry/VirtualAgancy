@@ -28,8 +28,8 @@ export const getSummarySections = ({ clientInfo = [], enquiryDetails = [], lineI
 export const getClientInfo = (fields = {}, formData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
   const source = response || formData;
   return [
-    { label: getLabel("lbl27"), value: response ? source.entityname : getOptionLabel(formDataList.division, source.division) },
-    { label: getLabel("lbl28"), value: response ? source.createdByUser : fields.clientName },
+    { label: getLabel("lbl27"), value: response ? source.divisionname : getOptionLabel(formDataList.division, source.division) },
+    { label: getLabel("lbl28"), value: response ? source.client : fields.clientName },
     { label: getLabel("lbl09"), value: response ? source.country : fields.country },
     { label: getLabel("lbl29"), value: response ? source.entityname : fields.entityName },
     { label: getLabel("lbl30"), value: response ? source.bussinessUnit : fields.businessUnit },

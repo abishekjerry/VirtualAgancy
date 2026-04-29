@@ -118,8 +118,9 @@ const EnquiryDetails = () => {
                         managementFeeType: data.enqProjectinfo.managementfeetypeId,
                         //hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
                         projectAttribute: getOptionValue(formDataList.projectAttribute, data.enqProjectinfo.attribute),
-                        //slaTemplate: data.enqProjectinfo.slaId,
+                        slaTemplate: data.enqProjectinfo.slaId,
                     }));
+                    localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId);
                 }
 
             } catch (error) {
@@ -160,10 +161,7 @@ const EnquiryDetails = () => {
     const slaTemplate = async (sla) => {
         try {
             setLoading(true);
-            const response = await PostApi(
-                EnquiryDetails_API.GetSlatemplateMaster,
-                { SlaId: sla }
-            );
+            const response = await PostApi(EnquiryDetails_API.GetSlatemplateMaster, { SlaId: sla , Enqid : id });
             setSlaTemplateData(response);
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);

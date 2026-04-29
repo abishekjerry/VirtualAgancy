@@ -20,7 +20,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
     const [activeItemIndex, setActiveItemIndex] = useState({ 3: 0 });
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({});
-
+    const enquiryID = localStorage.getItem("enquiryID")
     const handleOpen = (data = {}) => {
         setFormData(data);
         setOpen(true);
@@ -79,7 +79,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
 
                 <PGrid container className="justify-content-center">
                     <PTypography
-                        labelText={Labels.clientInfo.summary}
+                        labelText = {`${Labels.clientInfo.summary}${enquiryID && currentStep != 1 ? ` (${enquiryID})` : ""}`}
                         flag={Labels.fontFlags.subHeader}
                         weight={FontWeight.bold}
                         color={CommonColors.blue.main}
@@ -176,7 +176,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                                                                             color={CommonColors.grey.main}
                                                                             startIcon={<EditIcon />}
                                                                             width={80}
-                                                                            //onClick={() => handleEdit(section.step, item)}
+                                                                            onClick={() => handleEdit(section.step, item)}
                                                                         />
                                                                     </PGrid>
                                                                 </PGrid>

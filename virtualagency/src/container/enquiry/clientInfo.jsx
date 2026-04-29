@@ -327,7 +327,7 @@ const ClientInfo = () => {
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
                         navigate(labelRoutes.enquiryDetails, {
-                            state: { id: response.data.enqId, clientInfo: clientInfo }
+                            state: { id: response.data.enqId }
                         });
                     }, 500);
                 } else {

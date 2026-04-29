@@ -232,14 +232,31 @@ const LineItems = () => {
         }
     };
 
+    const SavingsReasonMaster = async (data) => {
+        try {
+            setLoading(false);
+            const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
+                TypeOfJob: getOptionLabel(formDataList.category, formData.category),
+                Savingstype: data,
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                savingsReason: response.savingsReason,
+            }));
+
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
 
     useEffect(() => {
-        const filtered = formDataList.yesOrNoNot?.filter(
-            option => option.value !== 2
-        ) || [];
+        const filtered = formDataList.yesOrNoNot?.filter(option => option.value !== 2) || [];
         setFormDataList(prev => {
             // prevent infinite loop
             if (JSON.stringify(prev.competitiveBiddingExceptionFormSigned) === JSON.stringify(filtered)) {
@@ -264,7 +281,8 @@ const LineItems = () => {
         regionalOrder: getSelectedValue(formDataList.regionalOrder),
         typeOfItem: getSelectedValue(formDataList.typeOfItem),
         printingMethod: getSelectedValue(formDataList.printingMethod),
-    }), [formDataList]);
+    }), [formDataList.yesOrNo, formDataList.soYesNoNa, formDataList.yesNoNa, formDataList.incoterm, formDataList.globalOrder,
+    formDataList.localCatalog, formDataList.regionalOrder, formDataList.typeOfItem, formDataList.printingMethod]);
 
     useEffect(() => {
         const { yesOrNo, soYesNoNa, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem, printingMethod } = selectedValues;
@@ -333,24 +351,6 @@ const LineItems = () => {
         }
     };
 
-    const SavingsReasonMaster = async (data) => {
-        try {
-            setLoading(false);
-            const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
-                TypeOfJob: getOptionLabel(formDataList.category, formData.category),
-                Savingstype: data,
-            });
-            setFormDataList(prev => ({
-                ...prev,
-                savingsReason: response.savingsReason,
-            }));
-
-        } catch (error) {
-            toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        } finally {
-            setLoading(false);
-        }
-    };
     const fieldConfig = {
         [Labels.lineItems.noOfMaterials]: { type: "number", max: 5 },
         [Labels.lineItems.noOfVersion]: { type: "number" },
@@ -413,9 +413,10 @@ const LineItems = () => {
         if (isValid) {
             try {
                 setLoading(true);
+                console.log(getOptionLabel(formDataList.typeOfItem, formData.typeOfItem), formData.typeOfItem, "formData.typeOfItem");
                 const payload = {
                     //lineItems
-                    EnqdetailsId: 0,
+                    //EnqdetailsId: 0,
                     EnqId: id,
                     Printornonprint: getOptionLabel(formDataList.category, formData.category),
                     TOJABC: getOptionLabel(formDataList.typeOfJob, formData.typeOfJob),
@@ -455,7 +456,7 @@ const LineItems = () => {
                     CatalogueUsage: getOptionLabel(formDataList.localCatalog, formData.localCatalogueName),
                     Eauction: getOptionLabel(formDataList.yesOrNo, formData.eAuction),
                     printingmethod: getOptionLabel(formDataList.printingMethod, formData.printingMethod),
-                    typeofitem: getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
+                    typeofitem: formData.typeOfItem == "" ? "N/A" : getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
                     Noofmaterials: formData.noOfMaterials,
                     DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
                     Innovation: getOptionLabel(formDataList.yesNoNa, formData.innovation),
@@ -474,7 +475,6 @@ const LineItems = () => {
                     FlatSizeLength: formData.length,
                     FlatSizeWidth: formData.width,
                     FlatSizeDandH: formData.depth,
-
                     ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
                 };
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
@@ -497,7 +497,6 @@ const LineItems = () => {
                 }
 
             } catch (error) {
-                console.log(error, "sahfjh");
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
                 setLoading(false);

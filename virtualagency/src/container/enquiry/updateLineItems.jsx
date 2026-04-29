@@ -80,6 +80,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step }) => {
     });
 
     // ✅ Load data when popup opens
+
     useEffect(() => {
         const category = getOptionValue(data.items, "Category");
         isNotEmpty(category) ? LineItemsMaster(category) : null
@@ -95,6 +96,8 @@ const UpdateLineItems = ({ open, onClose, data = {}, step }) => {
         const globalOrderWindowCatalogueName = getOptionValue(data.items, "Global Order Window Catalogue Name");
         const localCatalogueName = getOptionValue(data.items, "Local Catalogue Name");
         const quantity = getOptionValue(data.items, "Quantity");
+        if (!formDataList.printingMethod?.length || !formDataList.sourcingLocation?.length) return;
+        console.log(sourcingLocation, printingMethod, "printingMethod");
         if (open && data) {
             setFormData(prev => ({
                 ...prev,
@@ -174,99 +177,100 @@ const UpdateLineItems = ({ open, onClose, data = {}, step }) => {
     // ✅ Submit
     const handleSubmit = async () => {
         const isValid = LineItemsValidation();
-        // if (isValid) {
-        //     try {
-        //         setLoading(true);
-        //         const payload = {
-        //             //lineItems
-        //             EnqdetailsId: formData.enquiryId,
-        //             EnqId: id,
-        //             // Printornonprint: getOptionLabel(formDataList.category, formData.category),
-        //             // TOJABC: getOptionLabel(formDataList.typeOfJob, formData.typeOfJob),
-        //             // localRateCard: getOptionLabel(formDataList.yesOrNo, formData.rateCard),
-        //             // Competbidmandate: getOptionLabel(formDataList.yesOrNoNot, formData.competitiveBiddingMandatory),
-        //             // Competbidcomplaint: getOptionLabel(formDataList.yesOrNoNot, formData.competitiveBiddingCompliant),
-        //             // Competbidexception: getOptionLabel(formDataList.competitiveBiddingExceptionFormSigned, formData.competitiveBiddingExceptionFormSigned),
-        //             // Exceptionreason: getOptionLabel(formDataList.exceptionsReasonCode, formData.exceptionsReasonCode),
-        //             // ProductCategoryId: formData.itemCategory,
-        //             // SubcatID: formData.subCategory,
-        //             // Simplex: getOptionLabel(formDataList.simplex, formData.simplex),
-        //             // TCOapproval: getOptionLabel(formDataList.tcoYesOrNo, formData.tcoApprovalRequired),
-        //             // TCOapproved: getOptionLabel(formDataList.tcoYesOrNo, formData.tcoApproved),
-        //             // Dictated: getOptionLabel(formDataList.yesOrNo, formData.dictatedJob),
-        //             // Itemtype: getOptionLabel(formDataList.itemType, formData.itemType),
-        //             // Incoterm: getOptionLabel(formDataList.incoterm, formData.incoterm),
-        //             ItemName: formData.itemName,
-        //             ItemDescription: formData.itemNameDescription,
+        if (isValid) {
+            try {
+                setLoading(true);
+                const payload = {
+                    //lineItems
+                    EnqdetailsId: formData.enquiryId,
+                    EnqId: id,
+                    // Printornonprint: getOptionLabel(formDataList.category, formData.category),
+                    // TOJABC: getOptionLabel(formDataList.typeOfJob, formData.typeOfJob),
+                    // localRateCard: getOptionLabel(formDataList.yesOrNo, formData.rateCard),
+                    // Competbidmandate: getOptionLabel(formDataList.yesOrNoNot, formData.competitiveBiddingMandatory),
+                    // Competbidcomplaint: getOptionLabel(formDataList.yesOrNoNot, formData.competitiveBiddingCompliant),
+                    // Competbidexception: getOptionLabel(formDataList.competitiveBiddingExceptionFormSigned, formData.competitiveBiddingExceptionFormSigned),
+                    // Exceptionreason: getOptionLabel(formDataList.exceptionsReasonCode, formData.exceptionsReasonCode),
+                    // ProductCategoryId: formData.itemCategory,
+                    // SubcatID: formData.subCategory,
+                    // Simplex: getOptionLabel(formDataList.simplex, formData.simplex),
+                    // TCOapproval: getOptionLabel(formDataList.tcoYesOrNo, formData.tcoApprovalRequired),
+                    // TCOapproved: getOptionLabel(formDataList.tcoYesOrNo, formData.tcoApproved),
+                    // Dictated: getOptionLabel(formDataList.yesOrNo, formData.dictatedJob),
+                    // Itemtype: getOptionLabel(formDataList.itemType, formData.itemType),
+                    // Incoterm: getOptionLabel(formDataList.incoterm, formData.incoterm),
+                    ItemName: formData.itemName,
+                    ItemDescription: formData.itemNameDescription,
 
 
-        //             // ✅ Sustainability
-        //             // usingFSCMaterial: getOptionLabel(formDataList.yesNoNa, formData.fscOrPefcMaterial),
-        //             // OEKOTEXCertification: getOptionLabel(formDataList.yesNoNa, formData.taxCertification),
-        //             // Recycled: getOptionLabel(formDataList.yesNoNa, formData.recyclable),
-        //             // SustainableOptionthatwasrejected: getOptionLabel(formDataList.yesNoNa, formData.sustainabilityOption),
-        //             // WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
-        //             // Isthisitemdesignedtobereused: getOptionLabel(formDataList.yesNoNa, formData.designedToBeReused),
-        //             // containrecycledmaterial: getOptionLabel(formDataList.yesNoNa, formData.containsPlastic),
-        //             // containrecycledplastic: getOptionLabel(formDataList.yesNoNa, formData.containsRecycledPlastic),
-        //             // Weightageofrecycledmaterial: formData.recycledMaterialWeightKg,
-        //             //CompetetiveWinningSupplier
+                    // ✅ Sustainability
+                    // usingFSCMaterial: getOptionLabel(formDataList.yesNoNa, formData.fscOrPefcMaterial),
+                    // OEKOTEXCertification: getOptionLabel(formDataList.yesNoNa, formData.taxCertification),
+                    // Recycled: getOptionLabel(formDataList.yesNoNa, formData.recyclable),
+                    // SustainableOptionthatwasrejected: getOptionLabel(formDataList.yesNoNa, formData.sustainabilityOption),
+                    // WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
+                    // Isthisitemdesignedtobereused: getOptionLabel(formDataList.yesNoNa, formData.designedToBeReused),
+                    // containrecycledmaterial: getOptionLabel(formDataList.yesNoNa, formData.containsPlastic),
+                    // containrecycledplastic: getOptionLabel(formDataList.yesNoNa, formData.containsRecycledPlastic),
+                    // Weightageofrecycledmaterial: formData.recycledMaterialWeightKg,
+                    //CompetetiveWinningSupplier
 
-        //             // Catalogue Section
-        //             //RateCard: getOptionLabel(formDataList.tcoYesOrNo, formData.ratecardCatalogueItemDeclined),
-        //             PromoOSSOrderWindows: getOptionLabel(formDataList.globalOrder, formData.globalOrderWindowCatalogueName),
-        //             //Regionalname: getOptionLabel(formDataList.regionalOrder, formData.regionalOrderWindowCatalogue),
-        //             CatalogueUsage: getOptionLabel(formDataList.localCatalog, formData.localCatalogueName),
-        //             //Eauction: getOptionLabel(formDataList.yesOrNo, formData.eAuction),
-        //             printingmethod: getOptionLabel(formDataList.printingMethod, formData.printingMethod),
-        //             // typeofitem: getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
-        //             // Noofmaterials: formData.noOfMaterials,
-        //             DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
-        //             Innovation: getOptionLabel(formDataList.yesNoNa, formData.innovation),
-        //             Sourcinglocation: getOptionLabel(formDataList.sourcingLocation, formData.sourcingLocation),
-        //             // savingstype: getOptionLabel(formDataList.savingsType, formData.savingsType),
-        //             // savingsreason: getOptionLabel(formDataList.savingsReason, formData.savingsReason),
-        //             // OWlink: getOptionLabel(formDataList.yesNoNa, formData.owWithLink),
-        //             // CompetetiveWinningSupplier: formData.competitiveBiddingWinningSupplierCost,
-        //             // Specifications
-        //             Version: formData.noOfVersion,
-        //             SpecNote: formData.specifications,
-        //             SNote: formData.notesComments,
-        //             // Quantity
-        //             //QuoteType: getOptionLabel(formDataList.quoteType, formData.quantityType),
-        //             QuoteQtyOrSize: formData.quantity,
-        //             // FlatSizeLength: formData.length,
-        //             // FlatSizeWidth: formData.width,
-        //             // FlatSizeDandH: formData.depth,
+                    // Catalogue Section
+                    //RateCard: getOptionLabel(formDataList.tcoYesOrNo, formData.ratecardCatalogueItemDeclined),
+                    PromoOSSOrderWindows: getOptionLabel(formDataList.globalOrder, formData.globalOrderWindowCatalogueName),
+                    //Regionalname: getOptionLabel(formDataList.regionalOrder, formData.regionalOrderWindowCatalogue),
+                    CatalogueUsage: getOptionLabel(formDataList.localCatalog, formData.localCatalogueName),
+                    //Eauction: getOptionLabel(formDataList.yesOrNo, formData.eAuction),
+                    printingmethod: getOptionLabel(formDataList.printingMethod, formData.printingMethod),
+                    // typeofitem: getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
+                    // Noofmaterials: formData.noOfMaterials,
+                    DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
+                    Innovation: getOptionLabel(formDataList.yesNoNa, formData.innovation),
+                    Sourcinglocation: getOptionLabel(formDataList.sourcingLocation, formData.sourcingLocation),
+                    // savingstype: getOptionLabel(formDataList.savingsType, formData.savingsType),
+                    // savingsreason: getOptionLabel(formDataList.savingsReason, formData.savingsReason),
+                    // OWlink: getOptionLabel(formDataList.yesNoNa, formData.owWithLink),
+                    // CompetetiveWinningSupplier: formData.competitiveBiddingWinningSupplierCost,
+                    // Specifications
+                    Version: formData.noOfVersion,
+                    SpecNote: formData.specifications,
+                    SNote: formData.notesComments,
+                    // Quantity
+                    //QuoteType: getOptionLabel(formDataList.quoteType, formData.quantityType),
+                    QuoteQtyOrSize: formData.quantity,
+                    // FlatSizeLength: formData.length,
+                    // FlatSizeWidth: formData.width,
+                    // FlatSizeDandH: formData.depth,
 
-        //             ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
-        //         };
-        //         const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
-        //         if (isSuccess(response)) {
-        //             setAllowRedirect(true);
-        //             toast(Labels.status.success, response.data.message);
-        //             setTimeout(() => {
-        //                 navigate(route, {
-        //                     state: { id: response.data.enqId }
-        //                 });
-        //             }, 500);
-        //             onClose();
-        //         } else {
-        //             setErrors((prev) => ({
-        //                 ...prev,
-        //                 name: ""
-        //             }));
-        //             toast(Labels.status.failure, response.data.message);
-        //         }
+                    ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+                };
+                console.log(payload, "payload");
+                const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
+                if (isSuccess(response)) {
+                    setAllowRedirect(true);
+                    toast(Labels.status.success, response.data.message);
+                    setTimeout(() => {
+                        navigate(route, {
+                            state: { id: response.data.enqId }
+                        });
+                    }, 500);
+                    onClose();
+                } else {
+                    setErrors((prev) => ({
+                        ...prev,
+                        name: ""
+                    }));
+                    toast(Labels.status.failure, response.data.message);
+                }
 
-        //     } catch (error) {
-        //         toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        // } else {
-        //     setAllowRedirect(false);
-        // }
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            setAllowRedirect(false);
+        }
     };
 
     {/*Update LineItems*/ }
