@@ -485,10 +485,7 @@ const LineItems = () => {
                         });
                     }, 500);
                     if (!isSubmit) {
-                        fetchData();
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 300);
+                       await fetchData();   
                     };
                 } else {
                     setErrors((prev) => ({
@@ -613,11 +610,6 @@ const LineItems = () => {
     const handlePreview = (index) => {
         setCurrentIndex(index);
         setPreviewOpen(true);
-    };
-    const handleCloseChoose = () => {
-
-    };
-    const handleSendChoose = async () => {
     };
 
     return (

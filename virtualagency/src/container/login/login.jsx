@@ -60,9 +60,21 @@ function Login(props) {
 
   const handleCloseRecover = () => {
     setOpenRecover(false);
+    setFormData((prev) => ({
+      ...prev,
+      resetUsername: "",
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      resetUsername: "",
+    }));
   };
 
   const handleSendRecover = () => {
+    const isValid = resetUserNameValidation();
+    if (isValid) {
+
+    }
     setOpenRecover(false);
   };
 
@@ -147,6 +159,23 @@ function Login(props) {
       }
     }
   };
+
+  const resetUserNameValidation = () => {
+    const requiredFields = [
+      Labels.login.resetUsername,
+    ];
+
+    let newErrors = {};
+    requiredFields.forEach((field) => {
+      const value = formData[field];
+      if (!value || value.trim() === "") {
+        newErrors[field] = Labels.commonLabel.required;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
 
   const loginValidation = () => {
     const requiredFields = [
@@ -262,33 +291,43 @@ function Login(props) {
         </div>
       </form>
 
-      < PDialog
+      <PDialog
         open={openRecover}
         onClose={handleCloseRecover}
-        title={Labels.recoverPassword}
+        title={Labels.loginPage.recoverPasswordByYourUserName}
         showCloseIcon={true}
         actions={
           < PGrid className="d-flex align-items-center justify-content-end gap-2" >
             <PButton
-              fullWidth
               label={Labels.buttonLabel.backToLogin}
               variant="outlined"
               onClick={handleCloseRecover}
               color={CommonColors.grey.main}
-              width={120}
+              width={180}
             />
             <PButton
-              fullWidth
               label={Labels.buttonLabel.submit}
               variant={Labels.contained}
-              onClick={handleOpenRecover}
+              onClick={handleSendRecover}
               color={CommonColors.green.main}
               width={120}
             />
-          </PGrid >
+          </PGrid>
         }
       >
-      </PDialog >
+        <PGrid container>
+          <PGrid item xs={12} sm={12} md={12}>
+            <PTextField
+              name={Labels.login.resetUsername}
+              label={Labels.loginPage.userName}
+              value={formData.resetUsername}
+              onChange={handleChange}
+              helperText={errors?.resetUsername}
+            />
+          </PGrid>
+        </PGrid>
+      </PDialog>
+
     </>
   );
 }

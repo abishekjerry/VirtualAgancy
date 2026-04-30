@@ -61,11 +61,10 @@ const Suppliers = () => {
             });
             setFormDataList(prev => ({
                 ...prev,
-                country:  [ { label: "All", value: 0 }, ...(response.country || [])],
-                print: [ { label: "All", value: 0 }, ...(response.printcapabilities || [])],
+                country:  [ { label: "All", value: 0 ,  selected: true}, ...(response.country || [])],
+                print: [ { label: "All", value: 0 , selected: true}, ...(response.printcapabilities || [])],
                 suppliers: supplierResponse,
             }));
-
             if (id !== 0) {
                 const data = await PostApi(Dashboard_API.GetDetails, {
                     Enquiryid: id,

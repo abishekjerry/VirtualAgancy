@@ -16,6 +16,7 @@ export const Labels = {
     password: "password",
     newPassword: "newPassword",
     confirmPassword: "confirmPassword",
+    resetUsername : "resetUsername"
   },
 
   dashboard: {
