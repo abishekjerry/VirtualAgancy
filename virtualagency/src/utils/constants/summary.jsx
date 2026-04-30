@@ -41,7 +41,7 @@ export const getClientInfo = (fields = {}, formData = {}, formDataList = {}, get
     { label: getLabel("lbl36"), value: response ? source.pmgEntityname : getOptionLabel(formDataList.pmgEntity, source.pmgEntity) }
   ];
 };
-export const getEnquiryDetails = (formData = {}, dynamicData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {  
+export const getEnquiryDetails = (formData = {}, dynamicData = {}, formDataList = {}, getLabel, getOptionLabel, response = null) => {
   return [
     { label: getLabel("lbl42"), value: `${response.projectNo || formData.projectNo || "-"}` },
     { label: getLabel("lbl43"), value: `${response.estdate || formData.estdeliveryDate || "-"}` },
@@ -85,9 +85,9 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
 
     { key: "usingFSCMaterial", label: "lbl70" },
     { key: "oekotexCertification", label: "lbl151" },
-    { key: "designedforrecycling", label: "lbl71" },
-    { key: "plasticapartfromPLA", label: "lbl75" },
-    { key: "proposedwithsustainabilityoption", label: "lbl72" },
+    { key: "recycled", label: "lbl71" },
+    { key: "wasthisitemdesignedtoreducedPlastic", label: "lbl75" },
+    { key: "sustainableOptionthatwasrejected", label: "lbl72" },
     { key: "containrecycledmaterial", label: "lbl73" },
     { key: "containrecycledplastic", label: "lbl76" },
     { key: "weightageofrecycledmaterial", label: "lbl79" },
@@ -118,8 +118,11 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
   ];
 
   const items = formDataList?.lineItems?.length ? formDataList.lineItems : response;
-  const lineItems = items.map((item, index) => ({
-    itemTitle: `Item ${index + 1}`,
+  const validItems = (items || []).filter(
+    item => item?.itemNumber !== undefined && item?.itemNumber !== null
+  );
+  const lineItems = (validItems || []).map((item, index) => ({
+    itemTitle: `Item ${item.itemNumber}`,
     itemColor: "warning",
     enquiryId: item.enqdetailsId,
     items: lineItemMapping.map(field => ({

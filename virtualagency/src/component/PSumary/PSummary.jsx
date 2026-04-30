@@ -12,8 +12,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PButton from "../PButton/PButton";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import UpdateLineItems from "../../container/enquiry/updateLineItems";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { isSuccess, toast } from "../../utils/commonFunction/common";
+import { LineItems_API } from "../../utils/api/apiUrl";
+import { PostApi } from "../../utils/api/networking";
 
-export const PSummary = ({ sections = [], currentStep = 1 }) => {
+export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => {
     const { state } = useLocation();
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(currentStep);
@@ -32,7 +36,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
 
     const handleEdit = (step, item = null) => {
         if (step === 3) {
-            handleOpen(item); 
+            handleOpen(item);
             return;
         }
         const routeMap = {
@@ -73,13 +77,36 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
         </PGrid>
     );
 
+    const handleDuplicate = async (step, data) => {
+        try {
+            const payload = {
+                EnqdetailsId: data.enquiryId,
+                EnqId: state.id,
+                modifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+            };
+            const response = await PostApi(LineItems_API.GetEnqDuplicate, payload);
+            if (isSuccess(response)) {
+                toast(Labels.status.success, response.data);
+                await refreshSummary(); 
+            } else {
+                setErrors((prev) => ({
+                    ...prev,
+                    name: ""
+                }));
+                toast(Labels.status.failure, response.data.message);
+            }
+
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } 
+    };
     return (
         <>
             <PCard>
 
                 <PGrid container className="justify-content-center">
                     <PTypography
-                        labelText = {`${Labels.clientInfo.summary}${enquiryID && currentStep != 1 ? ` (${enquiryID})` : ""}`}
+                        labelText={`${Labels.clientInfo.summary}${enquiryID && currentStep != 1 ? ` (${enquiryID})` : ""}`}
                         flag={Labels.fontFlags.subHeader}
                         weight={FontWeight.bold}
                         color={CommonColors.blue.main}
@@ -92,14 +119,11 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                     return (
                         <Fragment key={section.step}>
                             <hr className="my-2" />
-                            <PGrid
-                                container
-                                className="d-flex align-items-center justify-content-between"
+                            <PGrid container className="d-flex align-items-center justify-content-between"
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
                                     const newStep = isOpen ? null : section.step;
                                     setActiveStep(newStep);
-
                                     if (newStep === 3) {
                                         setActiveItemIndex({ 3: 0 });
                                     } else {
@@ -109,7 +133,7 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                             >
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTypography
-                                        labelText={`${section.step}. ${section.title}${[3, 4].includes(section.step) ? ` (${section.items?.length || 0})` : ""}`}
+                                        labelText={`${section.step}. ${section.title}${[3, 4].includes(section.step) ? `(${section.items?.length || 0})` : ""}`}
                                         flag={Labels.fontFlags.subHeader}
                                         weight={FontWeight.bold}
                                     />
@@ -123,24 +147,15 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                             {/* CONTENT */}
                             {isOpen && (
                                 <PGrid container className={Labels.margin.mt1}>
-
                                     {section.step === 3 ? (
                                         section.items?.map((item, i) => {
                                             const isItemOpen = activeItemIndex[3] === i;
-
                                             return (
                                                 <Fragment key={i}>
                                                     <hr className="my-3" />
-                                                    <PGrid
-                                                        container
-                                                        className="d-flex align-items-center justify-content-between"
+                                                    <PGrid container className="d-flex align-items-center justify-content-between"
                                                         style={{ cursor: "pointer" }}
-                                                        onClick={() =>
-                                                            setActiveItemIndex((prev) => ({
-                                                                ...prev,
-                                                                3: prev[3] === i ? null : i
-                                                            }))
-                                                        }
+                                                        onClick={() => setActiveItemIndex((prev) => ({ ...prev, 3: prev[3] === i ? null : i }))}
                                                     >
                                                         <PGrid item xs={12} sm={6} md={8}>
                                                             <PTypography
@@ -169,14 +184,22 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
 
                                                             {section.step && (
                                                                 <PGrid container>
-                                                                    <PGrid item xs={12} className="d-flex justify-content-end">
+                                                                    <PGrid item xs={12} className="d-flex justify-content-end gap-2">
                                                                         <PButton
                                                                             label="Edit"
                                                                             variant="contained"
                                                                             color={CommonColors.grey.main}
                                                                             startIcon={<EditIcon />}
-                                                                            width={80}
+                                                                            width={90}
                                                                             onClick={() => handleEdit(section.step, item)}
+                                                                        />
+                                                                        <PButton
+                                                                            label="Duplicate"
+                                                                            variant="contained"
+                                                                            color={CommonColors.green.main}
+                                                                            startIcon={<ContentCopyIcon />}
+                                                                            width={120}
+                                                                            onClick={() => handleDuplicate(section.step, item)}
                                                                         />
                                                                     </PGrid>
                                                                 </PGrid>
@@ -224,7 +247,8 @@ export const PSummary = ({ sections = [], currentStep = 1 }) => {
                 open={open}
                 onClose={() => setOpen(false)}
                 data={formData}
-                step = {currentStep}
+                step={currentStep}
+                refreshSummary ={refreshSummary}
             />
         </>
     );

@@ -49,43 +49,42 @@ const Suppliers = () => {
         supplier: []
     });
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await PostApi(Dashboard_API.Master, {});
-                const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
-                    currency: currency,
-                    Country: countryName
+        fetchData();
+    }, []);
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(Dashboard_API.Master, {});
+            const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
+                currency: currency,
+                Country: countryName
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                country:  [ { label: "All", value: 0 }, ...(response.country || [])],
+                print: [ { label: "All", value: 0 }, ...(response.printcapabilities || [])],
+                suppliers: supplierResponse,
+            }));
+
+            if (id !== 0) {
+                const data = await PostApi(Dashboard_API.GetDetails, {
+                    Enquiryid: id,
                 });
                 setFormDataList(prev => ({
                     ...prev,
-                    country: response.country,
-                    print: response.printcapabilities,
-                    suppliers: supplierResponse,
-                }));
+                    clientInfo: data.enqClientinfo,
+                    enquiryDetails: data.enqProjectinfo,
+                    lineItems: data.enqlineItems,
+                    supplier: data.supplierinfo,
+                }))
 
-                if (id !== 0) {
-                    const data = await PostApi(Dashboard_API.GetDetails, {
-                        Enquiryid: id,
-                    });
-                    setFormDataList(prev => ({
-                        ...prev,
-                        clientInfo: data.enqClientinfo,
-                        enquiryDetails: data.enqProjectinfo,
-                        lineItems: data.enqlineItems,
-                        supplier: data.supplierinfo,
-                    }))
-
-                }
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
             }
-        };
-
-        fetchData();
-    }, []);
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
     const tableHeader = [
         { field: "suppliername", header: "Supplier's Name" },
         { field: "country", header: "Country" },
@@ -314,7 +313,7 @@ const Suppliers = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={4} />
+                        <PSummary sections={sections} currentStep={4} refreshSummary={fetchData} />
                     </PGrid>
                 </PGrid>
             </Box>

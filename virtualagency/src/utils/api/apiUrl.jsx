@@ -41,6 +41,7 @@ export const EnquiryDetails_API ={
 export const LineItems_API ={
   AddUpdateLineItems : Base_Url + "/VA/EnqLineItemDetails",
   GetEnqLineItemsMaster : Base_Url + "/VA/EnqLineItemsDropdowns",
+  GetEnqDuplicate : Base_Url + "/VA/EB_Duplicate"
 }
 export const Suppliers_API ={
   GetEnqSupplierMaster : Base_Url + "/VA/GetSupplier",

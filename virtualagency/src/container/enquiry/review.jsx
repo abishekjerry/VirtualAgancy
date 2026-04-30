@@ -49,34 +49,34 @@ const Review = () => {
 
     const id = state?.id > 0 ? state.id : 0;
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await PostApi(Dashboard_API.GetDetails, {
-                    Enquiryid: id,
-                });
-                const supplierColor = ["success", "info", "primary", "warning"];
-                const suppliers = response.supplierinfo.map((item, index) => ({
-                    name: item.suppliername,
-                    color: supplierColor[index % supplierColor.length]
-                }));
-
-                setFormDataList(prev => ({
-                    ...prev,
-                    suppliers: suppliers,
-                    lineItems: response.enqlineItems,
-                    clientInfo: response.enqClientinfo,
-                    enquiryDetails: response.enqProjectinfo
-                }));
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchData();
     }, []);
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(Dashboard_API.GetDetails, {
+                Enquiryid: id,
+            });
+            const supplierColor = ["success", "info", "primary", "warning"];
+            const suppliers = response.supplierinfo.map((item, index) => ({
+                name: item.suppliername,
+                color: supplierColor[index % supplierColor.length]
+            }));
+
+            setFormDataList(prev => ({
+                ...prev,
+                suppliers: suppliers,
+                lineItems: response.enqlineItems,
+                clientInfo: response.enqClientinfo,
+                enquiryDetails: response.enqProjectinfo
+            }));
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
@@ -197,7 +197,7 @@ const Review = () => {
                                                 size="small"
                                                 startIcon={<EditIcon />}
                                                 onClick={(e) => {
-                                                    e.stopPropagation() //, handleEdit(3, item)
+                                                    e.stopPropagation(), handleEdit(3, item)
                                                 }}
                                                 sx={{
                                                     color: "#fff",
@@ -293,6 +293,7 @@ const Review = () => {
                 open={openUpdateLineItems}
                 onClose={() => setOpenUpdateLineItems(false)}
                 data={formData}
+                refreshSummary={fetchData}
             />
         </>
     );

@@ -202,7 +202,7 @@ const LineItems = () => {
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
         enquiryId: item.enquiryId,
-        items: item.items
+        items: item.items,
     }));
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
     const fetchData = async () => {
@@ -352,7 +352,7 @@ const LineItems = () => {
     };
 
     const fieldConfig = {
-        [Labels.lineItems.noOfMaterials]: { type: "number", max: 5 },
+        [Labels.lineItems.noOfMaterials]: { type: "number" },
         [Labels.lineItems.noOfVersion]: { type: "number" },
         [Labels.lineItems.quantity]: { type: "number" },
 
@@ -367,7 +367,7 @@ const LineItems = () => {
         const { name, value, files, label } = e.target;
         const config = fieldConfig[name];
         const formattedValue = config?.type === "number"
-            ? allowOnlyNumbers(value, config?.max) : config?.type === "decimal" ? allowDecimal(value) : value;
+            ? allowOnlyNumbers(value) : config?.type === "decimal" ? allowDecimal(value) : value;
 
         // Handle special field logic
         if (name === Labels.lineItems.category) {
@@ -413,10 +413,8 @@ const LineItems = () => {
         if (isValid) {
             try {
                 setLoading(true);
-                console.log(getOptionLabel(formDataList.typeOfItem, formData.typeOfItem), formData.typeOfItem, "formData.typeOfItem");
                 const payload = {
                     //lineItems
-                    //EnqdetailsId: 0,
                     EnqId: id,
                     Printornonprint: getOptionLabel(formDataList.category, formData.category),
                     TOJABC: getOptionLabel(formDataList.typeOfJob, formData.typeOfJob),
@@ -441,10 +439,10 @@ const LineItems = () => {
                     usingFSCMaterial: getOptionLabel(formDataList.yesNoNa, formData.fscOrPefcMaterial),
                     OEKOTEXCertification: getOptionLabel(formDataList.yesNoNa, formData.taxCertification),
                     Recycled: getOptionLabel(formDataList.yesNoNa, formData.recyclable),
-                    SustainableOptionthatwasrejected: getOptionLabel(formDataList.yesNoNa, formData.sustainabilityOption),
-                    WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
+                    SustainableOptionthatwasrejected: getOptionLabel(formDataList.soYesNoNa, formData.sustainabilityOption),
+                    WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.containsPlastic),
                     Isthisitemdesignedtobereused: getOptionLabel(formDataList.yesNoNa, formData.designedToBeReused),
-                    containrecycledmaterial: getOptionLabel(formDataList.yesNoNa, formData.containsPlastic),
+                    containrecycledmaterial: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
                     containrecycledplastic: getOptionLabel(formDataList.yesNoNa, formData.containsRecycledPlastic),
                     Weightageofrecycledmaterial: formData.recycledMaterialWeightKg,
                     //CompetetiveWinningSupplier
@@ -480,14 +478,18 @@ const LineItems = () => {
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
-                    console.log();
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
                         navigate(isSubmit ? labelRoutes.suppliers : labelRoutes.LineItems, {
                             state: { id: response.data.enqId }
                         });
                     }, 500);
-                    if (!isSubmit) fetchData();
+                    if (!isSubmit) {
+                        fetchData();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 300);
+                    };
                 } else {
                     setErrors((prev) => ({
                         ...prev,
@@ -1086,7 +1088,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.noOfMaterials}
                                         name={Labels.lineItems.noOfMaterials}
-                                        maxLength={5}
+                                        max={5} min={1}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1348,7 +1350,21 @@ const LineItems = () => {
                                                 type={Labels.flag.file}
                                                 multiple={true}
                                                 maxLength={5}
+
                                             />
+                                            <PTypography
+                                                labelText={"You may attach up to 5 files of no more than 20mb each.."}
+                                                flag={Labels.fontFlags.smallText}
+                                                color={CommonColors.grey.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                            <PTypography
+                                                labelText={"Type: .pdf .png .jpg .jpeg .doc .docx .ppt .pptx .xls .xlsx"}
+                                                flag={Labels.fontFlags.smallText}
+                                                color={CommonColors.grey.main}
+                                                weight={FontWeight.bold}
+                                            />
+
                                         </PGrid>
 
                                         <PGrid item xs={12} sm={12} md={6} className="d-flex justify-content-end gap-2 mb-1">
@@ -1431,6 +1447,7 @@ const LineItems = () => {
                                             ))}
                                         </PGrid>
                                     )}
+
                                     <PreviewDialog
                                         open={previewOpen}
                                         onClose={() => setPreviewOpen(false)}
@@ -1479,7 +1496,7 @@ const LineItems = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={3} />
+                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} />
                     </PGrid>
                 </PGrid>
             </Box>

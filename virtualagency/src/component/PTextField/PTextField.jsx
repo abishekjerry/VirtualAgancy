@@ -38,6 +38,8 @@ export default function PTextField({
     multiple = false,
     defaultFileUrl = "",
     onBlur,
+    min,
+    max
 }) {
 
     const isFile = type === Labels.flag.file;
@@ -131,7 +133,7 @@ export default function PTextField({
         }
 
         setSelectedFiles(updatedFiles);
-        onChange?.({ target: { name, files: updatedFiles, },});
+        onChange?.({ target: { name, files: updatedFiles, }, });
         setFileError(errorMsg);
         e.target.value = "";
     };
@@ -242,8 +244,8 @@ export default function PTextField({
             sx={baseSx}
             inputProps={{
                 ...inputProps,
-                maxLength: maxLength,
-                minLength: minLength
+                min,
+                max
             }}
             InputProps={{
                 startAdornment: startIcon && (

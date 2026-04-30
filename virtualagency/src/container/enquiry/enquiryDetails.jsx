@@ -67,7 +67,7 @@ const EnquiryDetails = () => {
         ],
         hybird: [
             { label: "Yes", value: 1 },
-            { label: "No", value: 2 , selected: true }
+            { label: "No", value: 2, selected: true }
         ],
 
         clientInfo: [],
@@ -76,7 +76,6 @@ const EnquiryDetails = () => {
 
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
-
     const [slaTemplateData, setSlaTemplateData] = useState(null)
     const [phaseDates, setPhaseDates] = useState([]);
 
@@ -84,12 +83,10 @@ const EnquiryDetails = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-
                 const response = await PostApi(Dashboard_API.Master, {
                     userCountryId: parseInt(localStorage.getItem("countryID")),
                     role: localStorage.getItem("role")
                 });
-
                 setFormDataList(prev => ({
                     ...prev,
                     managementFeeType: response.managementFeetype,
@@ -97,32 +94,6 @@ const EnquiryDetails = () => {
                     year: response.year,
                     slaTemplate: response.sla
                 }));
-                if (id !== 0) {
-                    const data = await PostApi(Dashboard_API.GetDetails, {
-                        Enquiryid: id,
-                    });
-                    setFormDataList(prev => ({
-                        ...prev,
-                        clientInfo: data.enqClientinfo,
-                        enquiryDetails: data.enqProjectinfo
-                    }))
-                    // Update state
-                    setFormData(prev => ({
-                        ...prev,
-                        projectNo: data.enqProjectinfo.projectNo,
-                        estdeliveryDate: data.enqProjectinfo.estdate,
-                        briefReceivedDate: data.enqProjectinfo.briefdate,
-                        projectDescription: data.enqProjectinfo.projectDesc,
-                        projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
-                        year: getOptionValue(formDataList.year, data.enqProjectinfo.year),
-                        managementFeeType: data.enqProjectinfo.managementfeetypeId,
-                        //hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
-                        projectAttribute: getOptionValue(formDataList.projectAttribute, data.enqProjectinfo.attribute),
-                        slaTemplate: data.enqProjectinfo.slaId,
-                    }));
-                    localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId);
-                }
-
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -145,23 +116,62 @@ const EnquiryDetails = () => {
 
     }, [formDataList]);
 
+    const defaultSla = formDataList?.slaTemplate?.[0]?.value ?? null;
     useEffect(() => {
         if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
-            const slaId = formDataList?.enquiryDetails?.slaId ? formDataList?.enquiryDetails?.slaId : formDataList.slaTemplate[0].value;
-            const hybrid =  formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
+            const slaId = formDataList?.enquiryDetails?.slaId ?? defaultSla;
+            const hybrid = formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
             setFormData(prev => ({
                 ...prev,
                 slaTemplate: slaId,
-                hybrid : hybrid,
+                hybrid: hybrid,
             }));
             slaTemplate(slaId);
         }
-    }, [formDataList.slaTemplate]);
+    }, [formDataList.slaTemplate, formDataList.enquiryDetails]);
+
+    useEffect(() => {
+        const GetData = async () => {
+            try {
+                if (id !== 0) {
+                    const data = await PostApi(Dashboard_API.GetDetails, {
+                        Enquiryid: id,
+                    });
+                    setFormDataList(prev => ({
+                        ...prev,
+                        clientInfo: data.enqClientinfo,
+                        enquiryDetails: data.enqProjectinfo
+                    }))
+                    // Update state
+                    setFormData(prev => ({
+                        ...prev,
+                        projectNo: data.enqProjectinfo.projectNo,
+                        estdeliveryDate: data.enqProjectinfo.estdate,
+                        briefReceivedDate: data.enqProjectinfo.briefdate,
+                        projectDescription: data.enqProjectinfo.projectDesc,
+                        projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
+                        year: getOptionValue(formDataList.year, data.enqProjectinfo.year),
+                        managementFeeType: data.enqProjectinfo.managementfeetypeId,
+                        hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
+                        projectAttribute: getOptionValue(formDataList.projectAttribute, data.enqProjectinfo.attribute),
+                        slaTemplate: data?.enqProjectinfo?.slaId,
+                    }));
+                    localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId);
+                }
+             } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        };
+        GetData();
+    }, []);
+
 
     const slaTemplate = async (sla) => {
         try {
             setLoading(true);
-            const response = await PostApi(EnquiryDetails_API.GetSlatemplateMaster, { SlaId: sla , Enqid : id });
+            const response = await PostApi(EnquiryDetails_API.GetSlatemplateMaster, { SlaId: sla, Enqid: id });
             setSlaTemplateData(response);
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
