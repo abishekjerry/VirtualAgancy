@@ -500,7 +500,8 @@ const LineItems = () => {
             } finally {
                 setLoading(false);
             }
-        } else {
+        }
+        else {
             setAllowRedirect(false);
         }
     };
@@ -543,7 +544,7 @@ const LineItems = () => {
             Labels.lineItems.designedToBeReused,
             Labels.lineItems.containsPlastic,
             Labels.lineItems.containsRecycledPlastic,
-            Labels.lineItems.recycledMaterialWeightKg,
+            formData.recycledMaterial == 1  ?  Labels.lineItems.recycledMaterialWeightKg : "" ,
 
             // Catalogue Section
             Labels.lineItems.ratecardCatalogueItemDeclined,
@@ -950,7 +951,7 @@ const LineItems = () => {
                                         label={`${getLabel("lbl79")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.recycledMaterialWeightKg}
                                         onChange={handleChange}
-                                        helperText={errors?.recycledMaterialWeightKg}
+                                        helperText={formData.recycledMaterial == 1 ?  errors?.recycledMaterialWeightKg : ""}
                                         name={Labels.lineItems.recycledMaterialWeightKg}
                                         disabled={formData.recycledMaterial == 1 ? false : true}
 

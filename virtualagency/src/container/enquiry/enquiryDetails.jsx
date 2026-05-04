@@ -184,11 +184,11 @@ const EnquiryDetails = () => {
         if (!slaTemplateData) return;
         const slaData = slaTemplateData;
         const initialPhases = [
-            { name: getLabel("lbl54"), days: slaData?.quote, mdays: slaData?.defQuote },
-            { name: getLabel("lbl55"), days: slaData?.proof, mdays: slaData?.defProof },
-            { name: getLabel("lbl56"), days: slaData?.production, mdays: slaData?.defProduction },
-            { name: getLabel("lbl57"), days: slaData?.fileCopies, mdays: slaData?.defFileCopies },
-            { name: getLabel("lbl58"), days: slaData?.invoicing, mdays: slaData?.defInvoices }
+            { name: getLabel("lbl54"), days: slaData?.defQuote, mdays: slaData?.quote },
+            { name: getLabel("lbl55"), days: slaData?.defProof, mdays: slaData?.proof },
+            { name: getLabel("lbl56"), days: slaData?.defProduction, mdays: slaData?.production },
+            { name: getLabel("lbl57"), days: slaData?.defFileCopies, mdays: slaData?.fileCopies },
+            { name: getLabel("lbl58"), days: slaData?.defInvoices, mdays: slaData?.invoicing }
         ];
         setPhaseDates(initialPhases);
         const startDate = formDataList?.enquiryDetails?.quotestartdate ? formDataList.enquiryDetails.quotestartdate : today;

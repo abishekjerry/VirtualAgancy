@@ -109,7 +109,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                       <TableCell
                         key={i}
                         sx={{
-                          fontSize: Labels.fontSize.xxs,
+                          fontSize: Labels.fontSize.xs,
                           color: CommonColors.pTable.darkGrey,
                           py: 1.8,
                           textWrap: Labels.rap.nowrap

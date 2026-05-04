@@ -179,10 +179,10 @@ const ClientInfo = () => {
                     }))
         
                     const aboveAtMarket = getOptionValue(formDataList.aboveAtMarket, data.enqClientinfo.aboveorAtmarket)
-                    // // Update state
+                    // Update state
                     setFormData(prev => ({
                         ...prev,
-                        division: data.enqClientinfo.divisionid,
+                        division: getOptionValue(response.division,data.enqClientinfo.divisionname),
                         clientContact: data.enqClientinfo.clientContactId,
                         pmgEntity: data.enqClientinfo.pmgEntity,
                         deliveryCountry: data.enqClientinfo.deliveryCountryId,
@@ -451,7 +451,7 @@ const ClientInfo = () => {
                     if (isSuccess(response)) {
                         setCcOpenFilter(false);
                         toast(Labels.status.success, response.data);
-                        GlobalBuMappingMaster(formData.division);
+                        ClientInfoMaster(formData.globalBUMapping);
                         //ClientInfoMaster(formData.globalBUMapping);
                     } else {
                         setErrors((prev) => ({
@@ -480,8 +480,9 @@ const ClientInfo = () => {
                     if (isSuccess(response)) {
                         setBrandOpenFilter(false);
                         toast(Labels.status.success, response.data);
-                        GlobalBuMappingMaster(formData.division);
-                        //ClientInfoMaster(formData.globalBUMapping);
+
+                        //GlobalBuMappingMaster(formData.division);
+                        ClientInfoMaster(formData.globalBUMapping);
                     } else {
                         setErrors((prev) => ({
                             ...prev,

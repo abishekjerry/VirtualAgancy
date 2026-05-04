@@ -134,7 +134,7 @@ export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => 
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTypography
                                         labelText={`${section.step}. ${section.title}${[3, 4].includes(section.step) ? `(${section.items?.length || 0})` : ""}`}
-                                        flag={Labels.fontFlags.subHeader}
+                                        flag={Labels.fontFlags.errorLbl}
                                         weight={FontWeight.bold}
                                     />
                                 </PGrid>
