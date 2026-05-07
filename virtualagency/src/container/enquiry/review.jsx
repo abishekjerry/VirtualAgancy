@@ -102,6 +102,11 @@ const Review = () => {
         });
     };
 
+    const handleSubmit = () => {
+        navigate(labelRoutes.enquirySuceess, {
+            state: { id: state.id }
+        });
+    }
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>

@@ -145,6 +145,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       </TableContainer>
 
       {/* PAGINATION */}
+      
       <Box sx={{ borderTop: "1px solid #e2e8f0" }}>
         <TablePagination
           component="div"

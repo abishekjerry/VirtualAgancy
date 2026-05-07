@@ -7,12 +7,13 @@ export const labelRoutes = {
 
   // Enquiry Pages
   clientInfo: "/clientInfo",
-  enquiryDetails : "/enquiryDetails",
-  lineItems : "/lineItems",
-  suppliers : "/suppliers",
-  review : "/review",
+  enquiryDetails: "/enquiryDetails",
+  lineItems: "/lineItems",
+  suppliers: "/suppliers",
+  review: "/review",
   PageNotFound: "/pageNotFound",
-  
+  enquirySuceess: "/enquirySuccess",
+  projectEnquiry : "/projectEnquiry",
   //PageNotFound: "*"
 
 };
