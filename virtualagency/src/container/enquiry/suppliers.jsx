@@ -312,7 +312,7 @@ const Suppliers = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={4} refreshSummary={fetchData} />
+                        <PSummary sections={sections} currentStep={4} refreshSummary={fetchData} duplicate={true}/>
                     </PGrid>
                 </PGrid>
             </Box>

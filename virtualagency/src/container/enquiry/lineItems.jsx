@@ -141,7 +141,7 @@ const LineItems = () => {
         exceptionsReasonCode: "",
         itemCategory: "",
         subCategory: "",
-        simplex: "",
+        //simplex: "",
         tcoApprovalRequired: "",
         tcoApproved: "",
         dictatedJob: "",
@@ -410,6 +410,7 @@ const LineItems = () => {
     const id = state?.id > 0 ? state.id : 0;
     const handleSubmit = async (e, isSubmit) => {
         const isValid = LineItemsValidation();
+        console.log(isValid,"ahfdajh");
         if (isValid) {
             try {
                 setLoading(true);
@@ -485,7 +486,7 @@ const LineItems = () => {
                         });
                     }, 500);
                     if (!isSubmit) {
-                       await fetchData();   
+                        await fetchData();
                     };
                 } else {
                     setErrors((prev) => ({
@@ -527,7 +528,7 @@ const LineItems = () => {
             Labels.lineItems.exceptionsReasonCode,
             Labels.lineItems.itemCategory,
             Labels.lineItems.subCategory,
-            Labels.lineItems.simplex,
+            //Labels.lineItems.simplex,
             Labels.lineItems.tcoApprovalRequired,
             Labels.lineItems.tcoApproved,
             Labels.lineItems.dictatedJob,
@@ -544,7 +545,8 @@ const LineItems = () => {
             Labels.lineItems.designedToBeReused,
             Labels.lineItems.containsPlastic,
             Labels.lineItems.containsRecycledPlastic,
-            formData.recycledMaterial == 1  ?  Labels.lineItems.recycledMaterialWeightKg : "" ,
+            Labels.lineItems.recycledMaterialWeightKg,
+           // formData.recycledMaterial == 1 ? Labels.lineItems.recycledMaterialWeightKg : "",
 
             // Catalogue Section
             Labels.lineItems.ratecardCatalogueItemDeclined,
@@ -748,7 +750,7 @@ const LineItems = () => {
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={4}>
+                                {/* <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl101")} ${Labels.symbols.required}`}
                                         value={formData.simplex}
@@ -758,7 +760,7 @@ const LineItems = () => {
                                         options={formDataList.simplex}
                                         flag={Labels.flag.auto}
                                     />
-                                </PGrid>
+                                </PGrid> */}
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl102")} ${Labels.symbols.required}`}
@@ -779,18 +781,6 @@ const LineItems = () => {
                                         options={formDataList.tcoYesOrNo}
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
-                                {/* <PGrid item xs={12} sm={6} md={4}>
-                                    <PDropdown
-                                        label={`${getLabel("lbl63")} ${Labels.symbols.required}`}
-                                        value={formData.dictatedJob}
-                                        onChange={handleChange}
-                                        helperText={errors?.dictatedJob}
-                                        name={Labels.lineItems.dictatedJob}
-                                        options={formDataList.yesOrNo}
-                                    />
-                                </PGrid> */}
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl64")} ${Labels.symbols.required}`}
@@ -803,19 +793,20 @@ const LineItems = () => {
                                     />
 
                                 </PGrid>
-                                {[3].includes(formData.category) && (
-                                    <PGrid item xs={12} sm={6} md={4}>
-                                        <PDropdown
-                                            label={`${getLabel("lbl152")} ${Labels.symbols.required}`}
-                                            value={formData.incoterm}
-                                            onChange={handleChange}
-                                            helperText={errors?.incoterm}
-                                            name={Labels.lineItems.incoterm}
-                                            options={formDataList.incoterm}
-                                        />
-                                    </PGrid>
-                                )}
                             </PGrid>
+                            {/* <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
+                                        label={`${getLabel("lbl63")} ${Labels.symbols.required}`}
+                                        value={formData.dictatedJob}
+                                        onChange={handleChange}
+                                        helperText={errors?.dictatedJob}
+                                        name={Labels.lineItems.dictatedJob}
+                                        options={formDataList.yesOrNo}
+                                    />
+                                </PGrid> 
+
+                            </PGrid>*/}
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
@@ -825,6 +816,18 @@ const LineItems = () => {
                                         helperText={errors?.itemName}
                                         name={Labels.lineItems.itemName}
                                     />
+                                    {[3].includes(formData.category) && (
+                                        // <PGrid item xs={12} sm={6} md={4}>
+                                        <PDropdown
+                                            label={`${getLabel("lbl152")} ${Labels.symbols.required}`}
+                                            value={formData.incoterm}
+                                            onChange={handleChange}
+                                            helperText={errors?.incoterm}
+                                            name={Labels.lineItems.incoterm}
+                                            options={formDataList.incoterm}
+                                        />
+                                        // </PGrid>
+                                    )}
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTextField
@@ -951,7 +954,7 @@ const LineItems = () => {
                                         label={`${getLabel("lbl79")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
                                         value={formData.recycledMaterialWeightKg}
                                         onChange={handleChange}
-                                        helperText={formData.recycledMaterial == 1 ?  errors?.recycledMaterialWeightKg : ""}
+                                        helperText={formData.recycledMaterial == 1 ? errors?.recycledMaterialWeightKg : ""}
                                         name={Labels.lineItems.recycledMaterialWeightKg}
                                         disabled={formData.recycledMaterial == 1 ? false : true}
 
@@ -1489,7 +1492,7 @@ const LineItems = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} />
+                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} duplicate={true} />
                     </PGrid>
                 </PGrid>
             </Box>

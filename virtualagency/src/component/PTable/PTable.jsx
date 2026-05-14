@@ -23,7 +23,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   // Parent Select All
   const handleRowSelect = (row) => {
     const supplierId = row.supplierId;
-    const exists = selectedRows.some( item => item.supplierId === supplierId);
+    const exists = selectedRows.some(item => item.supplierId === supplierId);
     const update = exists ? selectedRows.filter(item => item.supplierId !== supplierId) : [...selectedRows, { supplierId }];
     onValidationChange?.(update); // ✅ send to parent
   };
@@ -129,10 +129,10 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                               onChange={() => handleRowSelect(row)}
                               sx={{ p: 0.5 }}
                             />
-                            {row[col.field]}
+                            {col.render ? col.render(row) : row[col.field]}
                           </Box>
                         ) : (
-                          row[col.field]
+                          col.render ? col.render(row) : row[col.field]
                         )}
                       </TableCell>
                     ))}
@@ -145,7 +145,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       </TableContainer>
 
       {/* PAGINATION */}
-      
+
       <Box sx={{ borderTop: "1px solid #e2e8f0" }}>
         <TablePagination
           component="div"

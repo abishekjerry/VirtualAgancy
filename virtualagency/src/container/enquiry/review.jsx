@@ -28,6 +28,7 @@ import { PostApi } from "../../utils/api/networking";
 import { getClientInfo, getEnquiryDetails, getLineneItems } from "../../utils/constants/summary";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import UpdateLineItems from "./updateLineItems";
+import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 
 const Review = () => {
     const { getLabel } = useLanguage();
@@ -37,6 +38,7 @@ const Review = () => {
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(0); // first item open by default
+    const [openDraft, setOpenDraft] = useState();
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
         enquiryDetails: [],
@@ -107,6 +109,9 @@ const Review = () => {
             state: { id: state.id }
         });
     }
+    const handleExitDraft = () => {
+        setOpenDraft(true);
+    };
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -299,6 +304,12 @@ const Review = () => {
                 onClose={() => setOpenUpdateLineItems(false)}
                 data={formData}
                 refreshSummary={fetchData}
+            />
+            <PDraftDialog
+                open={openDraft}
+                onClose={() => setOpenDraft(false)}
+                onSave={handleSubmit}
+                onDelete={handleSubmit}
             />
         </>
     );

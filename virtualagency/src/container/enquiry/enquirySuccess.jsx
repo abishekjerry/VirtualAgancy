@@ -61,9 +61,9 @@ const EnquirySuccess = () => {
     };
     const data = [
         { label: "Enquiry Id", value: formDataList.clientInfo?.enqUId || "-", icon: <DescriptionIcon /> },
-        { label: "Project Number", value: formDataList.enquiryDetails?.projectNo || "-", icon: <FolderIcon /> },
-        { label: "Client Name", value: formDataList.clientInfo?.client || "-", icon: <PersonIcon /> },
-        { label: "Country", value: formDataList.clientInfo?.country || "-", icon: <PublicIcon /> },
+        { label: getLabel("lbl42"), value: formDataList.enquiryDetails?.projectNo || "-", icon: <FolderIcon /> },
+        { label: getLabel("lbl28"), value: formDataList.clientInfo?.client || "-", icon: <PersonIcon /> },
+        { label: getLabel("lbl09"), value: formDataList.clientInfo?.country || "-", icon: <PublicIcon /> },
         { label: "Estimated Delivery Date", value: formDataList.enquiryDetails?.estdate || "-", icon: <EventIcon /> }
     ];
 

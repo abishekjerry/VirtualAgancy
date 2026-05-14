@@ -266,7 +266,7 @@ const EnquiryDetails = () => {
             Labels.enquiryDetails.year,
             Labels.enquiryDetails.managementFeeType,
             Labels.enquiryDetails.hybrid,
-            Labels.enquiryDetails.projectAttribute,
+            //Labels.enquiryDetails.projectAttribute,
             Labels.enquiryDetails.slaTemplate,
             Labels.enquiryDetails.projectQuoteType
         ];
@@ -485,7 +485,7 @@ const EnquiryDetails = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+                                {/* <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         name={Labels.enquiryDetails.projectAttribute}
                                         label={`${getLabel("lbl95")} ${Labels.symbols.required}`}
@@ -496,7 +496,7 @@ const EnquiryDetails = () => {
                                         width={100}
                                         flag={Labels.flag.auto}
                                     />
-                                </PGrid>
+                                </PGrid> */}
                             </PGrid>
 
                             <hr className="my-4" />

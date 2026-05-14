@@ -168,8 +168,6 @@ export default function PTextField({
             fontSize: FontSize.textField.label,
         },
     };
-
-    // ================= FILE INPUT =================
     if (isFile) {
         return (
             <>
@@ -219,8 +217,6 @@ export default function PTextField({
             </>
         );
     }
-
-    // ================= NORMAL INPUT =================
     return (
         <TextField
             name={name}

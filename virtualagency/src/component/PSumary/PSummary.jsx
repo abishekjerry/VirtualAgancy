@@ -17,7 +17,7 @@ import { isSuccess, toast } from "../../utils/commonFunction/common";
 import { LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 
-export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => {
+export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, duplicate = false }) => {
     const { state } = useLocation();
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(currentStep);
@@ -87,7 +87,7 @@ export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => 
             const response = await PostApi(LineItems_API.GetEnqDuplicate, payload);
             if (isSuccess(response)) {
                 toast(Labels.status.success, response.data);
-                await refreshSummary(); 
+                await refreshSummary();
             } else {
                 setErrors((prev) => ({
                     ...prev,
@@ -98,7 +98,7 @@ export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => 
 
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        } 
+        }
     };
     return (
         <>
@@ -193,14 +193,17 @@ export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => 
                                                                             width={90}
                                                                             onClick={() => handleEdit(section.step, item)}
                                                                         />
-                                                                        <PButton
-                                                                            label="Duplicate"
-                                                                            variant="contained"
-                                                                            color={CommonColors.green.main}
-                                                                            startIcon={<ContentCopyIcon />}
-                                                                            width={120}
-                                                                            onClick={() => handleDuplicate(section.step, item)}
-                                                                        />
+                                                                        {duplicate &&
+                                                                            <PButton
+                                                                                label="Duplicate"
+                                                                                variant="contained"
+                                                                                color={CommonColors.green.main}
+                                                                                startIcon={<ContentCopyIcon />}
+                                                                                width={120}
+                                                                                onClick={() => handleDuplicate(section.step, item)}
+                                                                            />
+                                                                        }
+
                                                                     </PGrid>
                                                                 </PGrid>
                                                             )}
@@ -248,7 +251,7 @@ export const PSummary = ({ sections = [], currentStep = 1 , refreshSummary}) => 
                 onClose={() => setOpen(false)}
                 data={formData}
                 step={currentStep}
-                refreshSummary ={refreshSummary}
+                refreshSummary={refreshSummary}
             />
         </>
     );

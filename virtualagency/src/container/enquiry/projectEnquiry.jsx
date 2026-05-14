@@ -26,13 +26,15 @@ import { useLanguage } from "../../utils/constants/language";
 import { useLocation, useNavigate } from "react-router-dom";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
-import { Dashboard_API, EnquiryDetails_API } from "../../utils/api/apiUrl";
-import { formatDate, getOptionLabel, parseDate, toast } from "../../utils/commonFunction/common";
+import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, Suppliers_API } from "../../utils/api/apiUrl";
+import { formatDate, getOptionLabel, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { PSummary } from "../../component/PSumary/PSummary";
 import PTable from "../../component/PTable/PTable";
 import { PostApi } from "../../utils/api/networking";
 import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
+import PDialog from "../../component/PDialog/PDialog";
+import PSearch from "../../component/PSearch/PSearch";
 
 const ProjectEnquiry = () => {
     const { state } = useLocation();
@@ -41,22 +43,41 @@ const ProjectEnquiry = () => {
     const [loading, setLoading] = useState(true);
     const [quoteStartDate, setQuoteStartDate] = useState("");
     const [phaseDates, setPhaseDates] = useState([]);
-    const [slaTemplateData, setSlaTemplateData] = useState(null)
+    const [slaTemplateData, setSlaTemplateData] = useState(null);
+    const [search, setSearch] = useState("");
+
+    //Global variable
+    const currency = localStorage.getItem("currency");
+    const countryName = localStorage.getItem("country");
+    const agancyUserID = parseInt(localStorage.getItem("agancyUserID"));
+    const id = state?.id > 0 ? state.id : 0;
+
+    //State & list states
     const [formData, setFormData] = useState({
         activeTab: "Job summary",
         status: "",
-        jobStatus: ""
+        sla: true,
+        rfq: true,
+        line: true,
+        job: true,
+        suppliers: false
     });
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
         lineItems: [],
         enquiryDetails: [],
-        status: [{ label: "Job Canceled", value: 1 }],
+        suppliers: [],
+        clientContact: [],
+        status: [{ label: "Job Cancelled", value: 1 }],
         data: [],
-        tabs: ["Job summary", "Line items", "RFQ", "SLA", "Revised Quotes", "Logs"]
+        tabs: ["Job summary", "Line items", "RFQ", "SLA", "Revised Quotes", "Logs"],
+        columns: [{ field: "suppliername", header: "Supplier's Name" }, { field: "country", header: "Country" }, { field: "suppliercode", header: "Supplier Code" },],
+        suppliersData: [],
+        selectedRows: [],
+        statusInfo: []
     });
 
-    const id = state?.id > 0 ? state.id : 0;
+    //Master function
     useEffect(() => {
         fetchData();
     }, []);
@@ -66,40 +87,86 @@ const ProjectEnquiry = () => {
             const response = await PostApi(Dashboard_API.GetDetails, {
                 Enquiryid: id,
             });
+            const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
+                currency: currency,
+                Country: countryName
+            });
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
                 clientInfo: response.enqClientinfo,
-                enquiryDetails: response.enqProjectinfo
-            }));
-            setFormData(prev => ({
-                ...prev,
-                jobStatus: response.jobstatus,
+                enquiryDetails: response.enqProjectinfo,
+                suppliers: response.supplierinfo,
+                suppliersData: supplierResponse,
+                statusInfo: [{ label: "Project Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }, { label: "Status", value: response.jobstatus || "-" }]
             }));
             slaTemplate(response.enqProjectinfo.slaId);
+            clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
         }
     };
-    const handleChange = async (e) => {
 
+    //Change Function
+    const handleChange = (e) => {
+        const { name, value, label } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+        setErrors((prev) => ({
+            ...prev,
+            [name]: ""   // clear only that field error
+        }));
     };
 
-    const statusInfo = [
-        { label: "Project Enquiry ID", value: formDataList.clientInfo?.enqUId || "-" },
-        { label: "Project Number", value: formDataList.enquiryDetails?.projectNo || "-" },
-        { label: "Status", value: formData?.jobStatus || "-" },
-    ];
 
     const columns = [
-        { field: "enquiryId", header: "Supplier" },
-        { field: "enquiryId", header: "Ini.Quote ($)" },
-        { field: "enquiryId", header: "Neg.Quote ($)" },
-        { field: "enquiryId", header: "Neg.unit Price ($)" },
-        { field: "enquiryId", header: "Neg.unit Price with MFee ($)" },
-        { field: "enquiryId", header: "PMG Sell Price ($)" },
+        { field: "suppliername", header: "Supplier" },
+        {
+            field: "initialQuote", header: "Ini.Quote ($)",
+            ...(formData.rfq ? {}
+                : {
+                    render: (row) => (
+                        <PTextField
+                            name={"initialQuote"}
+                            value={row.initialQuote || ""}
+                            onChange={(e) => handleInputChange(e.target.value, row.id)}
+                            width={50}
+                        />
+                    )
+                })
+        },
+        {
+            field: "negQuote", header: "Neg.Quote ($)",
+            ...(formData.rfq ? {}
+                : {
+                    render: (row) => (
+                        <PTextField
+                            name={"negQuote"}
+                            value={row.initialQuote || ""}
+                            onChange={(e) => handleInputChange(e.target.value, row.id)}
+                            width={50}
+                        />
+                    )
+                })
+        },
+        {
+            field: "negUnitPrice", header: "Neg.unit Price ($)"
+            // field: "negUnitPrice", header: "Neg.unit Price ($)",
+            // render: (row) => (
+            //     <PTextField
+            //         name={"negUnitPrice"}
+            //         value={row.initialQuote || ""}
+            //         onChange={(e) => handleInputChange(e.target.value, row.id)}
+            //         width={50}
+            //     />
+            // ),
+        },
+        { field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)" },
+        { field: "pmgSellPrice", header: "PMG Sell Price ($)" },
     ]
 
     const quotes = [
@@ -116,16 +183,6 @@ const ProjectEnquiry = () => {
         { field: "enquiryId", header: "New Value" },
         { field: "enquiryId", header: "Item Number" },
     ]
-    // const clientInfo = [
-    //     { label: "Created Date", value: "16/04/2026" },
-    //     { label: "Created By", value: "demouser sg" },
-    //     { label: "Enquiry Id", value: "ENQ002925" },
-    //     { label: "Division", value: "Nestlé > Singapore" },
-    //     { label: "Client Name", value: "Nestlé" },
-    //     { label: "Country", value: "Singapore" },
-    //     { label: "Entity Name", value: "Nestle Singapore Pte Ltd" },
-    //     { label: "Business Unit", value: "COFFEE" },
-    // ];
 
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails, true);
@@ -135,6 +192,9 @@ const ProjectEnquiry = () => {
         enquiryId: item.enquiryId,
         items: item.items,
     }));
+    const sections = getSummarySections({ lineItems, getLabel });
+
+    //SLA Template function
     const calculatePlanByQuote = (selectedDate, updatedPhases = null, startIndex = 0) => {
         setQuoteStartDate(selectedDate);
         let data = updatedPhases || phaseDates;
@@ -203,6 +263,7 @@ const ProjectEnquiry = () => {
             setLoading(false);
         }
     };
+    
     const today = formatDate(new Date())
     useEffect(() => {
         if (!slaTemplateData) return;
@@ -219,34 +280,124 @@ const ProjectEnquiry = () => {
         calculatePlanByQuote(startDate, initialPhases);
     }, [slaTemplateData]);
 
-    const sections = getSummarySections({ lineItems, getLabel });
+
+
+    //Edit & cancel section function
+    const handleEdit = (e, flag) => {
+        setFormData(prev => ({
+            ...prev,
+            [flag]: false,
+        }));
+    };
+    const handleCancel = async (e, flag) => {
+        setFormData(prev => ({
+            ...prev,
+            [flag]: true,
+        }));
+    }
+
+    const clientInfoMaster = async (globalBUMapping) => {
+        try {
+            setLoading(true);
+            const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
+                Divisionid: globalBUMapping
+            });
+
+            setFormDataList(prev => ({
+                ...prev,
+                clientContact: response.client,
+            }));
+
+        } catch (error) {
+            console.log(error);
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    //RFQ Section
+    useEffect(() => {
+        if (formDataList.suppliers?.length) {
+            setFormDataList(prev => ({
+                ...prev,
+                selectedRows: formDataList.suppliers.map(item => ({
+                    supplierId: item.supplierID
+                }))
+            }));
+        }
+    }, [formDataList.suppliers]);
+
+    const handleValidationChange = (rows) => {
+        const isValid = rows.length > 0;
+        setFormDataList(prev => ({
+            ...prev,
+            selectedRows: rows,
+        }));
+    };
+
+    let filteredData = formDataList.suppliersData;
+    if (search.trim() !== "") {
+        filteredData = filteredData.filter((item) =>
+            item.suppliername.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+    const data = filteredData;
+
+    const handleSendChoose = async () => {
+        const rows = formDataList.selectedRows || [];
+        const supplierIds = rows.map(r => r.supplierId).join(",");
+        try {
+            setLoading(true);
+            const payload = {
+                EnqId: id,
+                SelectedSuppliers: supplierIds,
+                ModifiedBy: agancyUserID,
+            };
+            const response = await PostApi(Suppliers_API.AddUpdateSuppliers, payload);
+            if (isSuccess(response)) {
+                toast(Labels.status.success, response.data.message);
+                setFormData(prev => ({
+                    ...prev,
+                    suppliers: false,
+                }));
+            } else {
+                toast(Labels.status.failure, response.data.message);
+            }
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <>
             <Box sx={{ px: 1, py: 1 }}>
 
                 <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                     <PGrid item xs={12} md={6} sm={8}>
-                        {statusInfo.map((item, i) => (
+                        {formDataList.statusInfo.map((item, i) => (
                             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }} key={i}>
                                 <PTypography
                                     labelText={`${item.label} :`}
                                     weight={FontWeight.bold}
-                                    color={CommonColors.black.main}
-                                    flag={Labels.fontFlags.subHeader}
+                                    color={CommonColors.yellow.dark}
+                                    flag={Labels.fontFlags.header}
                                 />
 
                                 <PTypography
                                     labelText={`${item.value}`}
                                     weight={FontWeight.bold}
                                     color={CommonColors.grey.main}
-                                    flag={Labels.fontFlags.smallText}
+                                    flag={Labels.fontFlags.subHeader}
                                 />
                             </Box>
                         ))}
                     </PGrid>
                     <PGrid item xs={12} sm={6} md={4} className="d-flex justify-content-end gap-2" >
                         <PDropdown
-                            name={Labels.clientInfo.pmgEntity}
+                            name={"status"}
                             value={formData.status}
                             label={"Project status"}
                             onChange={handleChange}
@@ -258,7 +409,7 @@ const ProjectEnquiry = () => {
                             label={getLabel("lbl40")}
                             variant="contained"
                             color={CommonColors.green.main}
-                            onClick={(e) => handleSubmit(e, true)}
+                            //onClick={(e) => handleSubmit(e, true)}
                             width={150}
                             height={45}
                         />
@@ -303,47 +454,112 @@ const ProjectEnquiry = () => {
                                 md={6}
                                 className="d-flex justify-content-end gap-2"
                             >
-                                <PButton
-                                    label={"Edit"}
-                                    variant="contained"
-                                    color={CommonColors.grey.main}
-                                    onClick={(e) => handleSubmit(e, true)}
-                                    width={120}
-                                />
+                                {formData.job ? (
+                                    <PButton
+                                        label={"Edit"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={(e) => handleEdit(e, "job")}
+                                        width={120}
+                                    />
+                                ) : (
+                                    <>
+                                        <PButton
+                                            label={"Cancel"}
+                                            variant="outlined"
+                                            color={CommonColors.blue.main}
+                                            onClick={(e) => handleCancel(e, "job")}
+                                            width={120}
+                                        />
+                                        <PButton
+                                            label={"Save"}
+                                            variant="contained"
+                                            color={CommonColors.green.main}
+                                            onClick={(e) => handleEdit(e, "job")}
+                                            width={120}
+                                        />
+                                    </>
+                                )}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb3}>
                             {clientInfo.map((item, i) => (
                                 <PGrid item xs={12} md={6} xl={3} key={i}>
-                                    <PGrid className={`ps-2 mb-4`}>
-                                        <PTypography
-                                            labelText={item.label}
-                                            weight={FontWeight.bold}
-                                        />
-                                        <PTypography
-                                            labelText={item.value}
-                                            color={CommonColors.grey.main}
-                                            weight={FontWeight.bold}
-                                        />
-                                    </PGrid>
+                                    {
+                                        !formData.job && item.label === getLabel("lbl35") ? (
+                                            <PDropdown
+                                                name={Labels.clientInfo.clientContact}
+                                                label={item.label}
+                                                value={formDataList.clientInfo.clientContactId}
+                                                onChange={(e) => handleChange(e, item)}
+                                                options={formDataList.clientContact}
+                                                width={100}
+                                            />
+                                        ) : (
+                                            <PGrid className={`ps-2 mb-4`}>
+                                                <PTypography
+                                                    labelText={item.label}
+                                                    weight={FontWeight.bold}
+                                                />
+                                                <PTypography
+                                                    labelText={item.value}
+                                                    color={CommonColors.grey.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                        )
+                                    }
                                 </PGrid>
                             ))}
                         </PGrid>
                         <PGrid container className={Labels.margin.mb3}>
                             {enquiryDetails.map((item, i) => (
                                 <PGrid item xs={12} md={6} xl={3} key={i}>
-                                    <PGrid className={`ps-2 mb-4`}>
-                                        <PTypography
-                                            labelText={item.label}
-                                            weight={FontWeight.bold}
-                                        />
-                                        <PTypography
-                                            labelText={item.value}
-                                            color={CommonColors.grey.main}
-                                            weight={FontWeight.bold}
-                                        />
-                                    </PGrid>
+                                    {
+                                        !formData.job && item.label === getLabel("lbl42") ? (
+                                            <PTextField
+                                                name={Labels.enquiryDetails.projectNo}
+                                                label={item.label}
+                                                value={item.value}
+                                                onChange={(e) => handleChange(e, item)}
+                                            />
+
+                                        ) : !formData.job && (item.label === getLabel("lbl43") || item.label === getLabel("lbl44")) ? (
+                                            <PDatepicker
+                                                name={getLabel("lbl43") ? Labels.enquiryDetails.estdeliveryDate : Labels.enquiryDetails.briefReceivedDate}
+                                                label={`${item.label}`}
+                                                value={item.value}
+                                                onChange={(e) => handleChange(e, item)}
+                                                //helperText={getLabel("lbl43") ? errors?.estdeliveryDate : errors.briefReceivedDate}
+                                                width={100}
+                                                allowFuture={true}
+                                            />
+                                        ) : !formData.job && item.label === getLabel("lbl45") ? (
+                                            <PTextField
+                                                name={Labels.enquiryDetails.projectDescription}
+                                                label={item.label}
+                                                value={item.value}
+                                                onChange={handleChange}
+                                                //helperText={errors?.projectDescription}
+                                                multiline={true}
+                                                rows={2.0}
+                                                width={100}
+                                            />
+                                        ) : (
+
+                                            <PGrid className={`ps-2 mt-4`}>
+                                                <PTypography
+                                                    labelText={item.label}
+                                                    weight={FontWeight.bold}
+                                                />
+                                                <PTypography
+                                                    labelText={item.value}
+                                                    color={CommonColors.grey.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                        )}
                                 </PGrid>
                             ))}
                         </PGrid>
@@ -365,6 +581,74 @@ const ProjectEnquiry = () => {
                         <PGrid container className={`${Labels.margin.mb3} ${"p-2"}`}>
                             <PGrid item xs={12} sm={12} md={12}>
                                 <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} />
+                            </PGrid>
+                        </PGrid>
+
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={6}>
+                                <PTypography
+                                    labelText={"Management Fee"}
+                                    flag={Labels.fontFlags.subHeader}
+                                    color={CommonColors.blue.main}
+                                    weight={FontWeight.bold}
+                                />
+                            </PGrid>
+                            <PGrid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={6}
+                                className="d-flex justify-content-end gap-2"
+                            >
+                                {formData.line ? (
+                                    <PButton
+                                        label={"Edit"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={(e) => handleEdit(e, "line")}
+                                        width={120}
+                                    />
+                                ) : (
+                                    <>
+                                        <PButton
+                                            label={"Cancel"}
+                                            variant="outlined"
+                                            color={CommonColors.blue.main}
+                                            onClick={(e) => handleCancel(e, "line")}
+                                            width={120}
+                                        />
+                                        <PButton
+                                            label={"Save"}
+                                            variant="contained"
+                                            color={CommonColors.green.main}
+                                            onClick={(e) => handleEdit(e, "line")}
+                                            width={120}
+                                        />
+                                    </>
+                                )}
+                            </PGrid>
+                        </PGrid>
+                        <Divider sx={{ mb: 2 }} />
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} md={12} xl={12} >
+                                <PGrid className={`ps-2 mb-4`}>
+                                    <PTypography
+                                        labelText={"Management Fee (%)"}
+                                        weight={FontWeight.bold}
+                                    />
+                                    {formData.line ? (
+                                        <PTypography
+                                            labelText={"9.00"}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        />) : (
+                                        <PTextField
+                                            value={""}
+                                            onChange={handleChange}
+                                            width={20}
+                                        />
+                                    )}
+                                </PGrid>
                             </PGrid>
                         </PGrid>
 
@@ -404,19 +688,38 @@ const ProjectEnquiry = () => {
                                 md={6}
                                 className="d-flex justify-content-end gap-2"
                             >
-                                <PButton
-                                    label={"Edit"}
-                                    variant="contained"
-                                    color={CommonColors.grey.main}
-                                    onClick={(e) => handleSubmit(e, true)}
-                                    width={120}
-                                />
+                                {formData.rfq ? (
+                                    <PButton
+                                        label={"Edit"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={(e) => handleEdit(e, "rfq")}
+                                        width={120}
+                                    />
+                                ) : (
+                                    <>
+                                        <PButton
+                                            label={"Cancel"}
+                                            variant="outlined"
+                                            color={CommonColors.blue.main}
+                                            onClick={(e) => handleCancel(e, "rfq")}
+                                            width={120}
+                                        />
+                                        <PButton
+                                            label={"Save"}
+                                            variant="contained"
+                                            color={CommonColors.green.main}
+                                            onClick={(e) => handleEdit(e, "rfq")}
+                                            width={120}
+                                        />
+                                    </>
+                                )}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={columns} rows={formDataList.data} />
+                                <PTable columns={columns} rows={formDataList.suppliers} showCheckbox={true} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
@@ -425,7 +728,10 @@ const ProjectEnquiry = () => {
                                     label={"Add Supplier"}
                                     variant="contained"
                                     color={CommonColors.grey.main}
-                                    onClick={(e) => handleSubmit(e, true)}
+                                    onClick={() => setFormData((prev) => ({
+                                        ...prev,
+                                        suppliers: true
+                                    }))}
                                     width={200}
                                 />
                             </PGrid>
@@ -452,13 +758,32 @@ const ProjectEnquiry = () => {
                                 md={6}
                                 className="d-flex justify-content-end gap-2"
                             >
-                                <PButton
-                                    label={"Edit"}
-                                    variant="contained"
-                                    color={CommonColors.grey.main}
-                                    onClick={(e) => handleSubmit(e, true)}
-                                    width={120}
-                                />
+                                {formData.sla ? (
+                                    <PButton
+                                        label={"Edit"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={(e) => handleEdit(e, "sla")}
+                                        width={120}
+                                    />
+                                ) : (
+                                    <>
+                                        <PButton
+                                            label={"Cancel"}
+                                            variant="outlined"
+                                            color={CommonColors.blue.main}
+                                            onClick={(e) => handleCancel(e, "sla")}
+                                            width={120}
+                                        />
+                                        <PButton
+                                            label={"Save"}
+                                            variant="contained"
+                                            color={CommonColors.green.main}
+                                            onClick={(e) => handleEdit(e, "sla")}
+                                            width={120}
+                                        />
+                                    </>
+                                )}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
@@ -482,7 +807,7 @@ const ProjectEnquiry = () => {
                                         value={phase.mdays ?? ""}
                                         onChange={(e) => handleModifiedDays(index, e.target.value)}
                                         width={50}
-                                        disabled={true}
+                                        disabled={formData.sla}
                                     />
                                 </PGrid>
                                 <PGrid item md={3}>
@@ -506,6 +831,7 @@ const ProjectEnquiry = () => {
                                             }
                                         }}
                                         allowFuture={true}
+                                        disabled={formData.sla}
                                     />
                                 </PGrid>
                                 <PGrid item md={3}>
@@ -571,8 +897,53 @@ const ProjectEnquiry = () => {
                         </PGrid>
                     </PCard>
                 )}
-            </Box>
+            </Box >
+
+            <PDialog
+                open={formData.suppliers}
+                onClose={() => setFormData((prev) => ({
+                    ...prev,
+                    suppliers: false
+                }))}
+                title={"Suppliers"}
+                showCloseIcon={true}
+                maxWidth="md"
+                actions={
+                    < PGrid className="d-flex align-items-center justify-content-end gap-2" >
+                        <PButton
+                            fullWidth
+                            label={getLabel("lbl125")}
+                            variant="outlined"
+                            onClick={() => setFormData((prev) => ({
+                                ...prev,
+                                suppliers: false
+                            }))}
+                            color={CommonColors.grey.main}
+                            width={120}
+                        />
+                        <PButton
+                            fullWidth
+                            label={getLabel("lbl124")}
+                            variant={Labels.contained}
+                            onClick={handleSendChoose}
+                            color={CommonColors.green.main}
+                            width={120}
+                        />
+                    </PGrid >
+                }
+
+            >
+                <PGrid container className={Labels.margin.mb4}>
+                    <PGrid item xs={12} sm={6} md={6}>
+                        <PSearch width="100%" placeholder={"Search a Suplier Name"} onChange={(e) => setSearch(e.target.value)} />
+                    </PGrid>
+                </PGrid>
+                <PGrid item xs={12} sm={6} md={12}>
+                    <PTable columns={formDataList.columns} rows={data} showCheckbox={true} selectedRows={formDataList.selectedRows} onValidationChange={handleValidationChange} />
+                </PGrid>
+            </PDialog>
         </>
+
     );
 };
 
