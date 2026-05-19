@@ -28,6 +28,7 @@ import PreviewDialog from "../../component/PDialog/PPreviewDialog";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
 import { PSummary } from "../../component/PSumary/PSummary";
 import PDialog from "../../component/PDialog/PDialog";
+import PFileUpload from "../../component/PFileUpload/PFileUpload";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -410,7 +411,6 @@ const LineItems = () => {
     const id = state?.id > 0 ? state.id : 0;
     const handleSubmit = async (e, isSubmit) => {
         const isValid = LineItemsValidation();
-        console.log(isValid,"ahfdajh");
         if (isValid) {
             try {
                 setLoading(true);
@@ -1213,8 +1213,7 @@ const LineItems = () => {
                                         helperText={errors?.specifications}
                                         name={Labels.lineItems.specifications}
                                         multiline={true}
-                                        rows={4.5}
-                                        width={100}
+                                        rows={4.5}    
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6}>
@@ -1226,7 +1225,6 @@ const LineItems = () => {
                                         name={Labels.lineItems.notesComments}
                                         multiline={true}
                                         rows={4.5}
-                                        width={100}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -1339,14 +1337,13 @@ const LineItems = () => {
                                     {/* Row with file input + button */}
                                     <PGrid container className={Labels.margin.mb4}>
                                         <PGrid item xs={12} sm={12} md={6}>
-                                            <PTextField
+                                            <PFileUpload
                                                 value={formData.files}
                                                 onChange={handleChange}
                                                 name={Labels.lineItems.files}
-                                                type={Labels.flag.file}
+                                                //type={Labels.flag.file}
                                                 multiple={true}
                                                 maxLength={5}
-
                                             />
                                             <PTypography
                                                 labelText={"You may attach up to 5 files of no more than 20mb each.."}

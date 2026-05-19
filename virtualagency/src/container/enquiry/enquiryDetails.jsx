@@ -419,7 +419,6 @@ const EnquiryDetails = () => {
                                         helperText={errors?.projectDescription}
                                         multiline={true}
                                         rows={4.5}
-                                        width={100}
                                     />
                                 </PGrid>
                             </PGrid>

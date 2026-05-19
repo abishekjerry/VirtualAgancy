@@ -27,7 +27,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
 import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, Suppliers_API } from "../../utils/api/apiUrl";
-import { formatDate, getOptionLabel, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
+import { formatDate, getOptionLabel, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { PSummary } from "../../component/PSumary/PSummary";
 import PTable from "../../component/PTable/PTable";
 import { PostApi } from "../../utils/api/networking";
@@ -35,6 +35,7 @@ import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import PDialog from "../../component/PDialog/PDialog";
 import PSearch from "../../component/PSearch/PSearch";
+import { PiArrowSquareUpLeftLight } from "react-icons/pi";
 
 const ProjectEnquiry = () => {
     const { state } = useLocation();
@@ -44,23 +45,34 @@ const ProjectEnquiry = () => {
     const [quoteStartDate, setQuoteStartDate] = useState("");
     const [phaseDates, setPhaseDates] = useState([]);
     const [slaTemplateData, setSlaTemplateData] = useState(null);
-    const [search, setSearch] = useState("");
+    const [supplierRows, setSupplierRows] = useState([]);
 
     //Global variable
     const currency = localStorage.getItem("currency");
     const countryName = localStorage.getItem("country");
     const agancyUserID = parseInt(localStorage.getItem("agancyUserID"));
+    const userID = parseInt(localStorage.getItem("userID"))
     const id = state?.id > 0 ? state.id : 0;
-
+    const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     //State & list states
     const [formData, setFormData] = useState({
         activeTab: "Job summary",
         status: "",
-        sla: true,
-        rfq: true,
-        line: true,
-        job: true,
-        suppliers: false
+        sla: false,
+        rfq: false,
+        line: false,
+        job: false,
+        suppliers: false,
+        calculateFlag: false,
+        Quote: "",
+        search: "",
+
+        //editable state
+        clientContact: "",
+        projectNo: "",
+        estdeliveryDate: "",
+        briefReceivedDate: "",
+        projectDescription: ""
     });
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
@@ -72,9 +84,14 @@ const ProjectEnquiry = () => {
         data: [],
         tabs: ["Job summary", "Line items", "RFQ", "SLA", "Revised Quotes", "Logs"],
         columns: [{ field: "suppliername", header: "Supplier's Name" }, { field: "country", header: "Country" }, { field: "suppliercode", header: "Supplier Code" },],
-        suppliersData: [],
+        supplierMaster: [],
         selectedRows: [],
-        statusInfo: []
+        statusInfo: [],
+        calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markup", header: "Markup ($)" }, { field: "margin", header: "Margin ($)" }],
+        calculateSupplierRows: [{ field: "cost", header: "Supplier Name" }, { field: "sell", header: "Item Name" }, { field: "margin", header: "Margin ($)" }, { field: "markup", header: "Supplier type" }, { field: "margin", header: "SMETA accredited" }
+            , { field: "margin", header: "GMP accredited" }, { field: "markup", header: "Nature of supplier" },
+        ],
+        selectedSupplierRows: []
     });
 
     //Master function
@@ -97,8 +114,12 @@ const ProjectEnquiry = () => {
                 clientInfo: response.enqClientinfo,
                 enquiryDetails: response.enqProjectinfo,
                 suppliers: response.supplierinfo,
-                suppliersData: supplierResponse,
+                supplierMaster: supplierResponse,
                 statusInfo: [{ label: "Project Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }, { label: "Status", value: response.jobstatus || "-" }]
+            }));
+            setFormData(prev => ({
+                ...prev,
+                Quote: response.enqProjectinfo?.quoteBy
             }));
             slaTemplate(response.enqProjectinfo.slaId);
             clientInfoMaster(response.enqClientinfo.divisionid);
@@ -116,58 +137,7 @@ const ProjectEnquiry = () => {
             ...prev,
             [name]: value
         }));
-        setErrors((prev) => ({
-            ...prev,
-            [name]: ""   // clear only that field error
-        }));
     };
-
-
-    const columns = [
-        { field: "suppliername", header: "Supplier" },
-        {
-            field: "initialQuote", header: "Ini.Quote ($)",
-            ...(formData.rfq ? {}
-                : {
-                    render: (row) => (
-                        <PTextField
-                            name={"initialQuote"}
-                            value={row.initialQuote || ""}
-                            onChange={(e) => handleInputChange(e.target.value, row.id)}
-                            width={50}
-                        />
-                    )
-                })
-        },
-        {
-            field: "negQuote", header: "Neg.Quote ($)",
-            ...(formData.rfq ? {}
-                : {
-                    render: (row) => (
-                        <PTextField
-                            name={"negQuote"}
-                            value={row.initialQuote || ""}
-                            onChange={(e) => handleInputChange(e.target.value, row.id)}
-                            width={50}
-                        />
-                    )
-                })
-        },
-        {
-            field: "negUnitPrice", header: "Neg.unit Price ($)"
-            // field: "negUnitPrice", header: "Neg.unit Price ($)",
-            // render: (row) => (
-            //     <PTextField
-            //         name={"negUnitPrice"}
-            //         value={row.initialQuote || ""}
-            //         onChange={(e) => handleInputChange(e.target.value, row.id)}
-            //         width={50}
-            //     />
-            // ),
-        },
-        { field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)" },
-        { field: "pmgSellPrice", header: "PMG Sell Price ($)" },
-    ]
 
     const quotes = [
         { field: "enquiryId", header: "Supplier" },
@@ -192,6 +162,8 @@ const ProjectEnquiry = () => {
         enquiryId: item.enquiryId,
         items: item.items,
     }));
+
+
     const sections = getSummarySections({ lineItems, getLabel });
 
     //SLA Template function
@@ -263,8 +235,7 @@ const ProjectEnquiry = () => {
             setLoading(false);
         }
     };
-    
-    const today = formatDate(new Date())
+
     useEffect(() => {
         if (!slaTemplateData) return;
         const slaData = slaTemplateData;
@@ -280,19 +251,27 @@ const ProjectEnquiry = () => {
         calculatePlanByQuote(startDate, initialPhases);
     }, [slaTemplateData]);
 
-
+    const today = formatDate(new Date())
+    const keys = ["quote", "proof", "production", "filecopies", "invoice"];
+    const dynamicData = phaseDates.reduce((acc, item, i) => {
+        const key = keys[i];
+        acc[`${key}startdate`] = item.startDate;
+        acc[`${key}enddate`] = item.endDate;
+        acc[`modified${key.charAt(0).toUpperCase() + key.slice(1)}`] = item.mdays;
+        return acc;
+    }, {});
 
     //Edit & cancel section function
     const handleEdit = (e, flag) => {
         setFormData(prev => ({
             ...prev,
-            [flag]: false,
+            [flag]: true,
         }));
     };
     const handleCancel = async (e, flag) => {
         setFormData(prev => ({
             ...prev,
-            [flag]: true,
+            [flag]: false,
         }));
     }
 
@@ -309,7 +288,6 @@ const ProjectEnquiry = () => {
             }));
 
         } catch (error) {
-            console.log(error);
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
@@ -336,10 +314,18 @@ const ProjectEnquiry = () => {
         }));
     };
 
-    let filteredData = formDataList.suppliersData;
-    if (search.trim() !== "") {
+    const handleRFQ = (rows) => {
+        const isValid = rows.length > 0;
+        setFormDataList(prev => ({
+            ...prev,
+            selectedSupplierRows: rows,
+        }));
+    };
+
+    let filteredData = formDataList.supplierMaster;
+    if (formData.search.trim() !== "") {
         filteredData = filteredData.filter((item) =>
-            item.suppliername.toLowerCase().includes(search.toLowerCase())
+            item.suppliername.toLowerCase().includes(formData.search.toLowerCase())
         );
     }
     const data = filteredData;
@@ -371,10 +357,209 @@ const ProjectEnquiry = () => {
         }
     };
 
+    const renderEditableField = (field) => ({
+        render: (row) => (
+            <PTextField
+                name={field}
+                value={row[field] || ""}
+                onChange={(e) =>
+                    handleInputChange(
+                        e.target.value.replace(/[^0-9.]/g, ""),
+                        row.rowId,
+                        field
+                    )
+                }
+                width={90}
+
+            />
+        )
+    });
+    useEffect(() => {
+        if (supplierRows.length === 0) {
+            const group = rawLineItems.flatMap((item, groupIndex) =>
+                formDataList.suppliers.map((s, supplierIndex) => ({
+                    ...s,
+                    groupName: item.itemTitle,
+                    rowId: `${groupIndex}_${supplierIndex}`
+                }))
+            );
+            setSupplierRows(group);
+        }
+    }, [formDataList.suppliers]);
+
+    const handleInputChange = (value, rowId, field) => {
+        setSupplierRows(prev => prev.map(item => item.rowId === rowId ? { ...item, [field]: value } : item));
+    };
+
+    const suppliers = rawLineItems.map((item) => ({
+        isSubTitle: true,
+        subTitle: item.itemTitle,
+        items: supplierRows.filter(s => s.groupName === item.itemTitle)
+    }));
+    const isQuote = formData.Quote == 1 && formData.rfq;
+    const isUnit = formData.Quote == 2 && formData.rfq;
+
+    const rfqSupplier = [
+        {
+            field: "suppliername",
+            header: "Supplier"
+        },
+
+        {
+            field: "initialQuote",
+            header: "Ini.Quote ($)",
+            ...(isQuote && renderEditableField("initialQuote"))
+        },
+
+        {
+            field: "negQuote",
+            header: "Neg.Quote ($)",
+            ...(isQuote && renderEditableField("negQuote"))
+        },
+
+        {
+            field: "iniUnitPrice",
+            header: "Ini.unit Price ($)",
+            ...(isUnit && renderEditableField("iniUnitPrice"))
+        },
+
+        {
+            field: "negUnitPrice",
+            header: "Neg.unit Price ($)",
+            ...(isUnit && renderEditableField("negUnitPrice"))
+        },
+
+        {
+            field: "negUnitPriceFee",
+            header: "Neg.unit Price with MFee ($)"
+        },
+
+        {
+            field: "pmgSellPrice",
+            header: "PMG Sell Price ($)"
+        }
+    ];
+
+    //Action button function
+    const renderActionButtons = (flag) => (
+        formData[flag] ? (
+            <>
+                <PButton
+                    label={getLabel("lbl125")}
+                    variant="outlined"
+                    color={CommonColors.blue.main}
+                    onClick={() => handleCancel(null, flag)}
+                    width={120}
+                />
+
+                <PButton
+                    label={getLabel("lbl124")}
+                    variant="contained"
+                    color={CommonColors.green.main}
+                    onClick={() => handleSubmit(null, flag)}
+                    width={120}
+                />
+            </>
+
+        ) : (
+            <PButton
+                label="Edit"
+                variant="contained"
+                color={CommonColors.grey.main}
+                onClick={() => handleEdit(null, flag)}
+                width={120}
+            />
+        )
+    );
+
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            ...(formDataList.clientInfo?.clientContactId && {
+                clientContact: formDataList.clientInfo.clientContactId
+            }),
+            ...(formDataList.enquiryDetails?.projectNo && {
+                projectNo: formDataList.enquiryDetails.projectNo
+            }),
+            ...(formDataList.enquiryDetails?.projectDesc && {
+                projectDescription: formDataList.enquiryDetails.projectDesc
+            }),
+            ...(formDataList.enquiryDetails?.estdate && {
+                estdeliveryDate: formDataList.enquiryDetails.estdate
+            }),
+            ...(formDataList.enquiryDetails?.briefdate && {
+                briefReceivedDate: formDataList.enquiryDetails.briefdate
+            }),
+        }));
+    }, [formDataList.clientInfo, formDataList.enquiryDetails]);
+
+
+    const handleSubmit = async (e, flag) => {
+        let activeTab = "";
+        let requests = [];
+        const clientInfo = {
+            enqId: id,
+            divisionid: formDataList.clientInfo.divisionid,
+            clientContactId: formData.clientContact,
+            createdBy: userID,
+            modifiedBy: agancyUserID,
+            brand: formDataList.clientInfo.brand,
+            deliveryCountryId: formDataList.clientInfo.deliveryCountryId,
+            pMGEntity: formDataList.clientInfo.pmgEntity,
+            aboveorAtmarket: formDataList.clientInfo.aboveorAtmarket,
+            Action: actionFlag,
+        };
+        const enquiryDetails = {
+            enqId: id,
+            projectNo: flag === "job" ? formData.projectNo : formDataList.enquiryDetails.projectNo,
+            projectDesc: flag === "job" ? formData.projectDescription : formDataList.enquiryDetails.projectDesc,
+            estdate: flag === "job" ? formatDate(parseDate(formData.estdeliveryDate)) : formDataList.enquiryDetails.estdate,
+            briefdate: flag === "job" ? formatDate(parseDate(formData.briefReceivedDate)) : formDataList.enquiryDetails.briefdate,
+            modifiedBy: agancyUserID,
+            quoteBy: formDataList.enquiryDetails.quoteBy,
+            slaId: formDataList.enquiryDetails.slaId,
+            managementfeetypeId: formDataList.enquiryDetails.managementfeetypeId,
+            hybridModel: formDataList.enquiryDetails.hybridModel,
+            attribute: formDataList.enquiryDetails.attribute,
+            year: formDataList.enquiryDetails.year,
+            ...dynamicData
+        };
+        if (flag === "sla") {
+            activeTab = "SLA";
+            requests.push(PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
+        }
+        if (flag === "job") {
+            console.log(enquiryDetails, clientInfo);
+            activeTab = "Job summary";
+            requests.push(PostApi(ClientInfo_API.AddUpdateClientInfo, clientInfo),
+                PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
+        }
+        try {
+            setLoading(true);
+            const response = await Promise.all(requests);
+            const successCount = response.filter(item => item?.status === true).length;
+            const message = successCount > 1 ? "Updated Successfully" : response?.[0]?.data?.message;
+            const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
+            console.log(message,status, response);
+            toast(status, message);
+            setFormData(prev => ({
+                ...prev,
+                activeTab,
+            }))
+            handleCancel(null, flag)
+            fetchData();
+
+        } catch (error) {
+            console.log(error, "error");
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <>
             <Box sx={{ px: 1, py: 1 }}>
-
                 <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                     <PGrid item xs={12} md={6} sm={8}>
                         {formDataList.statusInfo.map((item, i) => (
@@ -454,32 +639,7 @@ const ProjectEnquiry = () => {
                                 md={6}
                                 className="d-flex justify-content-end gap-2"
                             >
-                                {formData.job ? (
-                                    <PButton
-                                        label={"Edit"}
-                                        variant="contained"
-                                        color={CommonColors.grey.main}
-                                        onClick={(e) => handleEdit(e, "job")}
-                                        width={120}
-                                    />
-                                ) : (
-                                    <>
-                                        <PButton
-                                            label={"Cancel"}
-                                            variant="outlined"
-                                            color={CommonColors.blue.main}
-                                            onClick={(e) => handleCancel(e, "job")}
-                                            width={120}
-                                        />
-                                        <PButton
-                                            label={"Save"}
-                                            variant="contained"
-                                            color={CommonColors.green.main}
-                                            onClick={(e) => handleEdit(e, "job")}
-                                            width={120}
-                                        />
-                                    </>
-                                )}
+                                {renderActionButtons("job")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
@@ -487,12 +647,12 @@ const ProjectEnquiry = () => {
                             {clientInfo.map((item, i) => (
                                 <PGrid item xs={12} md={6} xl={3} key={i}>
                                     {
-                                        !formData.job && item.label === getLabel("lbl35") ? (
+                                        formData.job && item.label === getLabel("lbl35") ? (
                                             <PDropdown
                                                 name={Labels.clientInfo.clientContact}
                                                 label={item.label}
-                                                value={formDataList.clientInfo.clientContactId}
-                                                onChange={(e) => handleChange(e, item)}
+                                                value={formData.clientContact}
+                                                onChange={(e) => handleChange(e)}
                                                 options={formDataList.clientContact}
                                                 width={100}
                                             />
@@ -515,36 +675,46 @@ const ProjectEnquiry = () => {
                         </PGrid>
                         <PGrid container className={Labels.margin.mb3}>
                             {enquiryDetails.map((item, i) => (
+
                                 <PGrid item xs={12} md={6} xl={3} key={i}>
                                     {
-                                        !formData.job && item.label === getLabel("lbl42") ? (
+                                        formData.job && item.label === getLabel("lbl42") ? (
                                             <PTextField
                                                 name={Labels.enquiryDetails.projectNo}
                                                 label={item.label}
-                                                value={item.value}
-                                                onChange={(e) => handleChange(e, item)}
+                                                value={formData.projectNo}
+                                                onChange={(e) => handleChange(e)}
                                             />
 
-                                        ) : !formData.job && (item.label === getLabel("lbl43") || item.label === getLabel("lbl44")) ? (
+                                        ) : formData.job && (item.label === getLabel("lbl43") || item.label === getLabel("lbl44")) ? (
                                             <PDatepicker
-                                                name={getLabel("lbl43") ? Labels.enquiryDetails.estdeliveryDate : Labels.enquiryDetails.briefReceivedDate}
-                                                label={`${item.label}`}
-                                                value={item.value}
-                                                onChange={(e) => handleChange(e, item)}
-                                                //helperText={getLabel("lbl43") ? errors?.estdeliveryDate : errors.briefReceivedDate}
+                                                name={
+                                                    getLabel("lbl43") === item.label
+                                                        ? Labels.enquiryDetails.estdeliveryDate
+                                                        : getLabel("lbl44") === item.label
+                                                            ? Labels.enquiryDetails.briefReceivedDate
+                                                            : ""
+                                                }
+                                                label={item.label}
+                                                value={
+                                                    getLabel("lbl43") === item.label
+                                                        ? formData.estdeliveryDate
+                                                        : getLabel("lbl44") === item.label
+                                                            ? formData.briefReceivedDate
+                                                            : null
+                                                }
+                                                onChange={handleChange}
                                                 width={100}
-                                                allowFuture={true}
+                                                allowFuture
                                             />
-                                        ) : !formData.job && item.label === getLabel("lbl45") ? (
+                                        ) : formData.job && item.label === getLabel("lbl45") ? (
                                             <PTextField
                                                 name={Labels.enquiryDetails.projectDescription}
                                                 label={item.label}
-                                                value={item.value}
+                                                value={formData.projectDescription}
                                                 onChange={handleChange}
-                                                //helperText={errors?.projectDescription}
                                                 multiline={true}
                                                 rows={2.0}
-                                                width={100}
                                             />
                                         ) : (
 
@@ -565,6 +735,7 @@ const ProjectEnquiry = () => {
                         </PGrid>
                     </PCard>
                 )}
+
                 {formData.activeTab === "Line items" && (
                     <PCard >
                         <PGrid container className={Labels.margin.mb3}>
@@ -600,32 +771,7 @@ const ProjectEnquiry = () => {
                                 md={6}
                                 className="d-flex justify-content-end gap-2"
                             >
-                                {formData.line ? (
-                                    <PButton
-                                        label={"Edit"}
-                                        variant="contained"
-                                        color={CommonColors.grey.main}
-                                        onClick={(e) => handleEdit(e, "line")}
-                                        width={120}
-                                    />
-                                ) : (
-                                    <>
-                                        <PButton
-                                            label={"Cancel"}
-                                            variant="outlined"
-                                            color={CommonColors.blue.main}
-                                            onClick={(e) => handleCancel(e, "line")}
-                                            width={120}
-                                        />
-                                        <PButton
-                                            label={"Save"}
-                                            variant="contained"
-                                            color={CommonColors.green.main}
-                                            onClick={(e) => handleEdit(e, "line")}
-                                            width={120}
-                                        />
-                                    </>
-                                )}
+                                {renderActionButtons("line")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
@@ -637,15 +783,16 @@ const ProjectEnquiry = () => {
                                         weight={FontWeight.bold}
                                     />
                                     {formData.line ? (
+                                        <PTextField
+                                            value={"9.00"}
+                                            onChange={handleChange}
+                                            width={20}
+                                        />
+                                    ) : (
                                         <PTypography
                                             labelText={"9.00"}
                                             color={CommonColors.grey.main}
                                             weight={FontWeight.bold}
-                                        />) : (
-                                        <PTextField
-                                            value={""}
-                                            onChange={handleChange}
-                                            width={20}
                                         />
                                     )}
                                 </PGrid>
@@ -654,6 +801,7 @@ const ProjectEnquiry = () => {
 
                     </PCard>
                 )}
+
                 {formData.activeTab === "RFQ" && (
                     <PCard className={Labels.margin.mb3}>
                         <PGrid container className={Labels.margin.mb1}>
@@ -681,61 +829,67 @@ const ProjectEnquiry = () => {
                                     weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                                className="d-flex justify-content-end gap-2"
-                            >
-                                {formData.rfq ? (
-                                    <PButton
-                                        label={"Edit"}
-                                        variant="contained"
-                                        color={CommonColors.grey.main}
-                                        onClick={(e) => handleEdit(e, "rfq")}
-                                        width={120}
-                                    />
-                                ) : (
-                                    <>
-                                        <PButton
-                                            label={"Cancel"}
-                                            variant="outlined"
-                                            color={CommonColors.blue.main}
-                                            onClick={(e) => handleCancel(e, "rfq")}
-                                            width={120}
-                                        />
-                                        <PButton
-                                            label={"Save"}
-                                            variant="contained"
-                                            color={CommonColors.green.main}
-                                            onClick={(e) => handleEdit(e, "rfq")}
-                                            width={120}
-                                        />
-                                    </>
-                                )}
+                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
+                                {renderActionButtons("rfq")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={columns} rows={formDataList.suppliers} showCheckbox={true} />
+                                <PTable columns={rfqSupplier} rows={suppliers} showCheckbox={true} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb4}>
+                            {formData.calculateFlag &&
+                                <PGrid
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={6}
+                                    className="d-flex justify-content-end gap-2"
+                                >
+                                    <PButton
+                                        label={"Calculate Project Savings"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={() => handleCancel(null, flag)}
+                                        width={250}
+                                    />
+                                    <PButton
+                                        label={"Re-calculate Project Savings"}
+                                        variant="contained"
+                                        color={CommonColors.red.main}
+                                        onClick={() => handleEdit(null, flag)}
+                                        width={250}
+                                    />
+                                </PGrid>
+                            }:{
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PButton
+                                        label={"Add Supplier"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={() => setFormData((prev) => ({
+                                            ...prev,
+                                            suppliers: true
+                                        }))}
+                                        width={200}
+                                    />
+                                </PGrid>
+                            }
+                        </PGrid>
+
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={formDataList.calculateRows} rows={formDataList.data} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PButton
-                                    label={"Add Supplier"}
-                                    variant="contained"
-                                    color={CommonColors.grey.main}
-                                    onClick={() => setFormData((prev) => ({
-                                        ...prev,
-                                        suppliers: true
-                                    }))}
-                                    width={200}
-                                />
+                                <PTable columns={formDataList.calculateSupplierRows} rows={formDataList.data} />
                             </PGrid>
                         </PGrid>
+
                     </PCard>
                 )}
 
@@ -758,32 +912,7 @@ const ProjectEnquiry = () => {
                                 md={6}
                                 className="d-flex justify-content-end gap-2"
                             >
-                                {formData.sla ? (
-                                    <PButton
-                                        label={"Edit"}
-                                        variant="contained"
-                                        color={CommonColors.grey.main}
-                                        onClick={(e) => handleEdit(e, "sla")}
-                                        width={120}
-                                    />
-                                ) : (
-                                    <>
-                                        <PButton
-                                            label={"Cancel"}
-                                            variant="outlined"
-                                            color={CommonColors.blue.main}
-                                            onClick={(e) => handleCancel(e, "sla")}
-                                            width={120}
-                                        />
-                                        <PButton
-                                            label={"Save"}
-                                            variant="contained"
-                                            color={CommonColors.green.main}
-                                            onClick={(e) => handleEdit(e, "sla")}
-                                            width={120}
-                                        />
-                                    </>
-                                )}
+                                {renderActionButtons("sla")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
@@ -807,7 +936,7 @@ const ProjectEnquiry = () => {
                                         value={phase.mdays ?? ""}
                                         onChange={(e) => handleModifiedDays(index, e.target.value)}
                                         width={50}
-                                        disabled={formData.sla}
+                                        disabled={formData.sla ? false : true}
                                     />
                                 </PGrid>
                                 <PGrid item md={3}>
@@ -831,7 +960,7 @@ const ProjectEnquiry = () => {
                                             }
                                         }}
                                         allowFuture={true}
-                                        disabled={formData.sla}
+                                        disabled={formData.sla ? false : true}
                                     />
                                 </PGrid>
                                 <PGrid item md={3}>
@@ -846,6 +975,7 @@ const ProjectEnquiry = () => {
                         ))}
                     </Box>
                 )}
+
                 {formData.activeTab === "Revised Quotes" && (
                     <PCard className={Labels.margin.mb3}>
                         <PGrid container className={Labels.margin.mb4}>
@@ -864,6 +994,7 @@ const ProjectEnquiry = () => {
                         </PGrid>
                     </PCard>
                 )}
+
                 {formData.activeTab === "Logs" && (
                     <PCard className={Labels.margin.mb3}>
                         <PGrid container className={Labels.margin.mb4}>
@@ -903,7 +1034,8 @@ const ProjectEnquiry = () => {
                 open={formData.suppliers}
                 onClose={() => setFormData((prev) => ({
                     ...prev,
-                    suppliers: false
+                    suppliers: false,
+                    search: ""
                 }))}
                 title={"Suppliers"}
                 showCloseIcon={true}
@@ -923,11 +1055,11 @@ const ProjectEnquiry = () => {
                         />
                         <PButton
                             fullWidth
-                            label={getLabel("lbl124")}
+                            label={"Send invite to supplier"}
                             variant={Labels.contained}
                             onClick={handleSendChoose}
                             color={CommonColors.green.main}
-                            width={120}
+                            width={200}
                         />
                     </PGrid >
                 }
@@ -935,7 +1067,11 @@ const ProjectEnquiry = () => {
             >
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={6} md={6}>
-                        <PSearch width="100%" placeholder={"Search a Suplier Name"} onChange={(e) => setSearch(e.target.value)} />
+                        <PSearch width="100%" placeholder={"Search a Suplier Name"}
+                            onChange={(e) => setFormData((prev) => ({
+                                ...prev,
+                                search: e.target.value
+                            }))} />
                     </PGrid>
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={12}>

@@ -375,7 +375,6 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
                         name={Labels.lineItems.specifications}
                         multiline={true}
                         rows={2.5}
-                        width={100}
                     />
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={4}>
@@ -387,7 +386,6 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
                         name={Labels.lineItems.notesComments}
                         multiline={true}
                         rows={2.5}
-                        width={100}
                     />
                 </PGrid>
             </PGrid>

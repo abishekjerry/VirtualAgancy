@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     TextField,
     IconButton,
-    Tooltip,
-    InputAdornment,
+    InputAdornment
 } from "@mui/material";
 import {
-    UploadFile as UploadFileIcon,
-    InsertDriveFile as InsertDriveFileIcon,
     Visibility,
-    VisibilityOff,
+    VisibilityOff
 } from "@mui/icons-material";
+
 import { Labels } from "../../utils/constants/labels";
 import { FontFamily, FontSize } from "../../utils/constants/fonts";
 
@@ -21,8 +19,8 @@ export default function PTextField({
     value = "",
     onChange,
     onKeyPress,
-    eyeIcon,
     onKeyUp,
+    onBlur,
     disabled = false,
     name = "",
     helperText = "",
@@ -32,133 +30,31 @@ export default function PTextField({
     variant = "outlined",
     inputProps = {},
     startIcon,
-    width = "",
-    maxLength,
-    minLength,
-    multiple = false,
-    defaultFileUrl = "",
-    onBlur,
+    width = "100%",
     min,
-    max
+    max,
+    sx = {}
 }) {
-
-    const isFile = type === Labels.flag.file;
     const isPassword = flag === Labels.flag.password;
-
     const [showPassword, setShowPassword] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [fileError, setFileError] = useState("");
-
-    const internalRef = React.useRef(null);
-    const textFieldRef = inputRef || internalRef;
-
-    const allowedExtensions = [
-        "pdf", "png", "jpg", "jpeg",
-        "doc", "docx", "ppt", "pptx",
-        "xls", "xlsx"
-    ];
-
-    // ✅ handle default value
-    useEffect(() => {
-        if (defaultFileUrl || value) {
-            const files = Array.isArray(value) ? value : [value];
-
-            const mapped = files.map((file) => {
-                if (typeof file === "string") {
-                    return {
-                        name: file.split("/").pop(),
-                        url: file,
-                    };
-                }
-                return file;
-            });
-
-            setSelectedFiles(mapped);
-        } else {
-            setSelectedFiles([]);
-        }
-    }, [defaultFileUrl, value]);
-
     const handleToggleVisibility = () => {
-        setShowPassword(!showPassword);
+        setShowPassword(prev => !prev);
     };
-
-    const handleFileChange = (e) => {
-        const files = Array.from(e.target.files || []);
-        let errorMsg = "";
-        let updatedFiles = [...selectedFiles];
-        const remainingSlots = multiple ? maxLength - selectedFiles.length : 1;
-        if (multiple && remainingSlots <= 0) {
-            setFileError(`You may upload up to ${maxLength} files of no more than 20 MB each`);
-            e.target.value = "";
-            return;
-        }
-        for (let file of files) {
-            const ext = file.name.split(".").pop().toLowerCase();
-            const isValidType = allowedExtensions.includes(ext);
-            // ✅ Updated size validation (1MB to 20MB)
-            const isValidSize = file.size >= 0 * 1024 * 1024 && file.size <= 20 * 1024 * 1024;
-
-            if (!isValidType) {
-                errorMsg = "Allowed types: .pdf, .png, .jpg, .jpeg, .doc, .docx, .ppt, .pptx, .xls, .xlsx";
-                continue;
-            }
-
-            if (!isValidSize) {
-                errorMsg = "Each file must be between 1 MB and 20 MB";
-                continue;
-            }
-
-            if (multiple && updatedFiles.length >= maxLength) {
-                errorMsg = `You may upload up to ${maxLength} files of no more than 20 MB each`;
-                break;
-            }
-
-            if (!multiple) {
-                updatedFiles = [];
-            }
-
-            updatedFiles.push({
-                name: file.name,
-                size: file.size,
-                url: URL.createObjectURL(file),
-                file: file,
-            });
-        }
-
-        if (updatedFiles.length === selectedFiles.length) {
-            setFileError(errorMsg);
-            e.target.value = "";
-            return;
-        }
-
-        setSelectedFiles(updatedFiles);
-        onChange?.({ target: { name, files: updatedFiles, }, });
-        setFileError(errorMsg);
-        e.target.value = "";
-    };
-
-    const handleClearFiles = () => {
-        setSelectedFiles([]);
-        onChange?.({
-            target: { name, files: [] }
-        });
-        setFileError("");
-    };
-
-    // ✅ STYLES
     const baseSx = {
-        width: width ? `${width}%` : "100%",
+        width,
         mt: 0.4,
         "& .MuiOutlinedInput-root": {
             borderRadius: "12px",
-            backgroundColor: "#ffffff",
+            backgroundColor: "#fff",
+
             "& fieldset": {
                 borderColor: helperText ? "#d32f2f" : "#ccc",
             },
+
             "&:hover fieldset": {
                 borderColor: "#62BCD8",
             },
+
             "&.Mui-focused fieldset": {
                 borderColor: "#62BCD8",
             },
@@ -167,56 +63,15 @@ export default function PTextField({
             fontFamily: FontFamily.bold,
             fontSize: FontSize.textField.label,
         },
+        "& .MuiInputLabel-shrink": {
+            color: "#62BCD8",
+            fontWeight: 600,
+            fontSize: "12px",
+            transform: "translate(14px, -6px) scale(1)"
+        },
+        ...sx
     };
-    if (isFile) {
-        return (
-            <>
-                <TextField
-                    name={name}
-                    label={label}
-                    variant={variant}
-                    fullWidth
-                    disabled={disabled}
-                    onBlur={onBlur}
-                    inputRef={textFieldRef}
-                    placeholder="Choose file"
-                    error={!!fileError}
-                    helperText={fileError}
-                    value=""
-                    inputProps={{ readOnly: true }}
-                    sx={baseSx}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <UploadFileIcon />
-                            </InputAdornment>
-                        ),
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <input
-                                    hidden
-                                    type="file"
-                                    name={name}
-                                    multiple={multiple}
-                                    disabled={disabled}
-                                    onChange={handleFileChange}
-                                    id={`upload-${name}`}
-                                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
-                                />
-                                <label htmlFor={`upload-${name}`}>
-                                    <Tooltip title="Upload">
-                                        <IconButton component="span">
-                                            <InsertDriveFileIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </label>
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-            </>
-        );
-    }
+
     return (
         <TextField
             name={name}
@@ -225,12 +80,9 @@ export default function PTextField({
             onChange={onChange}
             onKeyPress={onKeyPress}
             onKeyUp={onKeyUp}
-            type={
-                isPassword && !showPassword
-                    ? Labels.flag.password
-                    : type
-            }
-            inputRef={textFieldRef}
+            onBlur={onBlur}
+            type={isPassword && !showPassword ? "password" : type}
+            inputRef={inputRef}
             multiline={multiline}
             rows={rows}
             disabled={disabled}
@@ -238,14 +90,12 @@ export default function PTextField({
             error={!!helperText}
             variant={variant}
             sx={baseSx}
-            inputProps={{
-                ...inputProps,
-                min,
-                max
-            }}
+            inputProps={{ ...inputProps, min, max }}
             InputProps={{
                 startAdornment: startIcon && (
-                    <InputAdornment position="start">{startIcon}</InputAdornment>
+                    <InputAdornment position="start">
+                        {startIcon}
+                    </InputAdornment>
                 ),
                 endAdornment: isPassword && (
                     <InputAdornment position="end">
