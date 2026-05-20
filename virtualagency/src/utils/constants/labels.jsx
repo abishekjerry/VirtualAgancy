@@ -99,6 +99,7 @@ export const Labels = {
     printingMethod: "printingMethod",
     typeOfItem: "typeOfItem",
     noOfMaterials: "noOfMaterials",
+    harmonizedOrder : "harmonizedOrder",
     digitalInnovation: "digitalInnovation",
     innovation: "innovation",
     sourcingLocation: "sourcingLocation",
@@ -137,7 +138,8 @@ export const Labels = {
   message: {
     success: "Success",
     failed: "Failed",
-    somethingWentWrong: "Something went wrong"
+    somethingWentWrong: "Something went wrong",
+    updatedSuccessfully: "Updated successfully"
   },
 
   language: {

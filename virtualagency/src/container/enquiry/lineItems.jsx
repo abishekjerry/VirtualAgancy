@@ -111,6 +111,7 @@ const LineItems = () => {
         printingMethod: "",
         typeOfItem: "",
         noOfMaterials: "",
+        harmonizedOrder: "",
         digitalInnovation: "",
         innovation: "",
         sourcingLocation: "",
@@ -172,6 +173,7 @@ const LineItems = () => {
         printingMethod: "",
         typeOfItem: "",
         noOfMaterials: "",
+        harmonizedOrder: "",
         digitalInnovation: "",
         innovation: "",
         sourcingLocation: "",
@@ -313,6 +315,7 @@ const LineItems = () => {
                     owWithLink: yesOrNo,
                     dictatedJob: yesOrNo,
                     rateCard: yesOrNo,
+                    harmonizedOrder: yesOrNo
                 }),
                 ...(incoterm && { incoterm: incoterm }),
                 ...(globalOrder && { globalOrderWindowCatalogueName: globalOrder }),
@@ -356,14 +359,14 @@ const LineItems = () => {
         [Labels.lineItems.noOfMaterials]: { type: "number" },
         [Labels.lineItems.noOfVersion]: { type: "number" },
         [Labels.lineItems.quantity]: { type: "number" },
-
-
         [Labels.lineItems.width]: { type: "decimal" },
         [Labels.lineItems.length]: { type: "decimal" },
         [Labels.lineItems.depth]: { type: "decimal" },
         [Labels.lineItems.recycledMaterialWeightKg]: { type: "decimal" },
         [Labels.lineItems.competitiveBiddingWinningSupplierCost]: { type: "decimal" }
     };
+
+ 
     const handleChange = (e) => {
         const { name, value, files, label } = e.target;
         const config = fieldConfig[name];
@@ -392,6 +395,13 @@ const LineItems = () => {
                 competitiveBiddingExceptionFormSigned: isType4 ? 3 : "",
                 competitiveBiddingMandatory: isType4 ? 3 : "",
                 exceptionsReasonCode: isType4 ? 8 : "",
+            };
+        }
+        if (name === Labels.lineItems.globalOrderWindowCatalogueName) {
+            const isType4 = formattedValue == 1;
+            data = {
+                ...data,
+                harmonizedOrder: isType4 ? 2 : 1,
             };
         }
 
@@ -546,7 +556,7 @@ const LineItems = () => {
             Labels.lineItems.containsPlastic,
             Labels.lineItems.containsRecycledPlastic,
             Labels.lineItems.recycledMaterialWeightKg,
-           // formData.recycledMaterial == 1 ? Labels.lineItems.recycledMaterialWeightKg : "",
+            // formData.recycledMaterial == 1 ? Labels.lineItems.recycledMaterialWeightKg : "",
 
             // Catalogue Section
             Labels.lineItems.ratecardCatalogueItemDeclined,
@@ -557,6 +567,7 @@ const LineItems = () => {
             Labels.lineItems.printingMethod,
             Labels.lineItems.typeOfItem,
             Labels.lineItems.noOfMaterials,
+            Labels.lineItems.harmonizedOrder,
             Labels.lineItems.digitalInnovation,
             Labels.lineItems.innovation,
             Labels.lineItems.sourcingLocation,
@@ -1089,6 +1100,19 @@ const LineItems = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
+                                        label={`${"Harmonized Order"} ${Labels.symbols.required}`}
+                                        value={formData.harmonizedOrder}
+                                        onChange={handleChange}
+                                        helperText={errors?.harmonizedOrder}
+                                        name={Labels.lineItems.harmonizedOrder}
+                                        options={formDataList.yesOrNo}
+                                        disabled={true}
+                                    />
+                                </PGrid>
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
+                                <PGrid item xs={12} sm={6} md={4}>
+                                    <PDropdown
                                         label={`${getLabel("lbl114")} ${Labels.symbols.required}`}
                                         value={formData.digitalInnovation}
                                         onChange={handleChange}
@@ -1098,8 +1122,6 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl115")} ${Labels.symbols.required}`}
@@ -1123,6 +1145,8 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
+                            </PGrid>
+                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl117")} ${Labels.symbols.required}`}
@@ -1135,9 +1159,6 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl118")} ${Labels.symbols.required}`}
@@ -1213,7 +1234,7 @@ const LineItems = () => {
                                         helperText={errors?.specifications}
                                         name={Labels.lineItems.specifications}
                                         multiline={true}
-                                        rows={4.5}    
+                                        rows={4.5}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6}>

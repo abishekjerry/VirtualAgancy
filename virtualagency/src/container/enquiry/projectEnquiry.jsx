@@ -140,7 +140,7 @@ const ProjectEnquiry = () => {
     };
 
     const quotes = [
-        { field: "enquiryId", header: "Supplier" },
+        { field: "suppliername", header: "Supplier" },
         { field: "enquiryId", header: "Supplier Price ($)" },
         { field: "enquiryId", header: "Date/Time Log" },
     ]
@@ -393,7 +393,7 @@ const ProjectEnquiry = () => {
 
     const suppliers = rawLineItems.map((item) => ({
         isSubTitle: true,
-        subTitle: item.itemTitle,
+        subTitle: `${item.itemTitle}`,
         items: supplierRows.filter(s => s.groupName === item.itemTitle)
     }));
     const isQuote = formData.Quote == 1 && formData.rfq;
@@ -538,7 +538,7 @@ const ProjectEnquiry = () => {
             setLoading(true);
             const response = await Promise.all(requests);
             const successCount = response.filter(item => item?.status === true).length;
-            const message = successCount > 1 ? "Updated Successfully" : response?.[0]?.data?.message;
+            const message = successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
             const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
             console.log(message,status, response);
             toast(status, message);
@@ -550,7 +550,6 @@ const ProjectEnquiry = () => {
             fetchData();
 
         } catch (error) {
-            console.log(error, "error");
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
@@ -776,7 +775,7 @@ const ProjectEnquiry = () => {
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} md={12} xl={12} >
+                            <PGrid item xs={12} sm={6} md={2} >
                                 <PGrid className={`ps-2 mb-4`}>
                                     <PTypography
                                         labelText={"Management Fee (%)"}
@@ -786,7 +785,7 @@ const ProjectEnquiry = () => {
                                         <PTextField
                                             value={"9.00"}
                                             onChange={handleChange}
-                                            width={20}
+                                            //width={}
                                         />
                                     ) : (
                                         <PTypography
@@ -989,7 +988,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={quotes} rows={formDataList.data} />
+                               <PTable columns={quotes} rows={suppliers}  />
                             </PGrid>
                         </PGrid>
                     </PCard>
