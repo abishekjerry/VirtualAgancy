@@ -14,7 +14,7 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false}) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false }) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -57,7 +57,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : rows;
 
   const renderCell = (col, data, rowIndex, meta = {}) => {
-  const content = col.render ? col.render(data, rowIndex) : data[col.field];
+    const content = col.render ? col.render(data, rowIndex) : data[col.field];
     if (showCheckbox && meta.isFirstCol) {
       return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -65,7 +65,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             size="small"
             checked={disabled && data.groupName ? false : isSelected(data)}
             onChange={() => handleRowSelect(data)}
-            disabled = {disabled}
+            disabled={disabled}
           />
           {content}
         </Box>
@@ -94,7 +94,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             whiteSpace: "nowrap"
           }}
         >
-          {renderCell(col, row, index, { isFirstCol: i === 0, groupName: row.groupName })}
+          {renderCell(col, row, index, { isFirstCol: i === 0 })}
         </TableCell>
       ))}
     </TableRow>
@@ -122,14 +122,24 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
           sx={{
             cursor: onClick ? "pointer" : "default",
             "&:hover": { backgroundColor: "#f1f5f9" },
-            backgroundColor: i % 2 ? "#f9fafb" : "#fff"
+            backgroundColor: i % 2 ? "#f9fafb" : "#fff",
+            "&:hover td[rowspan]": {
+              backgroundColor: "#ffffff !important"
+            }
           }}
         >
-          {columns.map((col, cIndex) => (
-            <TableCell key={cIndex} sx={{ fontSize: Labels.fontSize.xs, py: 1.8 }}>
-              {renderCell(col, item, item.rowId, { isFirstCol: cIndex === 0, groupName: group.subTitle })}
-            </TableCell>
-          ))}
+          {columns.map((col, cIndex) => {
+            if (col.rowSpan && i !== 0) return null;
+            return (
+              <TableCell key={cIndex} rowSpan={col.rowSpan ? group.items.length : 1}
+                sx={{
+                  fontSize: Labels.fontSize.xs, py: 1.8,
+                  verticalAlign: "middle", borderLeft: col.rowSpan ? "1px solid #e5e7eb" : "",
+                }}
+              >
+                {renderCell(col, { ...item, groupName: group.subTitle }, item.rowId, { isFirstCol: cIndex === 0 })}
+              </TableCell>);
+          })}
         </TableRow>
       ))}
     </React.Fragment>

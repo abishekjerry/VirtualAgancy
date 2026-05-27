@@ -17,7 +17,7 @@ import { isSuccess, toast } from "../../utils/commonFunction/common";
 import { LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 
-export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, duplicate = false }) => {
+export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, duplicate = false, showFlag = true }) => {
     const { state } = useLocation();
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(currentStep);
@@ -103,22 +103,24 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
     return (
         <>
             <PCard>
-
-                <PGrid container className="justify-content-center">
-                    <PTypography
-                        labelText={`${Labels.clientInfo.summary}${enquiryID && currentStep != 1 ? ` (${enquiryID})` : ""}`}
-                        flag={Labels.fontFlags.subHeader}
-                        weight={FontWeight.bold}
-                        color={CommonColors.blue.main}
-                    />
-                </PGrid>
+                {showFlag && (
+                    <>
+                        <PGrid container className="justify-content-center">
+                            <PTypography
+                                labelText={`${Labels.clientInfo.summary}${enquiryID && currentStep != 1 ? ` (${enquiryID})` : ""}`}
+                                flag={Labels.fontFlags.subHeader}
+                                weight={FontWeight.bold}
+                                color={CommonColors.blue.main}
+                            />
+                        </PGrid>
+                        <hr className="my-2" />
+                    </>
+                )}
 
                 {visibleSections.map((section) => {
                     const isOpen = activeStep === section.step;
-
                     return (
                         <Fragment key={section.step}>
-                            <hr className="my-2" />
                             <PGrid container className="d-flex align-items-center justify-content-between"
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
@@ -133,7 +135,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
                             >
                                 <PGrid item xs={12} sm={6} md={8}>
                                     <PTypography
-                                        labelText={`${section.step}. ${section.title}${[3, 4].includes(section.step) ? `(${section.items?.length || 0})` : ""}`}
+                                        labelText={`${showFlag ? `${section.step}. ` : ""} ${section.title}${[3, 4].includes(section.step) ? `(${section.items?.length || 0})` : ""}`}
                                         flag={Labels.fontFlags.errorLbl}
                                         weight={FontWeight.bold}
                                     />

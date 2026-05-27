@@ -52,6 +52,7 @@ const ProjectEnquiry = () => {
     const countryName = localStorage.getItem("country");
     const agancyUserID = parseInt(localStorage.getItem("agancyUserID"));
     const userID = parseInt(localStorage.getItem("userID"))
+    const userName = localStorage.getItem("user")
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     //State & list states
@@ -64,7 +65,10 @@ const ProjectEnquiry = () => {
         job: false,
         suppliers: false,
         calculateFlag: false,
-        Quote: "",
+        validateFlag: false,
+        marginFlag: false,
+        isCalculate: true,
+        quote: "",
         search: "",
 
         //editable state
@@ -87,11 +91,13 @@ const ProjectEnquiry = () => {
         supplierMaster: [],
         selectedRows: [],
         statusInfo: [],
-        calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markup", header: "Markup ($)" }, { field: "margin", header: "Margin ($)" }],
+        calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
         calculateSupplierRows: [{ field: "cost", header: "Supplier Name" }, { field: "sell", header: "Item Name" }, { field: "margin", header: "Margin ($)" }, { field: "markup", header: "Supplier type" }, { field: "margin", header: "SMETA accredited" }
             , { field: "margin", header: "GMP accredited" }, { field: "markup", header: "Nature of supplier" },
         ],
-        selectedSupplierRows: []
+        selectedSupplierRows: [],
+        extraInfo: [],
+        calculateRowsData: []
     });
 
     //Master function
@@ -108,6 +114,7 @@ const ProjectEnquiry = () => {
                 currency: currency,
                 Country: countryName
             });
+
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -115,11 +122,16 @@ const ProjectEnquiry = () => {
                 enquiryDetails: response.enqProjectinfo,
                 suppliers: response.supplierinfo,
                 supplierMaster: supplierResponse,
-                statusInfo: [{ label: "Project Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }, { label: "Status", value: response.jobstatus || "-" }]
+                statusInfo: [{ label: "Project Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }, { label: "Status", value: response.jobstatus || "-" }],
+                extraInfo: [
+                    { label: "Created Date", value: response.enqProjectinfo?.estdate || "-" },
+                    { label: getLabel("lbl10"), value: userName || "-" },
+                    { label: "Enquiry Id", value: response.enqClientinfo?.enqUId || "-" }
+                ]
             }));
             setFormData(prev => ({
                 ...prev,
-                Quote: response.enqProjectinfo?.quoteBy
+                quote: response.enqProjectinfo?.quoteBy
             }));
             slaTemplate(response.enqProjectinfo.slaId);
             clientInfoMaster(response.enqClientinfo.divisionid);
@@ -141,11 +153,11 @@ const ProjectEnquiry = () => {
 
     const quotes = [
         { field: "suppliername", header: "Supplier" },
-        { field: "enquiryId", header: "Supplier Price ($)" },
-        { field: "enquiryId", header: "Date/Time Log" },
+        { field: "enquiry", header: "Supplier Price ($)" },
+        { field: "enquiry", header: "Date/Time Log" },
     ]
 
-    const logs = [
+    const historyLogs = [
         { field: "enquiryId", header: "Modified Date" },
         { field: "enquiryId", header: "User ID" },
         { field: "enquiryId", header: "Field" },
@@ -154,15 +166,23 @@ const ProjectEnquiry = () => {
         { field: "enquiryId", header: "Item Number" },
     ]
 
-    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
-    const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails, true);
+    const lineItemslogs = [
+        { field: "enquiryId", header: "Modified Date" },
+        { field: "enquiryId", header: "User ID" },
+        { field: "enquiryId", header: "Field" },
+        { field: "enquiryId", header: "Old Value" },
+        { field: "enquiryId", header: "New Value" },
+    ]
+
+
+    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo, formDataList.extraInfo);
+    const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails, false);
     const rawLineItems = getLineneItems({}, formDataList, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
         subTitle: `${item.itemTitle}`,
         enquiryId: item.enquiryId,
         items: item.items,
     }));
-
 
     const sections = getSummarySections({ lineItems, getLabel });
 
@@ -266,14 +286,40 @@ const ProjectEnquiry = () => {
         setFormData(prev => ({
             ...prev,
             [flag]: true,
+            validateFlag: flag == "rfq" ? true : false
         }));
     };
     const handleCancel = async (e, flag) => {
         setFormData(prev => ({
             ...prev,
             [flag]: false,
+            calculateFlag: flag == "rfq" ? true : false
         }));
     }
+    const handleCalculate = async (e, flag) => {
+        setFormData(prev => ({
+            ...prev,
+            marginFlag: true
+        }));
+        calculateValues(formDataList.selectedSupplierRows);
+    }
+
+    const calculateValues = (rows) => {
+        const cost = rows.reduce((a, b) => a + Number(b.negQuote || 0), 0).toFixed(2);
+        const sell = rows.reduce((a, b) => a + Number(b.pmgSellPrice || 0), 0).toFixed(2);
+        const margin = (Number(sell) - Number(cost)).toFixed(2);
+        setFormDataList(prev => ({
+            ...prev,
+            calculateRowsData: [{
+                cost: cost,
+                sell: sell,
+                margin: margin,
+                markupPercent: ((margin / cost) * 100).toFixed(2),
+                marginPercent: ((margin / sell) * 100).toFixed(2)
+            }]
+        }));
+    };
+
 
     const clientInfoMaster = async (globalBUMapping) => {
         try {
@@ -281,12 +327,10 @@ const ProjectEnquiry = () => {
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
                 Divisionid: globalBUMapping
             });
-
             setFormDataList(prev => ({
                 ...prev,
                 clientContact: response.client,
             }));
-
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
@@ -320,6 +364,10 @@ const ProjectEnquiry = () => {
             ...prev,
             selectedSupplierRows: rows,
         }));
+        setFormData(prev => ({
+            ...prev,
+            isCalculate: isValid === true ? false : true
+        }))
     };
 
     let filteredData = formDataList.supplierMaster;
@@ -362,33 +410,36 @@ const ProjectEnquiry = () => {
             <PTextField
                 name={field}
                 value={row[field] || ""}
-                onChange={(e) =>
-                    handleInputChange(
-                        e.target.value.replace(/[^0-9.]/g, ""),
-                        row.rowId,
-                        field
-                    )
-                }
+                onChange={(e) => handleInputChange(e.target.value.replace(/[^0-9.]/g, ""), row.rowId, row.enquiryId, field)}
                 width={90}
-
             />
         )
     });
     useEffect(() => {
         if (supplierRows.length === 0) {
-            const group = rawLineItems.flatMap((item, groupIndex) =>
-                formDataList.suppliers.map((s, supplierIndex) => ({
+            let count = 0;
+            const group = rawLineItems.flatMap((item) =>
+                formDataList.suppliers.map((s, index) => ({
                     ...s,
                     groupName: item.itemTitle,
-                    rowId: `${groupIndex}_${supplierIndex}`
+                    enquiryId: item.enquiryId,
+                    rowId: index + 1
                 }))
             );
             setSupplierRows(group);
         }
     }, [formDataList.suppliers]);
 
-    const handleInputChange = (value, rowId, field) => {
-        setSupplierRows(prev => prev.map(item => item.rowId === rowId ? { ...item, [field]: value } : item));
+    const handleInputChange = (value, rowId, enquiryId, field) => {
+        setSupplierRows(prev => {
+            const update = prev.map(item => item.rowId === rowId &&
+                item.enquiryId === enquiryId ? { ...item, [field]: value } : item);
+            setFormData(form => ({
+                ...form,
+                validateFlag: !update.every(x => x.initialQuote || x.iniUnitPrice)
+            }));
+            return update;
+        });
     };
 
     const suppliers = rawLineItems.map((item) => ({
@@ -396,48 +447,33 @@ const ProjectEnquiry = () => {
         subTitle: `${item.itemTitle}`,
         items: supplierRows.filter(s => s.groupName === item.itemTitle)
     }));
-    const isQuote = formData.Quote == 1 && formData.rfq;
-    const isUnit = formData.Quote == 2 && formData.rfq;
+    const isQuote = formData.quote == 1 && formData.rfq;
+    const isUnit = formData.quote == 2 && formData.rfq;
 
     const rfqSupplier = [
-        {
-            field: "suppliername",
-            header: "Supplier"
-        },
-
+        { field: "suppliername", header: "Supplier" },
         {
             field: "initialQuote",
             header: "Ini.Quote ($)",
             ...(isQuote && renderEditableField("initialQuote"))
         },
-
         {
             field: "negQuote",
             header: "Neg.Quote ($)",
             ...(isQuote && renderEditableField("negQuote"))
         },
-
         {
             field: "iniUnitPrice",
             header: "Ini.unit Price ($)",
             ...(isUnit && renderEditableField("iniUnitPrice"))
         },
-
         {
             field: "negUnitPrice",
             header: "Neg.unit Price ($)",
             ...(isUnit && renderEditableField("negUnitPrice"))
         },
-
-        {
-            field: "negUnitPriceFee",
-            header: "Neg.unit Price with MFee ($)"
-        },
-
-        {
-            field: "pmgSellPrice",
-            header: "PMG Sell Price ($)"
-        }
+        { field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)" },
+        { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
 
     //Action button function
@@ -458,6 +494,7 @@ const ProjectEnquiry = () => {
                     color={CommonColors.green.main}
                     onClick={() => handleSubmit(null, flag)}
                     width={120}
+                    disabled={formData.validateFlag}
                 />
             </>
 
@@ -529,31 +566,50 @@ const ProjectEnquiry = () => {
             requests.push(PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
         }
         if (flag === "job") {
-            console.log(enquiryDetails, clientInfo);
             activeTab = "Job summary";
             requests.push(PostApi(ClientInfo_API.AddUpdateClientInfo, clientInfo),
                 PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
         }
-        try {
-            setLoading(true);
-            const response = await Promise.all(requests);
-            const successCount = response.filter(item => item?.status === true).length;
-            const message = successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
-            const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
-            console.log(message,status, response);
-            toast(status, message);
-            setFormData(prev => ({
-                ...prev,
-                activeTab,
-            }))
+        if (flag === "rfq") {
+            activeTab = "RFQ";
+            setSupplierRows(prev => prev.map(item => {
+                    const iniUnitPrice = (+item.iniUnitPrice || (+item.initialQuote || 0) / 5);
+                    const negUnitPrice = (+item.negUnitPrice || (+item.negQuote || 0) / 5);
+                    return {
+                        ...item,
+                        iniUnitPrice: iniUnitPrice.toFixed(2),
+                        negUnitPrice: negUnitPrice.toFixed(2),
+                        initialQuote: (iniUnitPrice * 5).toFixed(2),
+                        negQuote: (negUnitPrice * 5).toFixed(2),
+                        negUnitPriceFee: (negUnitPrice + 0.01).toFixed(2),
+                        pmgSellPrice: ((negUnitPrice + 0.01) * 5).toFixed(2)
+                    };
+                })
+            );
             handleCancel(null, flag)
             fetchData();
-
-        } catch (error) {
-            toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        } finally {
-            setLoading(false);
         }
+        if (flag === "sla" || flag === "job") {
+            try {
+                setLoading(true);
+                const response = await Promise.all(requests);
+                const successCount = response.filter(item => item?.status === true).length;
+                const message = successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
+                const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
+                toast(status, message);
+                setFormData(prev => ({
+                    ...prev,
+                    activeTab,
+                }))
+                handleCancel(null, flag)
+                fetchData();
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        }
+
     };
 
     return (
@@ -631,13 +687,7 @@ const ProjectEnquiry = () => {
                                     weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                                className="d-flex justify-content-end gap-2"
-                            >
+                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
                                 {renderActionButtons("job")}
                             </PGrid>
                         </PGrid>
@@ -705,6 +755,7 @@ const ProjectEnquiry = () => {
                                                 onChange={handleChange}
                                                 width={100}
                                                 allowFuture
+                                                maxDate={ getLabel("lbl44") === item.label ? formData.estdeliveryDate : null }
                                             />
                                         ) : formData.job && item.label === getLabel("lbl45") ? (
                                             <PTextField
@@ -750,7 +801,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={`${Labels.margin.mb3} ${"p-2"}`}>
                             <PGrid item xs={12} sm={12} md={12}>
-                                <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} />
+                                <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} showFlag={false} />
                             </PGrid>
                         </PGrid>
 
@@ -763,13 +814,7 @@ const ProjectEnquiry = () => {
                                     weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                                className="d-flex justify-content-end gap-2"
-                            >
+                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
                                 {renderActionButtons("line")}
                             </PGrid>
                         </PGrid>
@@ -785,7 +830,6 @@ const ProjectEnquiry = () => {
                                         <PTextField
                                             value={"9.00"}
                                             onChange={handleChange}
-                                            //width={}
                                         />
                                     ) : (
                                         <PTypography
@@ -829,7 +873,7 @@ const ProjectEnquiry = () => {
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                {renderActionButtons("rfq")}
+                                {formData.calculateFlag ? <></> : renderActionButtons("rfq")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
@@ -839,30 +883,25 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
-                            {formData.calculateFlag &&
-                                <PGrid
-                                    item
-                                    xs={12}
-                                    sm={6}
-                                    md={6}
-                                    className="d-flex justify-content-end gap-2"
-                                >
+                            {formData.calculateFlag ? (
+                                <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
                                     <PButton
                                         label={"Calculate Project Savings"}
                                         variant="contained"
                                         color={CommonColors.grey.main}
-                                        onClick={() => handleCancel(null, flag)}
+                                        onClick={() => handleCalculate(null, "calculate")}
                                         width={250}
+                                        disabled={formData.isCalculate}
                                     />
                                     <PButton
                                         label={"Re-calculate Project Savings"}
                                         variant="contained"
                                         color={CommonColors.red.main}
-                                        onClick={() => handleEdit(null, flag)}
+                                        onClick={() => handleCalculate(null, "reCalculate")}
                                         width={250}
                                     />
                                 </PGrid>
-                            }:{
+                            ) : (
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PButton
                                         label={"Add Supplier"}
@@ -875,20 +914,22 @@ const ProjectEnquiry = () => {
                                         width={200}
                                     />
                                 </PGrid>
-                            }
+                            )}
                         </PGrid>
-
-                        <PGrid container className={Labels.margin.mb4}>
-                            <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={formDataList.calculateRows} rows={formDataList.data} />
-                            </PGrid>
-                        </PGrid>
-                        <PGrid container className={Labels.margin.mb4}>
-                            <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={formDataList.calculateSupplierRows} rows={formDataList.data} />
-                            </PGrid>
-                        </PGrid>
-
+                        {formData.marginFlag ? (
+                            <>
+                                <PGrid container className={Labels.margin.mb4}>
+                                    <PGrid item xs={12} sm={6} md={12}>
+                                        <PTable columns={formDataList.calculateRows} rows={formDataList.calculateRowsData} />
+                                    </PGrid>
+                                </PGrid>
+                                <PGrid container className={Labels.margin.mb4}>
+                                    <PGrid item xs={12} sm={6} md={12}>
+                                        <PTable columns={formDataList.calculateSupplierRows} rows={formDataList.data} />
+                                    </PGrid>
+                                </PGrid>
+                            </>
+                        ) : (<></>)}
                     </PCard>
                 )}
 
@@ -904,13 +945,7 @@ const ProjectEnquiry = () => {
                                     weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                                className="d-flex justify-content-end gap-2"
-                            >
+                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
                                 {renderActionButtons("sla")}
                             </PGrid>
                         </PGrid>
@@ -988,7 +1023,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                               <PTable columns={quotes} rows={suppliers}  />
+                                <PTable columns={quotes} rows={suppliers} />
                             </PGrid>
                         </PGrid>
                     </PCard>
@@ -1007,7 +1042,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={logs} rows={formDataList.data} />
+                                <PTable columns={lineItemslogs} rows={formDataList.data} />
                             </PGrid>
                         </PGrid>
 
@@ -1022,7 +1057,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={logs} rows={formDataList.data} />
+                                <PTable columns={historyLogs} rows={formDataList.data} />
                             </PGrid>
                         </PGrid>
                     </PCard>

@@ -63,7 +63,7 @@ const LineItems = () => {
         yesOrNoNot: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "Not Applicable", value: 3 }],
         competitiveBiddingExceptionFormSigned: [],
         simplex: [{ label: "Non-Simplex", value: 1 }, { label: "Simplex", value: 2 }, { label: "Not Applicable", value: 3 }],
-        quoteType: [{ label: "Quote of Quantity", value: 1 }, { label: "Quote of Quantity & Size 2D", value: 2 }, { label: "Quote of Quantity & Size 3D", value: 3 }],
+        quoteType: [{ label: "Quote by Quantity", value: 1 }, { label: "Quote by Quantity & Size 2D", value: 2 }, { label: "Quote by Quantity & Size 3D", value: 3 }],
 
         //editable states
         clientInfo: [],

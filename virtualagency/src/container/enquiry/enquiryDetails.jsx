@@ -432,6 +432,7 @@ const EnquiryDetails = () => {
                                         helperText={errors?.briefReceivedDate}
                                         width={100}
                                         allowFuture={true}
+                                        maxDate={formData.estdeliveryDate}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
