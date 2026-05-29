@@ -88,9 +88,9 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
 
     { key: "usingFSCMaterial", label: "lbl70" },
     { key: "oekotexCertification", label: "lbl151" },
-    { key: "recycled", label: "lbl71" },
+    { key: "designedforrecycling", label: "lbl71" },
     { key: "wasthisitemdesignedtoreducedPlastic", label: "lbl75" },
-    { key: "sustainableOptionthatwasrejected", label: "lbl72" },
+    { key: "proposedwithsustainabilityoption", label: "lbl72" },
     { key: "containrecycledmaterial", label: "lbl73" },
     { key: "containrecycledplastic", label: "lbl76" },
     { key: "weightageofrecycledmaterial", label: "lbl79" },

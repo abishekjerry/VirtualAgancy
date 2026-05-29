@@ -207,6 +207,7 @@ const LineItems = () => {
         enquiryId: item.enquiryId,
         items: item.items,
     }));
+    console.log(lineItems.length, rawLineItems, "lineItems");
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
     const fetchData = async () => {
         try {
@@ -366,7 +367,7 @@ const LineItems = () => {
         [Labels.lineItems.competitiveBiddingWinningSupplierCost]: { type: "decimal" }
     };
 
- 
+
     const handleChange = (e) => {
         const { name, value, files, label } = e.target;
         const config = fieldConfig[name];
@@ -420,6 +421,11 @@ const LineItems = () => {
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
     const handleSubmit = async (e, isSubmit) => {
+        if (lineItems.length > 0) {
+            setAllowRedirect(false);
+            navigate(labelRoutes.suppliers, { state: { id: id }});
+            return;
+        }
         const isValid = LineItemsValidation();
         if (isValid) {
             try {
@@ -1107,6 +1113,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.harmonizedOrder}
                                         options={formDataList.yesOrNo}
                                         disabled={true}
+                                        readOnly={formData.harmonizedOrder == 1 ? true : false}
                                     />
                                 </PGrid>
                             </PGrid>

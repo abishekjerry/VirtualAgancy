@@ -94,6 +94,7 @@ const EnquiryDetails = () => {
                     year: response.year,
                     slaTemplate: response.sla
                 }));
+               await GetData(response);
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -101,20 +102,22 @@ const EnquiryDetails = () => {
             }
         };
         fetchData();
+        
     }, []);
 
 
-    useEffect(() => {
-        const { projectAttribute, year, enquiryDetails } = formDataList;
-        if (projectAttribute?.length && year?.length && enquiryDetails?.attribute && enquiryDetails?.year) {
-            setFormData(prev => ({
-                ...prev,
-                projectAttribute: getOptionValue(projectAttribute, enquiryDetails.attribute),
-                year: getOptionValue(year, enquiryDetails.year)
-            }));
-        }
+    // useEffect(() => {
+    //     const { projectAttribute, year, enquiryDetails } = formDataList;
+    //     if (projectAttribute?.length && year?.length && enquiryDetails?.attribute && enquiryDetails?.year) {
+    //         setFormData(prev => ({
+    //             ...prev,
+    //             projectAttribute: getOptionValue(projectAttribute, enquiryDetails.attribute),
+    //             //year: getOptionValue(year, enquiryDetails.year)
+    //         }));
+    //     }
 
-    }, [formDataList]);
+    // }, [formDataList]);
+
 
     const defaultSla = formDataList?.slaTemplate?.[0]?.value ?? null;
     useEffect(() => {
@@ -130,42 +133,41 @@ const EnquiryDetails = () => {
         }
     }, [formDataList.slaTemplate, formDataList.enquiryDetails]);
 
-    useEffect(() => {
-        const GetData = async () => {
-            try {
-                if (id !== 0) {
-                    const data = await PostApi(Dashboard_API.GetDetails, {
-                        Enquiryid: id,
-                    });
-                    setFormDataList(prev => ({
-                        ...prev,
-                        clientInfo: data.enqClientinfo,
-                        enquiryDetails: data.enqProjectinfo
-                    }))
-                    // Update state
-                    setFormData(prev => ({
-                        ...prev,
-                        projectNo: data.enqProjectinfo.projectNo,
-                        estdeliveryDate: data.enqProjectinfo.estdate,
-                        briefReceivedDate: data.enqProjectinfo.briefdate,
-                        projectDescription: data.enqProjectinfo.projectDesc,
-                        projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
-                        year: getOptionValue(formDataList.year, data.enqProjectinfo.year),
-                        managementFeeType: data.enqProjectinfo.managementfeetypeId,
-                        hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
-                        projectAttribute: getOptionValue(formDataList.projectAttribute, data.enqProjectinfo.attribute),
-                        slaTemplate: data?.enqProjectinfo?.slaId,
-                    }));
-                    localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId);
-                }
-             } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
+    //useEffect(() => {
+    const GetData = async (response) => {
+        try {
+            if (id !== 0) {
+                const data = await PostApi(Dashboard_API.GetDetails, {
+                    Enquiryid: id,
+                });
+                setFormDataList(prev => ({
+                    ...prev,
+                    clientInfo: data.enqClientinfo,
+                    enquiryDetails: data.enqProjectinfo
+                }))
+                // Update state
+                setFormData(prev => ({
+                    ...prev,
+                    projectNo: data.enqProjectinfo.projectNo,
+                    estdeliveryDate: data.enqProjectinfo.estdate,
+                    briefReceivedDate: data.enqProjectinfo.briefdate,
+                    projectDescription: data.enqProjectinfo.projectDesc,
+                    projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
+                    year: getOptionValue(response.year, data.enqProjectinfo.year),
+                    managementFeeType: data.enqProjectinfo.managementfeetypeId,
+                    hybrid: getOptionValue(response.hybird, data.enqProjectinfo.hybridModel),
+                    projectAttribute: getOptionValue(response.projectAttribute, data.enqProjectinfo.attribute),
+                    slaTemplate: data?.enqProjectinfo?.slaId,
+                }));
+                localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId);
             }
-        };
-        GetData();
-    }, []);
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+    //}, []);
 
 
     const slaTemplate = async (sla) => {
