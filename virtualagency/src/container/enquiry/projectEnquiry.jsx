@@ -122,7 +122,7 @@ const ProjectEnquiry = () => {
                 enquiryDetails: response.enqProjectinfo,
                 suppliers: response.supplierinfo,
                 supplierMaster: supplierResponse,
-                statusInfo: [{ label: "Project Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }, { label: "Status", value: response.jobstatus || "-" }],
+                statusInfo: [{ label: "Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }],
                 extraInfo: [
                     { label: "Created Date", value: response.enqProjectinfo?.estdate || "-" },
                     { label: getLabel("lbl10"), value: userName || "-" },
@@ -432,8 +432,9 @@ const ProjectEnquiry = () => {
 
     const handleInputChange = (value, rowId, enquiryId, field) => {
         setSupplierRows(prev => {
-            const update = prev.map(item => item.rowId === rowId &&
-                item.enquiryId === enquiryId ? { ...item, [field]: value } : item);
+            const update = prev.map(item => item.rowId === rowId && item.enquiryId === enquiryId &&
+                !((field === "negQuote" && +value >= +item.initialQuote) || (field === "negUnitPrice" && +value >= +item.iniUnitPrice) || +value < 0)
+                ? { ...item, [field]: value } : item);
             setFormData(form => ({
                 ...form,
                 validateFlag: !update.every(x => x.initialQuote || x.iniUnitPrice)
@@ -573,18 +574,18 @@ const ProjectEnquiry = () => {
         if (flag === "rfq") {
             activeTab = "RFQ";
             setSupplierRows(prev => prev.map(item => {
-                    const iniUnitPrice = (+item.iniUnitPrice || (+item.initialQuote || 0) / 5);
-                    const negUnitPrice = (+item.negUnitPrice || (+item.negQuote || 0) / 5);
-                    return {
-                        ...item,
-                        iniUnitPrice: iniUnitPrice.toFixed(2),
-                        negUnitPrice: negUnitPrice.toFixed(2),
-                        initialQuote: (iniUnitPrice * 5).toFixed(2),
-                        negQuote: (negUnitPrice * 5).toFixed(2),
-                        negUnitPriceFee: (negUnitPrice + 0.01).toFixed(2),
-                        pmgSellPrice: ((negUnitPrice + 0.01) * 5).toFixed(2)
-                    };
-                })
+                const iniUnitPrice = (+item.iniUnitPrice || (+item.initialQuote || 0) / 5);
+                const negUnitPrice = (+item.negUnitPrice || (+item.negQuote || 0) / 5);
+                return {
+                    ...item,
+                    iniUnitPrice: iniUnitPrice.toFixed(2),
+                    negUnitPrice: negUnitPrice.toFixed(2),
+                    initialQuote: (iniUnitPrice * 5).toFixed(2),
+                    negQuote: (negUnitPrice * 5).toFixed(2),
+                    negUnitPriceFee: (negUnitPrice + 0.01).toFixed(2),
+                    pmgSellPrice: ((negUnitPrice + 0.01) * 5).toFixed(2)
+                };
+            })
             );
             handleCancel(null, flag)
             fetchData();
@@ -615,44 +616,50 @@ const ProjectEnquiry = () => {
     return (
         <>
             <Box sx={{ px: 1, py: 1 }}>
-                <PGrid container className="d-flex align-items-center justify-content-between mb-3">
-                    <PGrid item xs={12} md={6} sm={8}>
-                        {formDataList.statusInfo.map((item, i) => (
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }} key={i}>
-                                <PTypography
-                                    labelText={`${item.label} :`}
-                                    weight={FontWeight.bold}
-                                    color={CommonColors.yellow.dark}
-                                    flag={Labels.fontFlags.header}
-                                />
-
-                                <PTypography
-                                    labelText={`${item.value}`}
-                                    weight={FontWeight.bold}
-                                    color={CommonColors.grey.main}
-                                    flag={Labels.fontFlags.subHeader}
-                                />
-                            </Box>
-                        ))}
+                <PGrid container className={Labels.margin.mb1}>
+                    <PGrid item xs={12} md={12} sm={12}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, flexWrap: "wrap", p: 2 }}>
+                            {formDataList.statusInfo.map((item, i) => (
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }} key={i}>
+                                    <PTypography
+                                        labelText={`${item.label} :`}
+                                        weight={FontWeight.bold}
+                                        color={CommonColors.blue.main}
+                                        flag={Labels.fontFlags.header}
+                                    />
+                                    <PTypography
+                                        labelText={`${item.value}`}
+                                        weight={FontWeight.bold}
+                                        color={CommonColors.black.main}
+                                        flag={Labels.fontFlags.subHeader}
+                                    />
+                                </Box>
+                            ))}
+                        </Box>
                     </PGrid>
-                    <PGrid item xs={12} sm={6} md={4} className="d-flex justify-content-end gap-2" >
-                        <PDropdown
-                            name={"status"}
-                            value={formData.status}
-                            label={"Project status"}
-                            onChange={handleChange}
-                            options={formDataList.status}
-                            width={100}
-                            helperText={""}
-                        />
-                        <PButton
-                            label={getLabel("lbl40")}
-                            variant="contained"
-                            color={CommonColors.green.main}
-                            //onClick={(e) => handleSubmit(e, true)}
-                            width={150}
-                            height={45}
-                        />
+                </PGrid>
+
+                <PGrid container className={Labels.margin.mb3}>
+                    <PGrid item xs={12} md={12} sm={12}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap"}}>
+                            <PDropdown
+                                name={"status"}
+                                value={formData.status}
+                                label={"Project status"}
+                                onChange={handleChange}
+                                options={formDataList.status}
+                                width={27}
+                                helperText={""}
+                            />
+                            <PButton
+                                label={getLabel("lbl40")}
+                                variant="contained"
+                                color={CommonColors.green.main}
+                                //onClick={(e) => handleSubmit(e, true)}
+                                width={150}
+                                height={45}
+                            />
+                        </Box>
                     </PGrid>
                 </PGrid>
 
@@ -755,7 +762,7 @@ const ProjectEnquiry = () => {
                                                 onChange={handleChange}
                                                 width={100}
                                                 allowFuture
-                                                maxDate={ getLabel("lbl44") === item.label ? formData.estdeliveryDate : null }
+                                                maxDate={getLabel("lbl44") === item.label ? formData.estdeliveryDate : null}
                                             />
                                         ) : formData.job && item.label === getLabel("lbl45") ? (
                                             <PTextField
@@ -934,7 +941,6 @@ const ProjectEnquiry = () => {
                 )}
 
                 {formData.activeTab === "SLA" && (
-
                     <Box sx={{ px: 2, py: 2 }}>
                         <PGrid container className={Labels.margin.mb3}>
                             <PGrid item xs={12} sm={6} md={6}>

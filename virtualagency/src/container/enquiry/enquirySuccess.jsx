@@ -109,30 +109,35 @@ const EnquirySuccess = () => {
                     weight={FontWeight.bold}
                 />
             </PGrid>
+            <PGrid container className={Labels.margin.mb3}>
+                <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-center">
+                    <Card variant="outlined" sx={{ borderRadius: 3, p: 2, mb: 3 ,   width: "100%", maxWidth: "500px"}} >
+                        {data.map((item, index) => (
+                            <React.Fragment key={index}>
+                                <PGrid container className="align-items-center" sx={{ py: 1.5 }}>
+                                    <PGrid item xs={12} sm={12} md={1}>
+                                        {item.icon}
+                                    </PGrid>
+                                    <PGrid item xs={12} sm={12} md={6}>
+                                        <PTypography labelText={item.label} weight={FontWeight.bold} />
+                                    </PGrid>
 
-            <Card variant="outlined" sx={{ borderRadius: 3, p: 2, mb: 3 }} >
-                {data.map((item, index) => (
-                    <React.Fragment key={index}>
-                        <PGrid container className="align-items-center" sx={{ py: 1 }}>
-                            <PGrid item xs={12} sm={12} md={1}>
-                                {item.icon}
-                            </PGrid>
-                            <PGrid item xs={12} sm={12} md={3}>
-                                <PTypography labelText={item.label} weight={FontWeight.bold} />
-                            </PGrid>
+                                    <PGrid item xs={12} sm={12} md={5}>
+                                        <PTypography
+                                            labelText={item.value}
+                                            weight={FontWeight.bold}
+                                            color={CommonColors.grey.main}
+                                        />
+                                    </PGrid>
+                                </PGrid>
+                                {index !== data.length - 1 && <Divider sx={{ mb: 1 }} />}
+                            </React.Fragment>
+                        ))}
+                    </Card>
+                </PGrid>
+            </PGrid>
 
-                            <PGrid item xs={12} sm={12} md={8}>
-                                <PTypography
-                                    labelText={item.value}
-                                    weight={FontWeight.bold}
-                                    color={CommonColors.grey.main}
-                                />
-                            </PGrid>
-                        </PGrid>
-                        {index !== data.length - 1 && <Divider />}
-                    </React.Fragment>
-                ))}
-            </Card>
+
 
             {/* Info Box */}
             <Box
