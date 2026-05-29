@@ -408,6 +408,7 @@ const EnquiryDetails = () => {
                                         helperText={errors?.estdeliveryDate}
                                         width={100}
                                         allowFuture={true}
+                                        minDate={today}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>

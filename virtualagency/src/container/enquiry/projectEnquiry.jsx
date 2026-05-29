@@ -763,6 +763,7 @@ const ProjectEnquiry = () => {
                                                 width={100}
                                                 allowFuture
                                                 maxDate={getLabel("lbl44") === item.label ? formData.estdeliveryDate : null}
+                                                minDate={getLabel("lbl43") === item.label ? today : null}
                                             />
                                         ) : formData.job && item.label === getLabel("lbl45") ? (
                                             <PTextField
