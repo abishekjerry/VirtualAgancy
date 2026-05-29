@@ -192,6 +192,29 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
           }}
+          sx={{
+            ".MuiTablePagination-toolbar": {
+              px: 2,
+              justifyContent: "flex-end",
+              alignItems: "center",
+              minHeight: "48px",
+            },
+            ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+              fontSize: "13px",
+              color: "#64748b",
+              mb: 0,
+              mt: 0,
+            },
+            ".MuiTablePagination-select": {
+              paddingTop: "0px",
+              paddingBottom: "0px",
+            },
+            ".MuiTablePagination-actions": {
+              marginLeft: "8px",
+              display: "flex",
+              alignItems: "center",
+            },
+          }}
         />
       </Box>
     </Paper>

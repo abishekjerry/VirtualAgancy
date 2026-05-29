@@ -421,9 +421,9 @@ const LineItems = () => {
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
     const handleSubmit = async (e, isSubmit) => {
-        if (lineItems.length > 0) {
+        if (lineItems.length > 0 && isSubmit) {
             setAllowRedirect(false);
-            navigate(labelRoutes.suppliers, { state: { id: id }});
+            navigate(labelRoutes.suppliers, { state: { id: id } });
             return;
         }
         const isValid = LineItemsValidation();
@@ -502,6 +502,7 @@ const LineItems = () => {
                         });
                     }, 500);
                     if (!isSubmit) {
+                        await handleCancel();
                         await fetchData();
                     };
                 } else {
@@ -511,7 +512,6 @@ const LineItems = () => {
                     }));
                     toast(Labels.status.failure, response.data.message);
                 }
-
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -631,6 +631,53 @@ const LineItems = () => {
         setCurrentIndex(index);
         setPreviewOpen(true);
     };
+
+    const handleCancel = () => {
+        setFormData((prev) => ({
+            ...prev,
+            category: "",
+            typeOfJob: "",
+            competitiveBiddingMandatory: "",
+            competitiveBiddingCompliant: "",
+            competitiveBiddingExceptionFormSigned: "",
+            exceptionsReasonCode: "",
+            itemCategory: "",
+            subCategory: "",
+            simplex: "",
+            tcoApprovalRequired: "",
+            tcoApproved: "",
+            dictatedJob: "",
+            itemType: "",
+            itemName: "",
+            itemNameDescription: "",
+
+            recycledMaterialWeightKg: "",
+
+            // Catalogue Section
+            ratecardCatalogueItemDeclined: "",
+            globalOrderWindowCatalogueName: "",
+            regionalOrderWindowCatalogue: "",
+            localCatalogueName: "",
+            competitiveBiddingWinningSupplierCost: "",
+            printingMethod: "",
+            typeOfItem: "",
+            noOfMaterials: "",
+            sourcingLocation: "",
+            savingsType: "",
+            savingsReason: "",
+
+            // Specifications
+            specifications: "",
+            notesComments: "",
+
+            // Quantity
+            quantityType: "",
+            quantity: "",
+            length: "",
+            width: "",
+            depth: "",
+        }))
+    }
 
     return (
         <>
