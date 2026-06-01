@@ -102,16 +102,18 @@ const EnquirySuccess = () => {
 
             {/* Job Summary */}
             <PGrid container className={Labels.margin.mb3}>
-                <PTypography
-                    labelText={"Job Summary"}
-                    flag={Labels.fontFlags.subHeader}
-                    color={CommonColors.black.main}
-                    weight={FontWeight.bold}
-                />
+                <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-center">
+                    <PTypography
+                        labelText={"Job Summary"}
+                        flag={Labels.fontFlags.header}
+                        color={CommonColors.black.main}
+                        weight={FontWeight.bold}
+                    />
+                </PGrid>
             </PGrid>
             <PGrid container className={Labels.margin.mb3}>
                 <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-center">
-                    <Card variant="outlined" sx={{ borderRadius: 3, p: 2, mb: 3 ,   width: "100%", maxWidth: "500px"}} >
+                    <Card variant="outlined" sx={{ borderRadius: 3, p: 2, mb: 3, width: "100%", maxWidth: "500px" }} >
                         {data.map((item, index) => (
                             <React.Fragment key={index}>
                                 <PGrid container className="align-items-center" sx={{ py: 1.5 }}>

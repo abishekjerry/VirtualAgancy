@@ -456,8 +456,8 @@ const LineItems = () => {
                     // ✅ Sustainability
                     usingFSCMaterial: getOptionLabel(formDataList.yesNoNa, formData.fscOrPefcMaterial),
                     OEKOTEXCertification: getOptionLabel(formDataList.yesNoNa, formData.taxCertification),
-                    Recycled: getOptionLabel(formDataList.yesNoNa, formData.recyclable),
-                    SustainableOptionthatwasrejected: getOptionLabel(formDataList.soYesNoNa, formData.sustainabilityOption),
+                    designedforrecycling: getOptionLabel(formDataList.yesNoNa, formData.recyclable),
+                    proposedwithsustainabilityoption: getOptionLabel(formDataList.soYesNoNa, formData.sustainabilityOption),
                     WasthisitemdesignedtoreducedPlastic: getOptionLabel(formDataList.yesNoNa, formData.containsPlastic),
                     Isthisitemdesignedtobereused: getOptionLabel(formDataList.yesNoNa, formData.designedToBeReused),
                     containrecycledmaterial: getOptionLabel(formDataList.yesNoNa, formData.recycledMaterial),
@@ -503,7 +503,6 @@ const LineItems = () => {
                         });
                     }, 500);
                     if (!isSubmit) {
-                        console.log("dsjfhbwjsmfhb");
                         await handleCancel();
                         await fetchData();
                     };
@@ -670,6 +669,7 @@ const LineItems = () => {
             localCatalogueName: "",
             competitiveBiddingWinningSupplierCost: "",
             printingMethod: "",
+            harmonizedOrder : 2,
             typeOfItem: "",
             noOfMaterials: "",
             sourcingLocation: "",
