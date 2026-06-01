@@ -124,10 +124,12 @@ const EnquiryDetails = () => {
         if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
             const slaId = formDataList?.enquiryDetails?.slaId ?? defaultSla;
             const hybrid = formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
+            const managementfeetypeId = formDataList?.enquiryDetails?.managementfeetypeId ? data.enqProjectinfo.managementfeetypeId : 8;
             setFormData(prev => ({
                 ...prev,
                 slaTemplate: slaId,
                 hybrid: hybrid,
+                managementFeeType : managementfeetypeId
             }));
             slaTemplate(slaId);
         }
@@ -155,7 +157,7 @@ const EnquiryDetails = () => {
                     projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
                     year: getOptionValue(response.year, data.enqProjectinfo.year),
                     managementFeeType: data.enqProjectinfo.managementfeetypeId,
-                    hybrid: getOptionValue(response.hybird, data.enqProjectinfo.hybridModel),
+                    hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
                     projectAttribute: getOptionValue(response.projectAttribute, data.enqProjectinfo.attribute),
                     slaTemplate: data?.enqProjectinfo?.slaId,
                 }));

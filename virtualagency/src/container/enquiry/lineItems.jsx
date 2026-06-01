@@ -207,7 +207,7 @@ const LineItems = () => {
         enquiryId: item.enquiryId,
         items: item.items,
     }));
-    console.log(lineItems.length, rawLineItems, "lineItems");
+
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
     const fetchData = async () => {
         try {
@@ -426,6 +426,7 @@ const LineItems = () => {
             navigate(labelRoutes.suppliers, { state: { id: id } });
             return;
         }
+
         const isValid = LineItemsValidation();
         if (isValid) {
             try {
@@ -502,6 +503,7 @@ const LineItems = () => {
                         });
                     }, 500);
                     if (!isSubmit) {
+                        console.log("dsjfhbwjsmfhb");
                         await handleCancel();
                         await fetchData();
                     };
@@ -561,8 +563,8 @@ const LineItems = () => {
             Labels.lineItems.designedToBeReused,
             Labels.lineItems.containsPlastic,
             Labels.lineItems.containsRecycledPlastic,
-            Labels.lineItems.recycledMaterialWeightKg,
-            // formData.recycledMaterial == 1 ? Labels.lineItems.recycledMaterialWeightKg : "",
+            //Labels.lineItems.recycledMaterialWeightKg,
+            formData.recycledMaterial == 1 ? Labels.lineItems.recycledMaterialWeightKg : null,
 
             // Catalogue Section
             Labels.lineItems.ratecardCatalogueItemDeclined,
@@ -594,7 +596,7 @@ const LineItems = () => {
             { field: Labels.lineItems.length, visible: [2, 3] },
             { field: Labels.lineItems.width, visible: [2, 3] },
             { field: Labels.lineItems.depth, visible: [3] },
-            { field: Labels.lineItems.incoterm, visible: [3] }
+            { field: Labels.lineItems.incoterm, visible: [3] },
         ];
 
         let newErrors = {};
@@ -651,6 +653,14 @@ const LineItems = () => {
             itemName: "",
             itemNameDescription: "",
 
+            fscOrPefcMaterial: "",
+            taxCertification: "",
+            recyclable: "",
+            sustainabilityOption: "",
+            recycledMaterial: "",
+            designedToBeReused: "",
+            containsPlastic: "",
+            containsRecycledPlastic: "",
             recycledMaterialWeightKg: "",
 
             // Catalogue Section
@@ -1016,7 +1026,7 @@ const LineItems = () => {
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
                                         label={`${getLabel("lbl79")} ${Labels.symbols.required} ${Labels.symbols.optional}`}
-                                        value={formData.recycledMaterialWeightKg}
+                                        value={formData.recycledMaterial == 1 ? formData.recycledMaterialWeightKg : ""}
                                         onChange={handleChange}
                                         helperText={formData.recycledMaterial == 1 ? errors?.recycledMaterialWeightKg : ""}
                                         name={Labels.lineItems.recycledMaterialWeightKg}
