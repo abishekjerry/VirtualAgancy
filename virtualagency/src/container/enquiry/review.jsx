@@ -83,8 +83,6 @@ const Review = () => {
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
 
-    console.log(lineItems,"fashkfjkn");
-
     const handleOpen = (data = {}) => {
         setFormData(data);
         setOpenUpdateLineItems(true);

@@ -7,6 +7,7 @@ export const PostApi = (url, data = "", isDashboard = false) => {
 
   return fetch(url.toString(), {
     method: "POST",
+    withCredentials: true,
     headers: {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
