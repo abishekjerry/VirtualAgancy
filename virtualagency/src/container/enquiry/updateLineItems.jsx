@@ -13,7 +13,7 @@ import PDropdown from "../../component/PDropdown/PDropdown";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) => {
+const UpdateLineItems = ({ open, onClose, data = {}, step, refreshSummary }) => {
     const { getLabel } = useLanguage();
     const { state } = useLocation();
     const navigate = useNavigate();
@@ -43,11 +43,17 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
         yesNoNa: [{ label: "Yes", value: 1 }, { label: "No", value: 2 }, { label: "N/A", value: 3, selected: true }],
     });
 
-    const LineItemsMaster = async (data) => {
+    useEffect(() => {
+        if (open && data?.printornonprint) {
+            LineItemsMaster(data.printornonprint);
+        }
+    }, [open, data]);
+
+    const LineItemsMaster = async (typeOfJob) => {
         try {
-            setLoading(false);
+            setLoading(true);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
-                TypeOfJob: data
+                TypeOfJob: typeOfJob
             });
             setFormDataList(prev => ({
                 ...prev,
@@ -56,7 +62,22 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
                 sourcingLocation: response.sourcingLocation,
                 printingMethod: response.printingMethod,
             }));
-
+            setFormData(prev => ({
+                ...prev,
+                itemName: data.itemName,
+                itemNameDescription: data.itemDescription,
+                noOfVersion: data.version,
+                specifications: data.specNote,
+                notesComments: data.sNote,
+                sourcingLocation: getOptionValue(response.sourcingLocation, data.sourcinglocation),
+                printingMethod: getOptionValue(response.printingMethod, data.printingMethod),
+                globalOrderWindowCatalogueName: getOptionValue(response.globalOrder, data.promoOSSOrderWindows),
+                localCatalogueName: getOptionValue(response.localCatalog, data.catalogueUsage),
+                digitalInnovation: getOptionValue(formDataList.yesNoNa, data.digitalInnovation),
+                innovation: getOptionValue(formDataList.yesNoNa, data.innovation),
+                quantity: data.quoteQtyOrSize,
+                enquiryId: data.enqdetailsId
+            }));
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
@@ -78,44 +99,6 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
         specifications: "",
         notesComments: ""
     });
-
-    // ✅ Load data when popup opens
-
-    useEffect(() => {
-        const category = getOptionValue(data.items, "Category");
-        isNotEmpty(category) ? LineItemsMaster(category) : null
-        const printingMethod = getOptionValue(data.items, "Printing Method");
-        const itemName = getOptionValue(data.items, "Item Name");
-        const itemNameDescription = getOptionValue(data.items, "Item Name Description");
-        const noOfVersion = getOptionValue(data.items, "No.of.version");
-        const specifications = getOptionValue(data.items, "Specifications");
-        const notesComments = getOptionValue(data.items, "Notes/Comments");
-        const digitalInnovation = getOptionValue(data.items, "Digital Innovation");
-        const innovation = getOptionValue(data.items, "Innovation");
-        const sourcingLocation = getOptionValue(data.items, "Sourcing Location");
-        const globalOrderWindowCatalogueName = getOptionValue(data.items, "Global Order Window Catalogue Name");
-        const localCatalogueName = getOptionValue(data.items, "Local Catalogue Name");
-        const quantity = getOptionValue(data.items, "Quantity");
-        if (!formDataList.printingMethod?.length || !formDataList.sourcingLocation?.length) return;
-        if (open && data) {
-            setFormData(prev => ({
-                ...prev,
-                itemName: itemName,
-                itemNameDescription: itemNameDescription,
-                noOfVersion: noOfVersion,
-                specifications: specifications,
-                notesComments: notesComments,
-                sourcingLocation: getOptionValue(formDataList.sourcingLocation, sourcingLocation),
-                globalOrderWindowCatalogueName: getOptionValue(formDataList.globalOrder, globalOrderWindowCatalogueName),
-                localCatalogueName: getOptionValue(formDataList.localCatalog, localCatalogueName),
-                digitalInnovation: getOptionValue(formDataList.yesNoNa, digitalInnovation),
-                innovation: getOptionValue(formDataList.yesNoNa, innovation),
-                printingMethod: getOptionValue(formDataList.printingMethod, printingMethod),
-                quantity: quantity,
-                enquiryId: data.enquiryId,
-            }));
-        }
-    }, [open, data]);
 
     const fieldConfig = {
         [Labels.lineItems.noOfVersion]: { type: "number" },
@@ -217,7 +200,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
 
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } 
+            }
         } else {
             setAllowRedirect(false);
         }
@@ -248,6 +231,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step , refreshSummary }) =>
                         onClick={handleSubmit}
                         color={CommonColors.green.main}
                         width={120}
+                        disabled={loading}
                     />
                 </PGrid >
             }

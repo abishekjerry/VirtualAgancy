@@ -83,13 +83,16 @@ const Review = () => {
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails);
     const lineItems = getLineneItems({}, {}, getLabel, getOptionLabel, formDataList.lineItems);
 
+    console.log(lineItems,"fashkfjkn");
+
     const handleOpen = (data = {}) => {
         setFormData(data);
         setOpenUpdateLineItems(true);
     };
-    const handleEdit = (step, item = null) => {
-        if (step === 3 && item != null) {
-            handleOpen(item);
+    const handleEdit = (step, enquiryId = null) => {
+        const data = formDataList.lineItems.find(item => item.enqdetailsId === enquiryId);
+        if (step === 3 && data) {
+            handleOpen(data);
             return;
         }
         const routeMap = {
@@ -207,7 +210,7 @@ const Review = () => {
                                                 size="small"
                                                 startIcon={<EditIcon />}
                                                 onClick={(e) => {
-                                                    e.stopPropagation(), handleEdit(3, item)
+                                                    e.stopPropagation(), handleEdit(3, item.enquiryId)
                                                 }}
                                                 sx={{
                                                     color: "#fff",

@@ -809,7 +809,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={`${Labels.margin.mb3} ${"p-2"}`}>
                             <PGrid item xs={12} sm={12} md={12}>
-                                <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} showFlag={false} />
+                                <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} showFlag={false} lineItems = {formDataList.lineItems}/>
                             </PGrid>
                         </PGrid>
 

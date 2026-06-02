@@ -17,7 +17,7 @@ import { isSuccess, toast } from "../../utils/commonFunction/common";
 import { LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 
-export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, duplicate = false, showFlag = true }) => {
+export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, duplicate = false, showFlag = true , lineItems = [] }) => {
     const { state } = useLocation();
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(currentStep);
@@ -34,9 +34,10 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
         (section) => section.step <= currentStep
     );
 
-    const handleEdit = (step, item = null) => {
-        if (step === 3) {
-            handleOpen(item);
+    const handleEdit = (step, enquiryId = null) => {
+        const data = lineItems.find(item => item.enqdetailsId === enquiryId);
+        if (step === 3 && data) {
+            handleOpen(data);
             return;
         }
         const routeMap = {
@@ -193,7 +194,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
                                                                             color={CommonColors.grey.main}
                                                                             startIcon={<EditIcon />}
                                                                             width={90}
-                                                                            onClick={() => handleEdit(section.step, item)}
+                                                                            onClick={() => handleEdit(section.step, item.enquiryId)}
                                                                         />
                                                                         {duplicate &&
                                                                             <PButton

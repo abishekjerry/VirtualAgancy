@@ -1574,7 +1574,7 @@ const LineItems = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} duplicate={true} />
+                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} duplicate={true} lineItems = {formDataList.lineItems}/>
                     </PGrid>
                 </PGrid>
             </Box>
