@@ -121,7 +121,7 @@ export const Labels = {
     files: "files"
   },
 
-  suppiers: {
+  suppliers: {
     required: "Please select at least one supplier to proceed."
   },
 

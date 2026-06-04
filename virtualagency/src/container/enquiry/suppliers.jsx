@@ -97,7 +97,7 @@ const Suppliers = () => {
             setFormDataList(prev => ({
                 ...prev,
                 selectedRows: formDataList.supplier.map(item => ({
-                    supplierId: item.supplierID
+                    supplierId: item.supplierID , suppliername : item.suppliername
                 }))
             }));
         }
@@ -142,7 +142,7 @@ const Suppliers = () => {
         enquiryId: item.enquiryId,
         items: item.items
     }));
-    const suppliers = getSuppliers(formDataList.suppiers, formDataList.supplier)
+    const suppliers = getSuppliers(formDataList.suppliers, formDataList.selectedRows)
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel });
 
 
@@ -268,7 +268,7 @@ const Suppliers = () => {
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12}>
                                         <PTypography
-                                            labelText={Labels.suppiers.required}
+                                            labelText={Labels.suppliers.required}
                                             flag={Labels.fontFlags.smallText}
                                             color={CommonColors.red.main}
                                             weight={FontWeight.bold}

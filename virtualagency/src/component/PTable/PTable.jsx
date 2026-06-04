@@ -14,7 +14,7 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false }) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false , showHeader = true, showPagination = true}) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -31,7 +31,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       const exists = selectedRows.some(item => item.supplierId === row.supplierId);
       update = exists
         ? selectedRows.filter(item => item.supplierId !== row.supplierId)
-        : [...selectedRows, { supplierId: row.supplierId }];
+        : [...selectedRows, { supplierId: row.supplierId , suppliername : row.suppliername}];
     }
     onValidationChange?.(update);
   };
@@ -155,15 +155,17 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       <TableContainer>
         <Table>
           {/* HEADER */}
-          <TableHead>
-            <TableRow sx={{ background: "#f8fafc" }}>
-              {columns.map((col, i) => (
-                <TableCell key={i} sx={{ fontWeight: 500, fontSize: Labels.fontSize.xs, color: CommonColors.pTable.violet, py: 2, textWrap: Labels.rap.nowrap }}>
-                  {col.header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
+          {showHeader && (
+            <TableHead>
+              <TableRow sx={{ background: "#f8fafc" }}>
+                {columns.map((col, i) => (
+                  <TableCell key={i} sx={{ fontWeight: 500, fontSize: Labels.fontSize.xs, color: CommonColors.pTable.violet, py: 2, textWrap: Labels.rap.nowrap }}>
+                    {col.header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+          )}
 
           {/* BODY */}
           <TableBody>
@@ -181,42 +183,44 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       </TableContainer>
 
       {/* PAGINATION */}
-      <Box sx={{ borderTop: "1px solid #e2e8f0" }}>
-        <TablePagination
-          component="div"
-          count={filteredRows.length}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={(e, p) => setPage(p)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          sx={{
-            ".MuiTablePagination-toolbar": {
-              px: 2,
-              justifyContent: "flex-end",
-              alignItems: "center",
-              minHeight: "48px",
-            },
-            ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
-              fontSize: "13px",
-              color: "#64748b",
-              mb: 0,
-              mt: 0,
-            },
-            ".MuiTablePagination-select": {
-              paddingTop: "0px",
-              paddingBottom: "0px",
-            },
-            ".MuiTablePagination-actions": {
-              marginLeft: "8px",
-              display: "flex",
-              alignItems: "center",
-            },
-          }}
-        />
-      </Box>
+      {showPagination && (
+        <Box sx={{ borderTop: "1px solid #e2e8f0" }}>
+          <TablePagination
+            component="div"
+            count={filteredRows.length}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={(e, p) => setPage(p)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            sx={{
+              ".MuiTablePagination-toolbar": {
+                px: 2,
+                justifyContent: "flex-end",
+                alignItems: "center",
+                minHeight: "48px",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+                fontSize: "13px",
+                color: "#64748b",
+                mb: 0,
+                mt: 0,
+              },
+              ".MuiTablePagination-select": {
+                paddingTop: "0px",
+                paddingBottom: "0px",
+              },
+              ".MuiTablePagination-actions": {
+                marginLeft: "8px",
+                display: "flex",
+                alignItems: "center",
+              },
+            }}
+          />
+        </Box>
+      )}
     </Paper>
   );
 };

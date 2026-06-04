@@ -6,7 +6,7 @@ import {
     Grid,
     Button,
     Divider,
-    Avatar
+    Avatar, Tooltip
 } from "@mui/material";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -26,7 +26,7 @@ import { useLanguage } from "../../utils/constants/language";
 import { useLocation, useNavigate } from "react-router-dom";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
-import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, Suppliers_API } from "../../utils/api/apiUrl";
+import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, LineItems_API, Suppliers_API } from "../../utils/api/apiUrl";
 import { formatDate, getOptionLabel, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { PSummary } from "../../component/PSumary/PSummary";
 import PTable from "../../component/PTable/PTable";
@@ -36,6 +36,14 @@ import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import PDialog from "../../component/PDialog/PDialog";
 import PSearch from "../../component/PSearch/PSearch";
 import { PiArrowSquareUpLeftLight } from "react-icons/pi";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import SavingsIcon from "@mui/icons-material/Savings";
+import PriceChangeIcon from "@mui/icons-material/PriceChange";
+import HistoryIcon from "@mui/icons-material/History";
+
 
 const ProjectEnquiry = () => {
     const { state } = useLocation();
@@ -57,7 +65,7 @@ const ProjectEnquiry = () => {
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     //State & list states
     const [formData, setFormData] = useState({
-        activeTab: "Job summary",
+        activeTab: "Job Summary",
         status: "",
         sla: false,
         rfq: false,
@@ -67,6 +75,7 @@ const ProjectEnquiry = () => {
         calculateFlag: false,
         validateFlag: false,
         marginFlag: false,
+        project: false,
         isCalculate: true,
         quote: "",
         search: "",
@@ -76,7 +85,11 @@ const ProjectEnquiry = () => {
         projectNo: "",
         estdeliveryDate: "",
         briefReceivedDate: "",
-        projectDescription: ""
+        projectDescription: "",
+        managementFee: "",
+        savingsType: "",
+        savingsReason: ""
+
     });
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
@@ -84,9 +97,13 @@ const ProjectEnquiry = () => {
         enquiryDetails: [],
         suppliers: [],
         clientContact: [],
+        savingsType: [],
+        savingsReason: [],
         status: [{ label: "Job Cancelled", value: 1 }],
         data: [],
-        tabs: ["Job summary", "Line items", "RFQ", "SLA", "Revised Quotes", "Logs"],
+        tabs: [{ label: "Job Summary", icon: <WorkOutlineIcon /> }, { label: "Line Items", icon: <Inventory2Icon /> },
+        { label: "RFQ", icon: <RequestQuoteIcon /> }, { label: "Project Saving", icon: <SavingsIcon /> }, { label: "SLA", icon: <HandshakeIcon /> },
+        { label: "Revised Quotes", icon: <PriceChangeIcon /> }, { label: "Logs", icon: <HistoryIcon /> }],
         columns: [{ field: "suppliername", header: "Supplier's Name" }, { field: "country", header: "Country" }, { field: "suppliercode", header: "Supplier Code" },],
         supplierMaster: [],
         selectedRows: [],
@@ -97,7 +114,17 @@ const ProjectEnquiry = () => {
         ],
         selectedSupplierRows: [],
         extraInfo: [],
-        calculateRowsData: []
+        calculateRowsData: [],
+        //project savings list
+
+        projectSavingsColumns: [{ field: "previousPoNumber", header: "Previous PO Number" }, { field: "savingsReason", header: "Savings Reason" }, { field: "baselineQuantity", header: "Baseline Quantity" },
+        { field: "savingsReferencePrice", header: "Savings Reference Price ($)" }, { field: "currentSellPriceExclFee", header: "Current PMG Sell Price (Excl. Fee)" }, { field: "currentSellPriceInclFee", header: "Current PMG Sell Price (Incl. Fee)" }],
+        savingsSummaryColumns: [{ field: "savingsInclFee", header: "Savings (Inc. Fee)" }, { field: "savingsPercentInclFee", header: "Savings % (Inc. Fee)" },
+        { field: "savingsExclFee", header: "Savings (Excl. Fee)" }, { field: "savingsPercentExclFee", header: "Savings % (Excl. Fee)" }],
+        savingsCalculateColumns: [{ field: "label" }, { field: "value" }],
+        savingsCalculateData: [{ label: "Savings Reference Price", value: "0" }, { label: "Total PMG Sell Price (inc.fee)", value: "1,013.70" },
+        { label: "Savings ($)", value: "0" }, { label: "Savings %", value: "0 %" }],
+        savingsReasonData: []
     });
 
     //Master function
@@ -109,6 +136,9 @@ const ProjectEnquiry = () => {
             setLoading(true);
             const response = await PostApi(Dashboard_API.GetDetails, {
                 Enquiryid: id,
+            });
+            const enqResponse = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
+                TypeOfJob: response.enqlineItems[0].printornonprint,
             });
             const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
                 currency: currency,
@@ -122,12 +152,15 @@ const ProjectEnquiry = () => {
                 enquiryDetails: response.enqProjectinfo,
                 suppliers: response.supplierinfo,
                 supplierMaster: supplierResponse,
+                savingsType: enqResponse.savingsType,
                 statusInfo: [{ label: "Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }],
                 extraInfo: [
                     { label: "Created Date", value: response.enqProjectinfo?.estdate || "-" },
                     { label: getLabel("lbl10"), value: userName || "-" },
                     { label: "Enquiry Id", value: response.enqClientinfo?.enqUId || "-" }
-                ]
+                ],
+                savingsReasonData: [{ item: "All items", savingType: response.enqlineItems[0].savingstype, savingReason: response.enqlineItems[0].savingsreason }]
+
             }));
             setFormData(prev => ({
                 ...prev,
@@ -149,6 +182,28 @@ const ProjectEnquiry = () => {
             ...prev,
             [name]: value
         }));
+        if (name === Labels.lineItems.savingsType) {
+            SavingsReasonMaster(label);
+        }
+    };
+
+    const SavingsReasonMaster = async (data) => {
+        try {
+            setLoading(false);
+            const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
+                TypeOfJob: formDataList.lineItems[0].printornonprint,
+                Savingstype: data,
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                savingsReason: response.savingsReason,
+            }));
+
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const quotes = [
@@ -415,6 +470,8 @@ const ProjectEnquiry = () => {
             />
         )
     });
+
+
     useEffect(() => {
         if (supplierRows.length === 0) {
             let count = 0;
@@ -477,6 +534,34 @@ const ProjectEnquiry = () => {
         { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
 
+    const savingsReasonColumns = [{ field: "item", header: "Item" },
+    {
+        field: "savingType", header: "Savings Type",
+        render: (row) =>
+            formData.project ? (
+                <PDropdown
+                    //label={`${getLabel("lbl117")}`}
+                    value={formData.savingsType}
+                    onChange={handleChange}
+                    //helperText={errors?.savingsType}
+                    name={Labels.lineItems.savingsType}
+                    options={formDataList.savingsType}
+                    flag={Labels.flag.auto}
+                />) : row.savingType
+    }, {
+        field: "savingReason", header: "Savings Reason", render: (row) =>
+            formData.project ? (
+                <PDropdown
+                    //label={`${getLabel("lbl118")}`}
+                    value={formData.savingsReason}
+                    onChange={handleChange}
+                    //helperText={errors?.savingsReason}
+                    name={Labels.lineItems.savingsReason}
+                    options={formDataList.savingsReason}
+                    flag={Labels.flag.auto}
+                />) : row.savingReason
+    }];
+
     //Action button function
     const renderActionButtons = (flag) => (
         formData[flag] ? (
@@ -533,6 +618,7 @@ const ProjectEnquiry = () => {
 
 
     const handleSubmit = async (e, flag) => {
+        console.log(flag, "kjwhfkwhk");
         let activeTab = "";
         let requests = [];
         const clientInfo = {
@@ -590,6 +676,26 @@ const ProjectEnquiry = () => {
             handleCancel(null, flag)
             fetchData();
         }
+        if (flag === "line") {
+            activeTab = "Line items";
+            handleCancel(null, flag)
+            fetchData();
+        }
+        if (flag == "project") {
+            activeTab = "Project Savings";
+            setFormDataList(prev => ({
+                ...prev,
+                savingsReasonData: [
+                    {
+                        item: "All items",
+                        savingType: getOptionLabel(formDataList.savingsType, formData.savingsType),
+                        savingReason: getOptionLabel(formDataList.savingsReason, formData.savingsReason)
+                    }
+                ]
+            }));
+            handleCancel(null, flag)
+            //fetchData();
+        }
         if (flag === "sla" || flag === "job") {
             try {
                 setLoading(true);
@@ -641,7 +747,7 @@ const ProjectEnquiry = () => {
 
                 <PGrid container className={Labels.margin.mb3}>
                     <PGrid item xs={12} md={12} sm={12}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap"}}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
                             <PDropdown
                                 name={"status"}
                                 value={formData.status}
@@ -665,25 +771,28 @@ const ProjectEnquiry = () => {
 
                 <PGrid container className={Labels.margin.mb1}>
                     <PGrid item xs={12} sm={6} md={12}>
-                        <Box sx={{ background: "#e6f7ed", borderRadius: 2, p: 0, mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
-                            {formDataList.tabs.map((tab, i) => (
-                                <PGrid item xs={12} sm={6} md={2} key={i}>
-                                    <span className={`d-block text-center p-2 ${formData.activeTab === tab ? "fw-bold text-primary" : "text-muted"}`}
-                                        style={{ cursor: "pointer" }} onClick={() =>
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                activeTab: tab
-                                            }))
-                                        }>
-                                        {tab}
-                                    </span>
-                                </PGrid>
+                        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap", mb: 3 }}>
+                            {formDataList.tabs.map((tab) => (
+                                <Tooltip title={tab.label} key={tab.label}>
+                                    <Box key={tab.label} onClick={() => setFormData(prev => ({ ...prev, activeTab: tab.label }))}
+                                        sx={{
+                                            width: 50, height: 50, borderRadius: "50%", cursor: "pointer",
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            bgcolor: formData.activeTab === tab.label ? "#32d74b" : "#f1f5f9",
+                                            color: formData.activeTab === tab.label ? "#fff" : "#64748b",
+                                            boxShadow: formData.activeTab === tab.label ? "0 4px 12px rgba(50,215,75,.4)" : "none",
+                                            transition: "0.3s", "&:hover": { transform: "scale(1.05)", }
+                                        }}
+                                    >
+                                        {tab.icon}
+                                    </Box>
+                                </Tooltip>
                             ))}
                         </Box>
                     </PGrid>
                 </PGrid>
 
-                {formData.activeTab === "Job summary" && (
+                {formData.activeTab === "Job Summary" && (
                     <PCard className={Labels.margin.mb3}>
                         <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                             <PGrid item xs={12} sm={6} md={6}>
@@ -794,7 +903,7 @@ const ProjectEnquiry = () => {
                     </PCard>
                 )}
 
-                {formData.activeTab === "Line items" && (
+                {formData.activeTab === "Line Items" && (
                     <PCard >
                         <PGrid container className={Labels.margin.mb3}>
                             <PGrid item xs={12} sm={6} md={6}>
@@ -809,7 +918,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={`${Labels.margin.mb3} ${"p-2"}`}>
                             <PGrid item xs={12} sm={12} md={12}>
-                                <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} showFlag={false} lineItems = {formDataList.lineItems}/>
+                                <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} showFlag={false} lineItems={formDataList.lineItems} />
                             </PGrid>
                         </PGrid>
 
@@ -836,12 +945,13 @@ const ProjectEnquiry = () => {
                                     />
                                     {formData.line ? (
                                         <PTextField
-                                            value={"9.00"}
+                                            name="managementFee"
+                                            value={formData.managementFee}
                                             onChange={handleChange}
                                         />
                                     ) : (
                                         <PTypography
-                                            labelText={"9.00"}
+                                            labelText={formData.managementFee}
                                             color={CommonColors.grey.main}
                                             weight={FontWeight.bold}
                                         />
@@ -940,6 +1050,60 @@ const ProjectEnquiry = () => {
                         ) : (<></>)}
                     </PCard>
                 )}
+
+                {formData.activeTab === "Project Saving" && (
+                    <PCard className={Labels.margin.mb3}>
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={6}>
+                                <PTypography
+                                    labelText={"Project Saving"}
+                                    flag={Labels.fontFlags.subHeader}
+                                    color={CommonColors.blue.main}
+                                    weight={FontWeight.bold}
+                                />
+                            </PGrid>
+                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
+                                {renderActionButtons("project")}
+                            </PGrid>
+                        </PGrid>
+
+                        <Divider sx={{ mb: 2 }} />
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={savingsReasonColumns} rows={formDataList.savingsReasonData} />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                <PButton
+                                    label={"Input Project Savings"}
+                                    variant="contained"
+                                    color={CommonColors.grey.main}
+                                    //onClick={() => handleCalculate(null, "calculate")}
+                                    width={250}
+
+                                />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={formDataList.projectSavingsColumns} rows={formDataList.data} />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.data} />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={6} ></PGrid>
+                            <PGrid item xs={12} sm={6} md={6} >
+                                <PTable columns={formDataList.savingsCalculateColumns} rows={formDataList.savingsCalculateData} showHeader={false} showPagination={false} />
+                            </PGrid>
+                        </PGrid>
+                    </PCard>
+                )}
+
 
                 {formData.activeTab === "SLA" && (
                     <Box sx={{ px: 2, py: 2 }}>

@@ -562,9 +562,8 @@ const LineItems = () => {
             Labels.lineItems.designedToBeReused,
             Labels.lineItems.containsPlastic,
             Labels.lineItems.containsRecycledPlastic,
-            //Labels.lineItems.recycledMaterialWeightKg,
-            formData.recycledMaterial == 1 ? Labels.lineItems.recycledMaterialWeightKg : null,
-
+            ...(formData.recycledMaterial == 1 ? [Labels.lineItems.recycledMaterialWeightKg] : []),
+            
             // Catalogue Section
             Labels.lineItems.ratecardCatalogueItemDeclined,
             Labels.lineItems.globalOrderWindowCatalogueName,
@@ -669,7 +668,7 @@ const LineItems = () => {
             localCatalogueName: "",
             competitiveBiddingWinningSupplierCost: "",
             printingMethod: "",
-            harmonizedOrder : 2,
+            harmonizedOrder: 2,
             typeOfItem: "",
             noOfMaterials: "",
             sourcingLocation: "",
@@ -1574,7 +1573,7 @@ const LineItems = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} duplicate={true} lineItems = {formDataList.lineItems}/>
+                        <PSummary sections={sections} currentStep={3} refreshSummary={fetchData} duplicate={true} lineItems={formDataList.lineItems} />
                     </PGrid>
                 </PGrid>
             </Box>
