@@ -540,10 +540,8 @@ const ProjectEnquiry = () => {
         render: (row) =>
             formData.project ? (
                 <PDropdown
-                    //label={`${getLabel("lbl117")}`}
                     value={formData.savingsType}
                     onChange={handleChange}
-                    //helperText={errors?.savingsType}
                     name={Labels.lineItems.savingsType}
                     options={formDataList.savingsType}
                     flag={Labels.flag.auto}
@@ -552,10 +550,8 @@ const ProjectEnquiry = () => {
         field: "savingReason", header: "Savings Reason", render: (row) =>
             formData.project ? (
                 <PDropdown
-                    //label={`${getLabel("lbl118")}`}
                     value={formData.savingsReason}
                     onChange={handleChange}
-                    //helperText={errors?.savingsReason}
                     name={Labels.lineItems.savingsReason}
                     options={formDataList.savingsReason}
                     flag={Labels.flag.auto}

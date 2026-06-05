@@ -17,7 +17,7 @@ import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
 import PTextField from "../../component/PTextField/PTextField";
-import { allowDecimal, allowOnlyNumbers, getEnquirySteps, getOptionLabel, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
+import { allowDecimal, allowOnlyNumbers, getEnquirySteps, getOptionLabel, getOptionValue, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -240,7 +240,7 @@ const LineItems = () => {
         try {
             setLoading(false);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
-                TypeOfJob: getOptionLabel(formDataList.category, formData.category),
+                TypeOfJob: category,
                 Savingstype: data,
             });
             setFormDataList(prev => ({
@@ -248,6 +248,12 @@ const LineItems = () => {
                 savingsReason: response.savingsReason,
             }));
 
+            //hybird condition
+            setFormData(prev => ({
+                ...prev,
+                savingsType: getOptionValue(response.savingsType, formDataList.lineItems?.[0]?.savingstype),
+                savingsReason: getOptionValue(response.savingsReason, formDataList.lineItems?.[0]?.savingsreason)
+            }));
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
@@ -563,7 +569,7 @@ const LineItems = () => {
             Labels.lineItems.containsPlastic,
             Labels.lineItems.containsRecycledPlastic,
             ...(formData.recycledMaterial == 1 ? [Labels.lineItems.recycledMaterialWeightKg] : []),
-            
+
             // Catalogue Section
             Labels.lineItems.ratecardCatalogueItemDeclined,
             Labels.lineItems.globalOrderWindowCatalogueName,
@@ -687,6 +693,18 @@ const LineItems = () => {
             depth: "",
         }))
     }
+
+    //hybird functionality
+    const hybird = formDataList?.enquiryDetails?.hybridModel === "No";
+    const category = hybird && lineItems?.length > 0 ? formDataList.lineItems[0].printornonprint
+        : getOptionLabel(formDataList.category, formData.category);
+
+    useEffect(() => {
+        if (hybird && lineItems.length > 0) {
+            LineItemsMaster(category);
+            SavingsReasonMaster(formDataList.lineItems[0].savingstype);
+        }
+    }, [hybird, lineItems.length]);
 
     return (
         <>
@@ -1219,7 +1237,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.savingsType}
                                         options={formDataList.savingsType}
                                         flag={Labels.flag.auto}
-
+                                        readOnly={hybird}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1231,6 +1249,7 @@ const LineItems = () => {
                                         name={Labels.lineItems.savingsReason}
                                         options={formDataList.savingsReason}
                                         flag={Labels.flag.auto}
+                                        readOnly={hybird}
 
                                     />
                                 </PGrid>
