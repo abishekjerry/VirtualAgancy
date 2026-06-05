@@ -614,7 +614,6 @@ const ProjectEnquiry = () => {
 
 
     const handleSubmit = async (e, flag) => {
-        console.log(flag, "kjwhfkwhk");
         let activeTab = "";
         let requests = [];
         const clientInfo = {

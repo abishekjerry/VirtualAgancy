@@ -138,7 +138,6 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
 
 
 export const getSuppliers = (formData = [], response = null) => {
-  console.log(response);
   const source = response || formData;
   return source.map(item => ({
     label: "",
