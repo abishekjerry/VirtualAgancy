@@ -14,7 +14,7 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false , showHeader = true, showPagination = true}) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true }) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -31,7 +31,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       const exists = selectedRows.some(item => item.supplierId === row.supplierId);
       update = exists
         ? selectedRows.filter(item => item.supplierId !== row.supplierId)
-        : [...selectedRows, { supplierId: row.supplierId , suppliername : row.suppliername}];
+        : [...selectedRows, { supplierId: row.supplierId, suppliername: row.suppliername }];
     }
     onValidationChange?.(update);
   };
@@ -91,7 +91,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             fontSize: Labels.fontSize.xs,
             color: CommonColors.pTable.darkGrey,
             py: 1.8,
-            whiteSpace: "nowrap"
+            whiteSpace: col.field === "specifications" ? "normal" : "nowrap",
           }}
         >
           {renderCell(col, row, index, { isFirstCol: i === 0 })}

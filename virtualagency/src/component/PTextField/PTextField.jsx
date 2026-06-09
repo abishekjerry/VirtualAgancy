@@ -33,7 +33,8 @@ export default function PTextField({
     width = "100%",
     min,
     max,
-    sx = {}
+    sx = {},
+    placeHolder = ""
 }) {
     const isPassword = flag === Labels.flag.password;
     const [showPassword, setShowPassword] = useState(false);
@@ -74,6 +75,7 @@ export default function PTextField({
 
     return (
         <TextField
+            placeholder={placeHolder}
             name={name}
             label={label}
             value={value}

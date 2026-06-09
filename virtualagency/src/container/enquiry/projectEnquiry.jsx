@@ -76,7 +76,10 @@ const ProjectEnquiry = () => {
         validateFlag: false,
         marginFlag: false,
         project: false,
+        inputPS: false,
         isCalculate: true,
+        historyTool: false,
+        historySearchTool: "",
         quote: "",
         search: "",
 
@@ -117,14 +120,36 @@ const ProjectEnquiry = () => {
         calculateRowsData: [],
         //project savings list
 
-        projectSavingsColumns: [{ field: "previousPoNumber", header: "Previous PO Number" }, { field: "savingsReason", header: "Savings Reason" }, { field: "baselineQuantity", header: "Baseline Quantity" },
-        { field: "savingsReferencePrice", header: "Savings Reference Price ($)" }, { field: "currentSellPriceExclFee", header: "Current PMG Sell Price (Excl. Fee)" }, { field: "currentSellPriceInclFee", header: "Current PMG Sell Price (Incl. Fee)" }],
+        projectSavingsData: [{
+            previousPoNumber: "",
+            savingsReason: "NES CA - Urgent Job",
+            baselineQuantity: 0,
+            savingsReferencePrice: 0,
+            currentSellPriceExclFee: 920.00,
+            currentSellPriceInclFee: 1002.80
+        },
+        {
+            previousPoNumber: "",
+            savingsReason: "NES CA - Urgent Job",
+            baselineQuantity: 0,
+            savingsReferencePrice: 0,
+            currentSellPriceExclFee: 10.00,
+            currentSellPriceInclFee: 10.90
+        },],
         savingsSummaryColumns: [{ field: "savingsInclFee", header: "Savings (Inc. Fee)" }, { field: "savingsPercentInclFee", header: "Savings % (Inc. Fee)" },
         { field: "savingsExclFee", header: "Savings (Excl. Fee)" }, { field: "savingsPercentExclFee", header: "Savings % (Excl. Fee)" }],
         savingsCalculateColumns: [{ field: "label" }, { field: "value" }],
         savingsCalculateData: [{ label: "Savings Reference Price", value: "0" }, { label: "Total PMG Sell Price (inc.fee)", value: "1,013.70" },
         { label: "Savings ($)", value: "0" }, { label: "Savings %", value: "0 %" }],
-        savingsReasonData: []
+        savingsReasonData: [],
+
+        //History Tool
+        historyToolCloumns: [{ field: "action", header: "Action" }, { field: "qty", header: "Qty" }, { field: "country", header: "Country" }, { field: "specifications", header: "Specifications" },
+        { field: "referencePrice", header: "Reference Price" }, { field: "materialUsed", header: "Material Used" }, { field: "poNumber", header: "PO Number" }, { field: "subCategory", header: "Sub Category" }, { field: "brand", header: "Brand" }],
+        historyToolData: [{
+            action: "ENQ033681", qty: 25, country: "Sigapore", specifications: "Digital print on sticker Gloss lami 1 side Mount on kapaline Diecut to shape"
+            , referencePrice: 820.56, materialUsed: "Kapaline Board", poNumber: 4560972835, subCategory: "Temporary displays", brand: "Kit Kat"
+        }]
     });
 
     //Master function
@@ -433,6 +458,12 @@ const ProjectEnquiry = () => {
     }
     const data = filteredData;
 
+    const search = formData.historySearchTool.trim().toLowerCase();
+    const historyToolData = formDataList.historyToolData.filter(item =>
+        !search || [item.brand, item.subCategory, item.qty, item.poNumber, item.action]
+            .some(v => v?.toString().toLowerCase().includes(search))
+    );
+
     const handleSendChoose = async () => {
         const rows = formDataList.selectedRows || [];
         const supplierIds = rows.map(r => r.supplierId).join(",");
@@ -460,6 +491,24 @@ const ProjectEnquiry = () => {
         }
     };
 
+    const renderProjectEditableField = (field) => ({
+        render: (row) => (
+            <PTextField
+                name={field}
+                value={row[field] || ""}
+                onKeyPress={() =>
+                    setFormData(prev => ({
+                        ...prev,
+                        historyTool: true
+                    }))
+                }
+                width={150}
+                placeHolder={field == "previousPoNumber" ? "Previous Po No" : "0"}
+                disabled={field == "previousPoNumber" ? false : true}
+            />
+        )
+    });
+
     const renderEditableField = (field) => ({
         render: (row) => (
             <PTextField
@@ -471,6 +520,8 @@ const ProjectEnquiry = () => {
         )
     });
 
+    const projectSavingsColumns = [{ field: "previousPoNumber", header: "Previous PO Number", ...(formData.inputPS && renderProjectEditableField("previousPoNumber")) }, { field: "savingsReason", header: "Savings Reason" }, { field: "baselineQuantity", header: "Baseline Quantity", ...(formData.inputPS && renderProjectEditableField("baselineQuantity")) },
+    { field: "savingsReferencePrice", header: "Savings Reference Price ($)", ...(formData.inputPS && renderProjectEditableField("savingsReferencePrice")) }, { field: "currentSellPriceExclFee", header: "Current PMG Sell Price (Excl. Fee)" }, { field: "currentSellPriceInclFee", header: "Current PMG Sell Price (Incl. Fee)" }];
 
     useEffect(() => {
         if (supplierRows.length === 0) {
@@ -582,11 +633,11 @@ const ProjectEnquiry = () => {
 
         ) : (
             <PButton
-                label="Edit"
+                label={flag == "inputPS" ? "Input Project Savings" : "Edit"}
                 variant="contained"
                 color={CommonColors.grey.main}
                 onClick={() => handleEdit(null, flag)}
-                width={120}
+                width={flag == "inputPS" ? 250 : 120}
             />
         )
     );
@@ -611,7 +662,6 @@ const ProjectEnquiry = () => {
             }),
         }));
     }, [formDataList.clientInfo, formDataList.enquiryDetails]);
-
 
     const handleSubmit = async (e, flag) => {
         let activeTab = "";
@@ -1070,19 +1120,12 @@ const ProjectEnquiry = () => {
                         </PGrid>
                         <PGrid container className={Labels.margin.mb3}>
                             <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
-                                <PButton
-                                    label={"Input Project Savings"}
-                                    variant="contained"
-                                    color={CommonColors.grey.main}
-                                    //onClick={() => handleCalculate(null, "calculate")}
-                                    width={250}
-
-                                />
+                                {renderActionButtons("inputPS")}
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb3}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={formDataList.projectSavingsColumns} rows={formDataList.data} />
+                                <PTable columns={projectSavingsColumns} rows={formDataList.projectSavingsData} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb3}>
@@ -1276,6 +1319,55 @@ const ProjectEnquiry = () => {
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={12}>
                     <PTable columns={formDataList.columns} rows={data} showCheckbox={true} selectedRows={formDataList.selectedRows} onValidationChange={handleValidationChange} />
+                </PGrid>
+            </PDialog>
+
+            <PDialog
+                open={formData.historyTool}
+                onClose={() => setFormData((prev) => ({
+                    ...prev,
+                    historyTool: false,
+                    historySearchTool: ""
+                }))}
+                title={"Historical Data Search Tool"}
+                showCloseIcon={true}
+                maxWidth="lg"
+                actions={
+                    < PGrid className="d-flex align-items-center justify-content-end gap-2" >
+                        <PButton
+                            fullWidth
+                            label={getLabel("lbl125")}
+                            variant="outlined"
+                            onClick={() => setFormData((prev) => ({
+                                ...prev,
+                                historyTool: false
+                            }))}
+                            color={CommonColors.grey.main}
+                            width={120}
+                        />
+                        <PButton
+                            fullWidth
+                            label={"Save Reference Price"}
+                            variant={Labels.contained}
+                            onClick={handleSendChoose}
+                            color={CommonColors.green.main}
+                            width={200}
+                        />
+                    </PGrid >
+                }
+
+            >
+                <PGrid container className={Labels.margin.mb4}>
+                    <PGrid item xs={12} sm={6} md={6}>
+                        <PSearch width="100%" placeholder={"Search by EnquiryId, Material Used, PO Number, Qty, Brands, Sub category"}
+                            onChange={(e) => setFormData((prev) => ({
+                                ...prev,
+                                historySearchTool: e.target.value
+                            }))} />
+                    </PGrid>
+                </PGrid>
+                <PGrid item xs={12} sm={6} md={12}>
+                    <PTable columns={formDataList.historyToolCloumns} rows={historyToolData} showCheckbox={true} />
                 </PGrid>
             </PDialog>
         </>
