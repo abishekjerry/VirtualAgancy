@@ -9,7 +9,7 @@ import {
   Paper,
   TableContainer,
   Box,
-  Checkbox
+  Checkbox, Tooltip
 } from "@mui/material";
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
@@ -57,7 +57,8 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : rows;
 
   const renderCell = (col, data, rowIndex, meta = {}) => {
-    const content = col.render ? col.render(data, rowIndex) : data[col.field];
+    const text = String(data[col.field] ?? "");
+    const content = col.render ? col.render(data, rowIndex) : text.length > 30 ? (<Tooltip title={text}> <span>{text.substring(0, 30)}...</span>  </Tooltip>) : text;
     if (showCheckbox && meta.isFirstCol) {
       return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -91,7 +92,8 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             fontSize: Labels.fontSize.xs,
             color: CommonColors.pTable.darkGrey,
             py: 1.8,
-            whiteSpace: col.field === "specifications" ? "normal" : "nowrap",
+            whiteSpace: "nowrap",
+            cursor: "pointer"
           }}
         >
           {renderCell(col, row, index, { isFirstCol: i === 0 })}

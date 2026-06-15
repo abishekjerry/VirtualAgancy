@@ -26,7 +26,7 @@ import { useLanguage } from "../../utils/constants/language";
 import { useLocation, useNavigate } from "react-router-dom";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
-import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, LineItems_API, Suppliers_API } from "../../utils/api/apiUrl";
+import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, LineItems_API, Suppliers_API, ProjectEnquiry_API } from "../../utils/api/apiUrl";
 import { formatDate, getOptionLabel, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { PSummary } from "../../component/PSumary/PSummary";
 import PTable from "../../component/PTable/PTable";
@@ -43,6 +43,8 @@ import HandshakeIcon from "@mui/icons-material/Handshake";
 import SavingsIcon from "@mui/icons-material/Savings";
 import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import HistoryIcon from "@mui/icons-material/History";
+import AttachmentIcon from "@mui/icons-material/Attachment";
+import PFileUpload from "../../component/PFileUpload/PFileUpload";
 
 
 const ProjectEnquiry = () => {
@@ -82,7 +84,7 @@ const ProjectEnquiry = () => {
         historySearchTool: "",
         quote: "",
         search: "",
-
+        files: [],
         //editable state
         clientContact: "",
         projectNo: "",
@@ -106,7 +108,7 @@ const ProjectEnquiry = () => {
         data: [],
         tabs: [{ label: "Job Summary", icon: <WorkOutlineIcon /> }, { label: "Line Items", icon: <Inventory2Icon /> },
         { label: "RFQ", icon: <RequestQuoteIcon /> }, { label: "Project Saving", icon: <SavingsIcon /> }, { label: "SLA", icon: <HandshakeIcon /> },
-        { label: "Revised Quotes", icon: <PriceChangeIcon /> }, { label: "Logs", icon: <HistoryIcon /> }],
+        { label: "Revised Quotes", icon: <PriceChangeIcon /> }, { label: "Logs", icon: <HistoryIcon /> }, { label: "Attachment", icon: <AttachmentIcon /> }],
         columns: [{ field: "suppliername", header: "Supplier's Name" }, { field: "country", header: "Country" }, { field: "suppliercode", header: "Supplier Code" },],
         supplierMaster: [],
         selectedRows: [],
@@ -118,6 +120,14 @@ const ProjectEnquiry = () => {
         selectedSupplierRows: [],
         extraInfo: [],
         calculateRowsData: [],
+        //logs
+        historyLogsCloumns: [{ field: "modifiedDate", header: "Modified Date" }, { field: "userName", header: "User ID" }, { field: "field", header: "Field" }
+            , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }],
+        historyLogs: [],
+        lineItemLogsCloumns: [{ field: "modifiedDate", header: "Modified Date" }, { field: "userName", header: "User ID" }, { field: "field", header: "Field" }
+            , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }, { field: "itemNumber", header: "Item Number" }],
+        lineItemLogs: [],
+
         //project savings list
 
         projectSavingsData: [{
@@ -144,12 +154,15 @@ const ProjectEnquiry = () => {
         savingsReasonData: [],
 
         //History Tool
-        historyToolCloumns: [{ field: "action", header: "Action" }, { field: "qty", header: "Qty" }, { field: "country", header: "Country" }, { field: "specifications", header: "Specifications" },
+        historySearchesCloumns: [{ field: "enquriyID", header: "Action" }, { field: "qty", header: "Qty" }, { field: "country", header: "Country" }, { field: "specifications", header: "Specifications" },
         { field: "referencePrice", header: "Reference Price" }, { field: "materialUsed", header: "Material Used" }, { field: "poNumber", header: "PO Number" }, { field: "subCategory", header: "Sub Category" }, { field: "brand", header: "Brand" }],
-        historyToolData: [{
-            action: "ENQ033681", qty: 25, country: "Sigapore", specifications: "Digital print on sticker Gloss lami 1 side Mount on kapaline Diecut to shape"
-            , referencePrice: 820.56, materialUsed: "Kapaline Board", poNumber: 4560972835, subCategory: "Temporary displays", brand: "Kit Kat"
-        }]
+        historySearches: [],
+
+        //RevisedQuotes
+        revisedQuotesCloumns: [{ field: "supplierName", header: "Supplier" }, { field: "supplierPrice", header: "Supplier Price ($)", render: (row) => Number(row.supplierPrice || 0).toFixed(2) },
+        { field: "dateOfChange", header: "Date/Time Log" }],
+        revisedQuotes: [],
+
     });
 
     //Master function
@@ -169,7 +182,17 @@ const ProjectEnquiry = () => {
                 currency: currency,
                 Country: countryName
             });
-
+            const projectResponse = await PostApi(ProjectEnquiry_API.GetProjectDetails, {
+                enquiryid: id,
+                Currency: currency,
+                Country: countryName
+            });
+            const revisedQuotes = [...new Map(projectResponse.revisedQuotes.map(x => [x.itemNumber, x])).values()]
+                .map(x => ({
+                    isSubTitle: true,
+                    subTitle: x.itemName,
+                    items: projectResponse.revisedQuotes.filter(y => y.itemNumber === x.itemNumber)
+                }));
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -184,8 +207,11 @@ const ProjectEnquiry = () => {
                     { label: getLabel("lbl10"), value: userName || "-" },
                     { label: "Enquiry Id", value: response.enqClientinfo?.enqUId || "-" }
                 ],
-                savingsReasonData: [{ item: "All items", savingType: response.enqlineItems[0].savingstype, savingReason: response.enqlineItems[0].savingsreason }]
-
+                savingsReasonData: [{ item: "All items", savingType: response.enqlineItems[0].savingstype, savingReason: response.enqlineItems[0].savingsreason }],
+                historyLogs: projectResponse.historyLogs,
+                lineItemLogs: projectResponse.lineItemLogs,
+                historySearches: projectResponse.historySearches,
+                revisedQuotes: revisedQuotes,
             }));
             setFormData(prev => ({
                 ...prev,
@@ -199,7 +225,7 @@ const ProjectEnquiry = () => {
             setLoading(false);
         }
     };
-
+    
     //Change Function
     const handleChange = (e) => {
         const { name, value, label } = e.target;
@@ -231,29 +257,15 @@ const ProjectEnquiry = () => {
         }
     };
 
-    const quotes = [
-        { field: "suppliername", header: "Supplier" },
-        { field: "enquiry", header: "Supplier Price ($)" },
-        { field: "enquiry", header: "Date/Time Log" },
-    ]
-
-    const historyLogs = [
-        { field: "enquiryId", header: "Modified Date" },
+    const attachments = [
+        { field: "enquiryId", header: "File Name" },
+        { field: "enquiryId", header: "Type" },
         { field: "enquiryId", header: "User ID" },
-        { field: "enquiryId", header: "Field" },
-        { field: "enquiryId", header: "Old Value" },
-        { field: "enquiryId", header: "New Value" },
-        { field: "enquiryId", header: "Item Number" },
+        { field: "enquiryId", header: "Size" },
+        { field: "enquiryId", header: "Uploaded" },
+        { field: "enquiryId", header: "Notes" },
+        { field: "enquiryId", header: "Status" }
     ]
-
-    const lineItemslogs = [
-        { field: "enquiryId", header: "Modified Date" },
-        { field: "enquiryId", header: "User ID" },
-        { field: "enquiryId", header: "Field" },
-        { field: "enquiryId", header: "Old Value" },
-        { field: "enquiryId", header: "New Value" },
-    ]
-
 
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo, formDataList.extraInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails, false);
@@ -459,8 +471,8 @@ const ProjectEnquiry = () => {
     const data = filteredData;
 
     const search = formData.historySearchTool.trim().toLowerCase();
-    const historyToolData = formDataList.historyToolData.filter(item =>
-        !search || [item.brand, item.subCategory, item.qty, item.poNumber, item.action]
+    const historyToolData = formDataList.historySearches.filter(item =>
+        !search || [item.brand, item.subCategory, item.qty, item.poNumber, item.enquiryID]
             .some(v => v?.toString().toLowerCase().includes(search))
     );
 
@@ -1232,7 +1244,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={quotes} rows={suppliers} />
+                                <PTable columns={formDataList.revisedQuotesCloumns} rows={formDataList.revisedQuotes} />
                             </PGrid>
                         </PGrid>
                     </PCard>
@@ -1251,7 +1263,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={lineItemslogs} rows={formDataList.data} />
+                                <PTable columns={formDataList.lineItemLogsCloumns} rows={formDataList.lineItemLogs} />
                             </PGrid>
                         </PGrid>
 
@@ -1266,7 +1278,49 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={historyLogs} rows={formDataList.data} />
+                                <PTable columns={formDataList.historyLogsCloumns} rows={formDataList.historyLogs} />
+                            </PGrid>
+                        </PGrid>
+                    </PCard>
+                )}
+
+                {formData.activeTab === "Attachment" && (
+                    <PCard className={Labels.margin.mb3}>
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PTypography
+                                labelText={"Attachment"}
+                                flag={Labels.fontFlags.subHeader}
+                                color={CommonColors.blue.main}
+                                weight={FontWeight.bold}
+                            />
+                        </PGrid>
+                        <Divider sx={{ mb: 2 }} />
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={4}>
+                                <PFileUpload
+                                    value={formData.files}
+                                    onChange={handleChange}
+                                    name={Labels.lineItems.files}
+                                    placeholder={`Choose a file`}
+                                />
+                                <PTypography
+                                    labelText={"File names should not contain special characters."}
+                                    flag={Labels.fontFlags.smallText}
+                                    color={CommonColors.grey.main}
+                                    weight={FontWeight.bold}
+                                />
+                                <PTypography
+                                    labelText={"Total upload size must be 100 MB or less."}
+                                    flag={Labels.fontFlags.smallText}
+                                    color={CommonColors.grey.main}
+                                    weight={FontWeight.bold}
+                                />
+                            </PGrid>
+                        </PGrid>
+
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={attachments} rows={formDataList.data} />
                             </PGrid>
                         </PGrid>
                     </PCard>
@@ -1367,7 +1421,7 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={12}>
-                    <PTable columns={formDataList.historyToolCloumns} rows={historyToolData} showCheckbox={true} />
+                    <PTable columns={formDataList.historySearchesCloumns} rows={historyToolData} showCheckbox={true} />
                 </PGrid>
             </PDialog>
         </>

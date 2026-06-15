@@ -23,8 +23,11 @@ export default function PFileUpload({
     helperText = "",
     variant = "outlined",
     multiple = false,
+    // multiline= false,
+    // rows = 1,
     maxLength = 5,
-    width = "100%"
+    width = "100%",
+    placeholder = ""
 }) {
 
     const [selectedFiles, setSelectedFiles] = useState([]);
@@ -100,8 +103,11 @@ export default function PFileUpload({
             error={!!fileError}
             variant={variant}
             fullWidth
+            //multiline={multiline}
             inputProps={{ readOnly: true }}
             sx={baseSx}
+            //rows = {rows}
+            placeholder= {placeholder}
             InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">

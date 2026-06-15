@@ -54,3 +54,9 @@ export const Suppliers_API = {
   GetEnqSupplierMaster: Base_Url + "/VA/GetSupplier",
   AddUpdateSuppliers: Base_Url + "/VA/EnqSupplierInfo",
 } 
+
+export const ProjectEnquiry_API = {
+  GetProjectDetails : Base_Url + "/VA/GetProjectDetails"
+}
+
+

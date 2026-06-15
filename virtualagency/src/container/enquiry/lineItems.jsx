@@ -29,6 +29,7 @@ import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } 
 import { PSummary } from "../../component/PSumary/PSummary";
 import PDialog from "../../component/PDialog/PDialog";
 import PFileUpload from "../../component/PFileUpload/PFileUpload";
+import PAttachment from "../../component/PAttachment/PAttachment";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -1479,66 +1480,17 @@ const LineItems = () => {
                                         <PGrid container>
                                             {formData.files.map((file, index) => (
                                                 <PGrid item xs={12} sm={6} key={index} className={Labels.margin.mb2}>
-                                                    <div
-                                                        style={{
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            justifyContent: "space-between",
-                                                            padding: "6px 10px",
-                                                            borderRadius: "10px",
-                                                            background: "#e4e3e3",
-                                                            border: "1px solid #d4d4d4",
-                                                            fontSize: "13px",
-                                                            width: "100%",
-                                                            boxSizing: "border-box",
-                                                        }}
-                                                    >
-                                                        {/* Left content */}
-                                                        <div
-                                                            style={{
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                gap: 6,
-                                                                overflow: "hidden",
-                                                            }}
-                                                        >
-                                                            {/* File name */}
-                                                            <span
-                                                                style={{
-                                                                    whiteSpace: "nowrap",
-                                                                    overflow: "hidden",
-                                                                    textOverflow: "ellipsis",
-                                                                    maxWidth: "140px",
-                                                                }}
-                                                            >
-                                                                {file.name}
-                                                            </span>
-
-                                                            {/* File size */}
-                                                            <span style={{ fontSize: "11px", color: "#555" }}>
-                                                                ({(file.size / (1024 * 1024)).toFixed(1)} MB)
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Actions */}
-                                                        <div style={{ display: "flex", gap: 4 }}>
-                                                            <IconButton size="small" onClick={() => handlePreview(index)}>
-                                                                <Visibility fontSize="inherit" />
-                                                            </IconButton>
-
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() =>
-                                                                    setFormData((prev) => ({
-                                                                        ...prev,
-                                                                        files: prev.files.filter((_, i) => i !== index),
-                                                                    }))
-                                                                }
-                                                            >
-                                                                <CloseIcon fontSize="inherit" />
-                                                            </IconButton>
-                                                        </div>
-                                                    </div>
+                                                    <PAttachment
+                                                        key={index}
+                                                        file={file}
+                                                        onPreview={() => handlePreview(index)}
+                                                        onDelete={() =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                files: prev.files.filter((_, i) => i !== index),
+                                                            }))
+                                                        }
+                                                    />
                                                 </PGrid>
                                             ))}
                                         </PGrid>
