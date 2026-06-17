@@ -55,7 +55,6 @@ const ProjectEnquiry = () => {
     const [quoteStartDate, setQuoteStartDate] = useState("");
     const [phaseDates, setPhaseDates] = useState([]);
     const [slaTemplateData, setSlaTemplateData] = useState(null);
-    const [supplierRows, setSupplierRows] = useState([]);
 
     //Global variable
     const currency = localStorage.getItem("currency");
@@ -163,6 +162,9 @@ const ProjectEnquiry = () => {
         { field: "dateOfChange", header: "Date/Time Log" }],
         revisedQuotes: [],
 
+        //RequestQuotes
+        requestQuotes: [],
+
     });
 
     //Master function
@@ -193,6 +195,15 @@ const ProjectEnquiry = () => {
                     subTitle: x.itemName,
                     items: projectResponse.revisedQuotes.filter(y => y.itemNumber === x.itemNumber)
                 }));
+
+            const requestQuotes = [...new Map(projectResponse.requestQuotes.map(x => [x.itemNumber, x])).values()]
+                .map(x => ({
+                    isSubTitle: true,
+                    subTitle: x.itemName,
+                    items: projectResponse.requestQuotes.filter(y => y.itemNumber === x.itemNumber)
+                }));
+
+
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -212,6 +223,7 @@ const ProjectEnquiry = () => {
                 lineItemLogs: projectResponse.lineItemLogs,
                 historySearches: projectResponse.historySearches,
                 revisedQuotes: revisedQuotes,
+                requestQuotes: requestQuotes,
             }));
             setFormData(prev => ({
                 ...prev,
@@ -225,7 +237,7 @@ const ProjectEnquiry = () => {
             setLoading(false);
         }
     };
-    
+
     //Change Function
     const handleChange = (e) => {
         const { name, value, label } = e.target;
@@ -525,8 +537,8 @@ const ProjectEnquiry = () => {
         render: (row) => (
             <PTextField
                 name={field}
-                value={row[field] || ""}
-                onChange={(e) => handleInputChange(e.target.value.replace(/[^0-9.]/g, ""), row.rowId, row.enquiryId, field)}
+                value={row[field] ?? ""}
+                onChange={(e) => handleInputChange(e.target.value.replace(/[^0-9.]/g, ""), row.supplierQuotesId, row.enquiryId, field)}
                 width={90}
             />
         )
@@ -536,64 +548,52 @@ const ProjectEnquiry = () => {
     { field: "savingsReferencePrice", header: "Savings Reference Price ($)", ...(formData.inputPS && renderProjectEditableField("savingsReferencePrice")) }, { field: "currentSellPriceExclFee", header: "Current PMG Sell Price (Excl. Fee)" }, { field: "currentSellPriceInclFee", header: "Current PMG Sell Price (Incl. Fee)" }];
 
     useEffect(() => {
-        if (supplierRows.length === 0) {
-            let count = 0;
-            const group = rawLineItems.flatMap((item) =>
-                formDataList.suppliers.map((s, index) => ({
-                    ...s,
-                    groupName: item.itemTitle,
-                    enquiryId: item.enquiryId,
-                    rowId: index + 1
-                }))
-            );
-            setSupplierRows(group);
-        }
-    }, [formDataList.suppliers]);
+        console.log("requestQuotes", formDataList.requestQuotes);
+    }, [formDataList.requestQuotes]);
 
-    const handleInputChange = (value, rowId, enquiryId, field) => {
-        setSupplierRows(prev => {
-            const update = prev.map(item => item.rowId === rowId && item.enquiryId === enquiryId &&
-                !((field === "negQuote" && +value >= +item.initialQuote) || (field === "negUnitPrice" && +value >= +item.iniUnitPrice) || +value < 0)
-                ? { ...item, [field]: value } : item);
-            setFormData(form => ({
-                ...form,
-                validateFlag: !update.every(x => x.initialQuote || x.iniUnitPrice)
-            }));
-            return update;
-        });
+    const handleInputChange = (data, Id, enquiryId, field) => {
+        setFormDataList(prev => ({
+            ...prev,
+            requestQuotes: prev.requestQuotes.map(group => ({
+                ...group,
+                items: group.items.map(item =>
+                    item.supplierQuotesId === Id
+                        ? { ...item, [field]: data }
+                        : item
+                )
+            }))
+        }));
     };
 
-    const suppliers = rawLineItems.map((item) => ({
-        isSubTitle: true,
-        subTitle: `${item.itemTitle}`,
-        items: supplierRows.filter(s => s.groupName === item.itemTitle)
-    }));
+
     const isQuote = formData.quote == 1 && formData.rfq;
     const isUnit = formData.quote == 2 && formData.rfq;
 
-    const rfqSupplier = [
-        { field: "suppliername", header: "Supplier" },
+    const requestQuotes = [
+        { field: "supplierName", header: "Supplier" },
         {
             field: "initialQuote",
             header: "Ini.Quote ($)",
-            ...(isQuote && renderEditableField("initialQuote"))
+            ...(isQuote && renderEditableField("initialQuote")),
         },
         {
             field: "negQuote",
             header: "Neg.Quote ($)",
-            ...(isQuote && renderEditableField("negQuote"))
+            ...(isQuote && renderEditableField("negQuote")),
         },
         {
             field: "iniUnitPrice",
             header: "Ini.unit Price ($)",
-            ...(isUnit && renderEditableField("iniUnitPrice"))
+            ...(isUnit && renderEditableField("iniUnitPrice")),
         },
         {
             field: "negUnitPrice",
             header: "Neg.unit Price ($)",
-            ...(isUnit && renderEditableField("negUnitPrice"))
+            ...(isUnit && renderEditableField("negUnitPrice")),
         },
-        { field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)" },
+        {
+            field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)"
+        },
         { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
 
@@ -716,20 +716,6 @@ const ProjectEnquiry = () => {
         }
         if (flag === "rfq") {
             activeTab = "RFQ";
-            setSupplierRows(prev => prev.map(item => {
-                const iniUnitPrice = (+item.iniUnitPrice || (+item.initialQuote || 0) / 5);
-                const negUnitPrice = (+item.negUnitPrice || (+item.negQuote || 0) / 5);
-                return {
-                    ...item,
-                    iniUnitPrice: iniUnitPrice.toFixed(2),
-                    negUnitPrice: negUnitPrice.toFixed(2),
-                    initialQuote: (iniUnitPrice * 5).toFixed(2),
-                    negQuote: (negUnitPrice * 5).toFixed(2),
-                    negUnitPriceFee: (negUnitPrice + 0.01).toFixed(2),
-                    pmgSellPrice: ((negUnitPrice + 0.01) * 5).toFixed(2)
-                };
-            })
-            );
             handleCancel(null, flag)
             fetchData();
         }
@@ -1054,7 +1040,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={rfqSupplier} rows={suppliers} showCheckbox={true} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} />
+                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={true} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>

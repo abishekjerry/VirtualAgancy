@@ -23,9 +23,9 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   // Parent Select All
   const handleRowSelect = (row) => {
     let update;
-    if (row.groupName) {
-      const isSame = selectedRows.some(item => item.groupName === row.groupName && item.supplierID === row.supplierID);
-      const filtered = selectedRows.filter(item => item.groupName !== row.groupName);
+    if (row.itemNumber) {
+      const isSame = selectedRows.some(item => item.itemNumber === row.itemNumber && item.supplierId === row.supplierId);
+      const filtered = selectedRows.filter(item => item.itemNumber !== row.itemNumber);
       update = isSame ? filtered : [...filtered, row];
     } else {
       const exists = selectedRows.some(item => item.supplierId === row.supplierId);
@@ -37,8 +37,8 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   };
 
   const isSelected = (data) => {
-    if (data.groupName) {
-      return selectedRows.some(item => item.groupName === data.groupName && item.supplierID === data.supplierID);
+    if (data.itemNumber) {
+      return selectedRows.some(item => item.itemNumber === data.itemNumber && item.supplierId === data.supplierId);
     }
     return selectedRows.some(item => item.supplierId === data.supplierId);
   };
@@ -64,7 +64,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Checkbox
             size="small"
-            checked={disabled && data.groupName ? false : isSelected(data)}
+            checked={disabled ? false : isSelected(data)}
             onChange={() => handleRowSelect(data)}
             disabled={disabled}
           />
@@ -139,7 +139,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                   verticalAlign: "middle", borderLeft: col.rowSpan ? "1px solid #e5e7eb" : "",
                 }}
               >
-                {renderCell(col, { ...item, groupName: group.subTitle }, item.rowId, { isFirstCol: cIndex === 0 })}
+                {renderCell(col, item, item.rowId, { isFirstCol: cIndex === 0 })}
               </TableCell>);
           })}
         </TableRow>
