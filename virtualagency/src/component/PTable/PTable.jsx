@@ -14,7 +14,7 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true }) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true, bgColor = false }) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -52,12 +52,11 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
   // Show only selected rows when global checkbox checked
-  const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : rows;
+  const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : (Array.isArray(rows) ? rows : []);
 
   const renderCell = (col, data, rowIndex, meta = {}) => {
-    const text = String(data[col.field] ?? "");
+    const text = String(typeof data[col.field] === "number" ? data[col.field].toFixed(2) : (data[col.field] ?? ""));
     const content = col.render ? col.render(data, rowIndex) : text.length > 30 ? (<Tooltip title={text}> <span>{text.substring(0, 30)}...</span>  </Tooltip>) : text;
     if (showCheckbox && meta.isFirstCol) {
       return (
@@ -118,16 +117,16 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       </TableRow>
 
       {group.items?.map((item, i) => (
+
         <TableRow
           key={`item-${index}-${i}`}
           onClick={() => onClick?.(item)}
           sx={{
             cursor: onClick ? "pointer" : "default",
-            "&:hover": { backgroundColor: "#f1f5f9" },
-            backgroundColor: i % 2 ? "#f9fafb" : "#fff",
-            "&:hover td[rowspan]": {
-              backgroundColor: "#ffffff !important"
-            }
+            backgroundColor: item.isCalculateId && item.supplierId === item.isCalculateId ? "#BCCDDE" : i % 2 ? "#f9fafb" : "#fff",
+            // "&:hover": {
+            //   backgroundColor: `${item.supplierId === item.isCalculateId ? "#BCCDDE" : "#f1f5f9" } !important`,
+            // },
           }}
         >
           {columns.map((col, cIndex) => {
@@ -140,17 +139,15 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                 }}
               >
                 {renderCell(col, item, item.rowId, { isFirstCol: cIndex === 0 })}
-              </TableCell>);
+              </TableCell>
+            );
           })}
         </TableRow>
       ))}
     </React.Fragment>
   );
 
-  const paginatedRows = filteredRows.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const paginatedRows = filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Paper elevation={0} sx={{ mt: 3, borderRadius: "16px", overflow: "hidden", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>

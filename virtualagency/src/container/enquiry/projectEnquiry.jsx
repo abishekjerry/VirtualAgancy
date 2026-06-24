@@ -112,13 +112,13 @@ const ProjectEnquiry = () => {
         supplierMaster: [],
         selectedRows: [],
         statusInfo: [],
-        calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
-        calculateSupplierRows: [{ field: "cost", header: "Supplier Name" }, { field: "sell", header: "Item Name" }, { field: "margin", header: "Margin ($)" }, { field: "markup", header: "Supplier type" }, { field: "margin", header: "SMETA accredited" }
-            , { field: "margin", header: "GMP accredited" }, { field: "markup", header: "Nature of supplier" },
-        ],
         selectedSupplierRows: [],
         extraInfo: [],
-        calculateRowsData: [],
+
+        //calculations
+        calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
+        calculationDetails: [],
+
         //logs
         historyLogsCloumns: [{ field: "modifiedDate", header: "Modified Date" }, { field: "userName", header: "User ID" }, { field: "field", header: "Field" }
             , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }],
@@ -126,6 +126,10 @@ const ProjectEnquiry = () => {
         lineItemLogsCloumns: [{ field: "modifiedDate", header: "Modified Date" }, { field: "userName", header: "User ID" }, { field: "field", header: "Field" }
             , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }, { field: "itemNumber", header: "Item Number" }],
         lineItemLogs: [],
+        calculateSupplierlogsRows: [{ field: "supplierName", header: "Supplier Name" }, { field: "itemName", header: "Item Name" }, { field: "supplierType", header: "Supplier type" }, { field: "smetaAccredited", header: "SMETA accredited" }
+            , { field: "gmpAccredited", header: "GMP accredited" }, { field: "natureofsupplier", header: "Nature of supplier" },
+        ],
+        calculationSupplierlogs: [],
 
         //project savings list
 
@@ -202,8 +206,14 @@ const ProjectEnquiry = () => {
                     subTitle: x.itemName,
                     items: projectResponse.requestQuotes.filter(y => y.itemNumber === x.itemNumber)
                 }));
-
-
+            if (projectResponse.calculationDetails != null) {
+                setFormData(prev => ({
+                    ...prev,
+                    marginFlag: true,
+                    calculateFlag: true
+                }));
+            }
+            console.log(projectResponse.calculationDetails, "dsmnvnsm,d");
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -224,6 +234,8 @@ const ProjectEnquiry = () => {
                 historySearches: projectResponse.historySearches,
                 revisedQuotes: revisedQuotes,
                 requestQuotes: requestQuotes,
+                calculationDetails: projectResponse.calculationDetails ? [projectResponse.calculationDetails] : [],
+                calculationSupplierlogs : projectResponse.calculationSupplierlogs,
             }));
             setFormData(prev => ({
                 ...prev,
@@ -401,28 +413,25 @@ const ProjectEnquiry = () => {
         }));
     }
     const handleCalculate = async (e, flag) => {
-        setFormData(prev => ({
-            ...prev,
-            marginFlag: true
-        }));
-        calculateValues(formDataList.selectedSupplierRows);
+        if (flag == "reCalculate") {
+            const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
+                enqId: id,
+                modifiedBy: agancyUserID,
+                status: 2
+            });
+            setFormData(prev => ({
+                ...prev,
+                marginFlag: false
+            }));
+        }
+        else {
+            setFormData(prev => ({
+                ...prev,
+                marginFlag: true
+            }));
+        }
     }
 
-    const calculateValues = (rows) => {
-        const cost = rows.reduce((a, b) => a + Number(b.negQuote || 0), 0).toFixed(2);
-        const sell = rows.reduce((a, b) => a + Number(b.pmgSellPrice || 0), 0).toFixed(2);
-        const margin = (Number(sell) - Number(cost)).toFixed(2);
-        setFormDataList(prev => ({
-            ...prev,
-            calculateRowsData: [{
-                cost: cost,
-                sell: sell,
-                margin: margin,
-                markupPercent: ((margin / cost) * 100).toFixed(2),
-                marginPercent: ((margin / sell) * 100).toFixed(2)
-            }]
-        }));
-    };
 
 
     const clientInfoMaster = async (globalBUMapping) => {
@@ -547,10 +556,6 @@ const ProjectEnquiry = () => {
     const projectSavingsColumns = [{ field: "previousPoNumber", header: "Previous PO Number", ...(formData.inputPS && renderProjectEditableField("previousPoNumber")) }, { field: "savingsReason", header: "Savings Reason" }, { field: "baselineQuantity", header: "Baseline Quantity", ...(formData.inputPS && renderProjectEditableField("baselineQuantity")) },
     { field: "savingsReferencePrice", header: "Savings Reference Price ($)", ...(formData.inputPS && renderProjectEditableField("savingsReferencePrice")) }, { field: "currentSellPriceExclFee", header: "Current PMG Sell Price (Excl. Fee)" }, { field: "currentSellPriceInclFee", header: "Current PMG Sell Price (Incl. Fee)" }];
 
-    useEffect(() => {
-        console.log("requestQuotes", formDataList.requestQuotes);
-    }, [formDataList.requestQuotes]);
-
     const handleInputChange = (data, Id, enquiryId, field) => {
         setFormDataList(prev => ({
             ...prev,
@@ -562,6 +567,11 @@ const ProjectEnquiry = () => {
                         : item
                 )
             }))
+        }));
+
+        setFormData(prev => ({
+            ...prev,
+            validateFlag: data.trim() === ""
         }));
     };
 
@@ -705,6 +715,21 @@ const ProjectEnquiry = () => {
             year: formDataList.enquiryDetails.year,
             ...dynamicData
         };
+        const supplierQuotes = formDataList.requestQuotes.flatMap(group =>
+            group.items.map(item => ({
+                enqId: item.enquiryId,
+                quoteId: item.supplierQuotesId,
+                supplierQuoteAmountPriceOrQuantity: item.quantity,
+                itemNumber: item.enquiryDetailsId,
+                qty: item.quantity,
+                modifiedBy: agancyUserID,
+                intialprice: item.initialQuote?.toString(),
+                negoprice: item.negQuote?.toString(),
+                initialUnitprice: item.iniUnitPrice?.toString(),
+                negoUnitprice: item.negUnitPrice?.toString()
+            }))
+        );
+
         if (flag === "sla") {
             activeTab = "SLA";
             requests.push(PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
@@ -716,6 +741,7 @@ const ProjectEnquiry = () => {
         }
         if (flag === "rfq") {
             activeTab = "RFQ";
+            requests.push(PostApi(ProjectEnquiry_API.PostSupplierQuotes, supplierQuotes));
             handleCancel(null, flag)
             fetchData();
         }
@@ -1034,18 +1060,32 @@ const ProjectEnquiry = () => {
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                {formData.calculateFlag ? <></> : renderActionButtons("rfq")}
+                                {formData.marginFlag ? <></> : renderActionButtons("rfq")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={true} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} />
+                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.marginFlag ? false : true} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
+                            {formData.marginFlag ? <></> :
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PButton
+                                        label={"Add Supplier"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={() => setFormData((prev) => ({
+                                            ...prev,
+                                            suppliers: true
+                                        }))}
+                                        width={200}
+                                    />
+                                </PGrid>
+                            }
                             {formData.calculateFlag ? (
-                                <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                <PGrid item xs={12} sm={12} md={formData.marginFlag ? 12 : 6} className="d-flex justify-content-end gap-2">
                                     <PButton
                                         label={"Calculate Project Savings"}
                                         variant="contained"
@@ -1062,31 +1102,18 @@ const ProjectEnquiry = () => {
                                         width={250}
                                     />
                                 </PGrid>
-                            ) : (
-                                <PGrid item xs={12} sm={6} md={6}>
-                                    <PButton
-                                        label={"Add Supplier"}
-                                        variant="contained"
-                                        color={CommonColors.grey.main}
-                                        onClick={() => setFormData((prev) => ({
-                                            ...prev,
-                                            suppliers: true
-                                        }))}
-                                        width={200}
-                                    />
-                                </PGrid>
-                            )}
+                            ) : <></>}
                         </PGrid>
                         {formData.marginFlag ? (
                             <>
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12} sm={6} md={12}>
-                                        <PTable columns={formDataList.calculateRows} rows={formDataList.calculateRowsData} />
+                                        <PTable columns={formDataList.calculateRows} rows={formDataList.calculationDetails} />
                                     </PGrid>
                                 </PGrid>
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12} sm={6} md={12}>
-                                        <PTable columns={formDataList.calculateSupplierRows} rows={formDataList.data} />
+                                        <PTable columns={formDataList.calculateSupplierlogsRows} rows={formDataList.calculationSupplierlogs} />
                                     </PGrid>
                                 </PGrid>
                             </>
