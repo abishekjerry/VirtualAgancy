@@ -3,7 +3,7 @@ import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
@@ -20,7 +20,7 @@ import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import { PSummary } from "../../component/PSumary/PSummary";
 import { getClientInfo, getEnquiryDetails, getSummarySections } from "../../utils/constants/summary";
-import PSlaTemplate from "../../component/PSLATemplate/PSLATemplate";
+import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
 const EnquiryDetails = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -68,7 +68,6 @@ const EnquiryDetails = () => {
         clientInfo: [],
         enquiryDetails: []
     });
-
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
 
@@ -96,20 +95,19 @@ const EnquiryDetails = () => {
         };
         fetchData();
     }, []);
-
-    const defaultSla = formDataList?.slaTemplate?.[0]?.value ?? null;
+    
     useEffect(() => {
         if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
-            const slaId = formDataList?.enquiryDetails?.slaId ?? defaultSla;
             const hybrid = formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
             const managementfeetypeId = formDataList?.enquiryDetails?.managementfeetypeId ? data.enqProjectinfo.managementfeetypeId : 8;
+            const slaId = formDataList?.enquiryDetails?.slaId ?? 24;
             setFormData(prev => ({
                 ...prev,
                 slaTemplate: slaId,
                 hybrid: hybrid,
                 managementFeeType: managementfeetypeId
             }));
-            //slaTemplate(slaId);
+            //slaRef.current?.slaTemplate(slaId);
         }
     }, [formDataList.slaTemplate, formDataList.enquiryDetails]);
 
@@ -414,6 +412,7 @@ const EnquiryDetails = () => {
                                 </PGrid>
 
                             </PGrid>
+
                             <PSlaTemplate slaId={formData.slaTemplate} enquiryId={id} getLabel={getLabel}
                                 quoteStartDate={formDataList?.enquiryDetails?.quotestartdate}
                                 onChange={handleSlaChange}

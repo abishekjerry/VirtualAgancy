@@ -45,7 +45,7 @@ import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import HistoryIcon from "@mui/icons-material/History";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import PFileUpload from "../../component/PFileUpload/PFileUpload";
-import PSlaTemplate from "../../component/PSLATemplate/PSLATemplate";
+import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
 
 
 const ProjectEnquiry = () => {
@@ -281,7 +281,6 @@ const ProjectEnquiry = () => {
 
 
     const SavingsReasonMaster = async (data) => {
-        console.log(data, "djfnmb");
         try {
             setLoading(false);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
@@ -629,7 +628,6 @@ const ProjectEnquiry = () => {
     }, [formDataList.clientInfo, formDataList.enquiryDetails]);
 
     const handleSubmit = async (e, flag) => {
-        console.log(dynamicData, "dynamicData");
         let activeTab = "";
         let requests = [];
         const clientInfo = {

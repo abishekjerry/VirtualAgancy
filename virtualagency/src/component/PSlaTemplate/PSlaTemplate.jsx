@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import PGrid from "../PGrid/PGrid";
 import PTextField from "../PTextField/PTextField";
 import PDatepicker from "../PDatepicker/PDatepicker";
 import { formatDate, parseDate, toast } from "../../utils/commonFunction/common";
 import { Labels } from "../../utils/constants/labels";
 import { EnquiryDetails_API } from "../../utils/api/apiUrl";
-import { PostApi } from "../../utils/api/PostApi";
+import { PostApi } from "../../utils/api/networking";
 
-function PSlaTemplate ({ sla, enquiryId, quoteStartDate, disabled = false, onChange, getLabel }) {
+function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChange, getLabel }) {
     const keys = ["quote", "proof", "production", "filecopies", "invoice"];
     const today = formatDate(new Date());
     const [loading, setLoading] = useState(false);
@@ -83,7 +83,6 @@ function PSlaTemplate ({ sla, enquiryId, quoteStartDate, disabled = false, onCha
                 Enqid: enquiryId
             }
             );
-
             const phases = [
                 { name: getLabel("lbl54"), days: response?.defQuote, mdays: response?.quote },
                 { name: getLabel("lbl55"), days: response?.defProof, mdays: response?.proof },
@@ -94,7 +93,6 @@ function PSlaTemplate ({ sla, enquiryId, quoteStartDate, disabled = false, onCha
             calculatePlanByQuote(quoteStartDate || today, phases);
         }
         catch (error) {
-            console.log(error,"vsvmbsmn");
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         }
         finally {
@@ -102,9 +100,7 @@ function PSlaTemplate ({ sla, enquiryId, quoteStartDate, disabled = false, onCha
         }
     };
     useEffect(() => {
-        if (sla) {
-            slaTemplate(sla);
-        }
+        slaTemplate(sla ?? 24);
     }, [sla]);
 
     return (
@@ -161,7 +157,6 @@ function PSlaTemplate ({ sla, enquiryId, quoteStartDate, disabled = false, onCha
                 </PGrid>
             ))}
         </>
-    );
-};
-
+    )
+}
 export default PSlaTemplate;
