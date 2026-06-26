@@ -144,7 +144,16 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                                     )
                             }
                             allowFuture={true}
-                            onChange={(e) => handleStartDateChange(index, formatDate(e))}
+                            onChange={(e) => {
+                                const selectedDate = e?.target?.value
+                                    ? e.target.value
+                                    : formatDate(e);
+                                if (index === 0) {
+                                    calculatePlanByQuote(selectedDate, phaseDates, 0);
+                                } else {
+                                    handleStartDateChange(index, selectedDate);
+                                }
+                            }}
                         />
                     </PGrid>
 
