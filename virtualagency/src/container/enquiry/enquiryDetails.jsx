@@ -3,7 +3,7 @@ import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
@@ -20,6 +20,7 @@ import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import { PSummary } from "../../component/PSumary/PSummary";
 import { getClientInfo, getEnquiryDetails, getSummarySections } from "../../utils/constants/summary";
+import PSlaTemplate from "../../component/PSLATemplate/PSLATemplate";
 const EnquiryDetails = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -27,7 +28,7 @@ const EnquiryDetails = () => {
     const enquirySteps = getEnquirySteps(getLabel);
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [quoteStartDate, setQuoteStartDate] = useState("");
+    const [dynamicData, setDynamicData] = useState({});
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
         projectNo: "",
@@ -61,14 +62,8 @@ const EnquiryDetails = () => {
         projectAttribute: [],
         year: [],
         slaTemplate: [],
-        quoteType: [
-            { label: "Quote By Total Price", value: 1 },
-            { label: "Quote By Unit Price", value: 2 }
-        ],
-        hybird: [
-            { label: "Yes", value: 1 },
-            { label: "No", value: 2, selected: true }
-        ],
+        quoteType: [{ label: "Quote By Total Price", value: 1 }, { label: "Quote By Unit Price", value: 2 }],
+        hybird: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
 
         clientInfo: [],
         enquiryDetails: []
@@ -76,8 +71,6 @@ const EnquiryDetails = () => {
 
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
-    const [slaTemplateData, setSlaTemplateData] = useState(null)
-    const [phaseDates, setPhaseDates] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -94,7 +87,7 @@ const EnquiryDetails = () => {
                     year: response.year,
                     slaTemplate: response.sla
                 }));
-               await GetData(response);
+                await GetData(response);
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
@@ -102,22 +95,7 @@ const EnquiryDetails = () => {
             }
         };
         fetchData();
-        
     }, []);
-
-
-    // useEffect(() => {
-    //     const { projectAttribute, year, enquiryDetails } = formDataList;
-    //     if (projectAttribute?.length && year?.length && enquiryDetails?.attribute && enquiryDetails?.year) {
-    //         setFormData(prev => ({
-    //             ...prev,
-    //             projectAttribute: getOptionValue(projectAttribute, enquiryDetails.attribute),
-    //             //year: getOptionValue(year, enquiryDetails.year)
-    //         }));
-    //     }
-
-    // }, [formDataList]);
-
 
     const defaultSla = formDataList?.slaTemplate?.[0]?.value ?? null;
     useEffect(() => {
@@ -129,13 +107,12 @@ const EnquiryDetails = () => {
                 ...prev,
                 slaTemplate: slaId,
                 hybrid: hybrid,
-                managementFeeType : managementfeetypeId
+                managementFeeType: managementfeetypeId
             }));
-            slaTemplate(slaId);
+            //slaTemplate(slaId);
         }
     }, [formDataList.slaTemplate, formDataList.enquiryDetails]);
 
-    //useEffect(() => {
     const GetData = async (response) => {
         try {
             if (id !== 0) {
@@ -169,35 +146,6 @@ const EnquiryDetails = () => {
             setLoading(false);
         }
     };
-    //}, []);
-
-
-    const slaTemplate = async (sla) => {
-        try {
-            setLoading(true);
-            const response = await PostApi(EnquiryDetails_API.GetSlatemplateMaster, { SlaId: sla, Enqid: id });
-            setSlaTemplateData(response);
-        } catch (error) {
-            toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (!slaTemplateData) return;
-        const slaData = slaTemplateData;
-        const initialPhases = [
-            { name: getLabel("lbl54"), days: slaData?.defQuote, mdays: slaData?.quote },
-            { name: getLabel("lbl55"), days: slaData?.defProof, mdays: slaData?.proof },
-            { name: getLabel("lbl56"), days: slaData?.defProduction, mdays: slaData?.production },
-            { name: getLabel("lbl57"), days: slaData?.defFileCopies, mdays: slaData?.fileCopies },
-            { name: getLabel("lbl58"), days: slaData?.defInvoices, mdays: slaData?.invoicing }
-        ];
-        setPhaseDates(initialPhases);
-        const startDate = formDataList?.enquiryDetails?.quotestartdate ? formDataList.enquiryDetails.quotestartdate : today;
-        calculatePlanByQuote(startDate, initialPhases);
-    }, [slaTemplateData]);
 
     const handleChange = (e) => {
         const { name, value, label } = e.target;
@@ -209,10 +157,6 @@ const EnquiryDetails = () => {
             ...prev,
             [name]: ""   // clear only that field error
         }));
-        if (name === Labels.enquiryDetails.slaTemplate) {
-            slaTemplate(value);
-        }
-
     };
 
     const handleSubmit = async () => {
@@ -301,74 +245,16 @@ const EnquiryDetails = () => {
         setOpen(true);
     };
 
-    //SLA Date Management Function
+    const handleSlaChange = useCallback((data) => {
+        setDynamicData(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(data)) {
+                return prev;
+            }
+            return data;
+        });
+    }, []);
+
     const today = formatDate(new Date());
-    const keys = ["quote", "proof", "production", "filecopies", "invoice"];
-    const dynamicData = phaseDates.reduce((acc, item, i) => {
-        const key = keys[i];
-        acc[`${key}startdate`] = item.startDate;
-        acc[`${key}enddate`] = item.endDate;
-        acc[`modified${key.charAt(0).toUpperCase() + key.slice(1)}`] = item.mdays;
-        return acc;
-    }, {});
-
-    const calculatePlanByQuote = (selectedDate, updatedPhases = null, startIndex = 0) => {
-        setQuoteStartDate(selectedDate);
-        let data = updatedPhases || phaseDates;
-        let updated = [...data];
-        let startDate = startIndex === 0 ? parseDate(selectedDate) : parseDate(updated[startIndex].startDate);
-        // skip weekends
-        while (startDate.getDay() === 0 || startDate.getDay() === 6) {
-            startDate.setDate(startDate.getDate() + 1);
-        }
-        for (let i = startIndex; i < updated.length; i++) {
-            if (i !== startIndex) {
-                startDate = parseDate(updated[i - 1].endDate);
-            }
-            let tempStart = new Date(startDate);
-            let endDate = new Date(tempStart);
-            let mdays = updated[i].mdays ?? updated[i].days;
-            let count = 0;
-            while (count < mdays) {
-                endDate.setDate(endDate.getDate() + 1);
-                if (endDate.getDay() !== 0 && endDate.getDay() !== 6) {
-                    count++;
-                }
-            }
-            updated[i] = {
-                ...updated[i],
-                startDate: formatDate(tempStart),
-                endDate: formatDate(endDate)
-            };
-            startDate = new Date(endDate);
-        }
-        setPhaseDates(updated);
-    };
-
-    const handleModifiedDays = (index, value) => {
-        if (value === "") {
-            const updated = [...phaseDates];
-            updated[index] = { ...updated[index], mdays: "" };
-            setPhaseDates(updated);
-            return;
-        }
-        const num = Number(value);
-        if (isNaN(num) || num <= 0) return;
-        const updated = phaseDates.map((item, i) =>
-            i === index ? { ...item, mdays: num } : item
-        );
-        setPhaseDates(updated);
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
-    };
-
-    const handleStartDateChange = (index, selectedDate) => {
-        let updated = [...phaseDates];
-        if (index > 0 && parseDate(selectedDate) < parseDate(updated[index - 1].endDate)) return;
-        updated[index] = { ...updated[index], startDate: selectedDate };
-        setPhaseDates(updated);
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
-    };
-
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails(formData, dynamicData, formDataList, getLabel, getOptionLabel, id ? formDataList.enquiryDetails : null);
     const sections = getSummarySections({ clientInfo, enquiryDetails, getLabel });
@@ -528,70 +414,10 @@ const EnquiryDetails = () => {
                                 </PGrid>
 
                             </PGrid>
-
-                            <PGrid container className="fw-semibold mb-4">
-                                <PGrid item md={2} >{getLabel("lbl50")}</PGrid>
-                                <PGrid item md={2}>{getLabel("lbl51")}</PGrid>
-                                <PGrid item md={2}>{getLabel("lbl140")}</PGrid>
-                                <PGrid item md={3} >{getLabel("lbl52")}</PGrid>
-                                <PGrid item md={3} >{getLabel("lbl53")}</PGrid>
-                            </PGrid>
-                            {phaseDates.map((phase, index) => (
-                                <PGrid container className="mb-1 align-items-center" key={index}>
-
-                                    <PGrid item md={2} className="mb-3">
-                                        {phase.name}
-                                    </PGrid>
-
-                                    <PGrid item md={2} className="mb-3">
-                                        {phase.days}
-                                    </PGrid>
-
-                                    <PGrid item md={2}>
-                                        <PTextField
-                                            value={phase.mdays ?? ""}
-                                            onChange={(e) => handleModifiedDays(index, e.target.value)}
-                                            width={50}
-                                        />
-                                    </PGrid>
-
-                                    <PGrid item md={3}>
-                                        <PDatepicker
-                                            name={`${phase.name}_start`}
-                                            width={100}
-                                            value={phase.startDate || (index === 0 ? today : "")}
-
-                                            minDate={
-                                                index === 0
-                                                    ? parseDate(today)
-                                                    : parseDate(phaseDates[index - 1]?.endDate)
-                                            }
-
-                                            onChange={(e) => {
-                                                const selectedDate = e?.target?.value
-                                                    ? e.target.value
-                                                    : formatDate(e);
-
-                                                if (index === 0) {
-                                                    calculatePlanByQuote(selectedDate, phaseDates, 0);
-                                                } else {
-                                                    handleStartDateChange(index, selectedDate);
-                                                }
-                                            }}
-                                            allowFuture={true}
-                                        />
-                                    </PGrid>
-
-                                    <PGrid item md={3}>
-                                        <PTextField
-                                            name={`${phase.name}_end`}
-                                            value={phase.endDate || ""}
-                                            disabled={true}
-                                        />
-                                    </PGrid>
-
-                                </PGrid>
-                            ))}
+                            <PSlaTemplate slaId={formData.slaTemplate} enquiryId={id} getLabel={getLabel}
+                                quoteStartDate={formDataList?.enquiryDetails?.quotestartdate}
+                                onChange={handleSlaChange}
+                            />
 
                             <hr className="my-4" />
                             <PGrid container className="d-flex align-items-center justify-content-between">

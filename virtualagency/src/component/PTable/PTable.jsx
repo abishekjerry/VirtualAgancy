@@ -136,6 +136,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                 sx={{
                   fontSize: Labels.fontSize.xs, py: 1.8,
                   verticalAlign: "middle", borderLeft: col.rowSpan ? "1px solid #e5e7eb" : "",
+                  backgroundColor : col.rowSpan ? "#fff" : "",
                 }}
               >
                 {renderCell(col, item, item.rowId, { isFirstCol: cIndex === 0 })}

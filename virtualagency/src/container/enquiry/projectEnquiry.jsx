@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     Box,
     Typography,
@@ -27,7 +27,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
 import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, LineItems_API, Suppliers_API, ProjectEnquiry_API } from "../../utils/api/apiUrl";
-import { formatDate, getOptionLabel, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
+import { formatDate, getOptionLabel, getOptionValue, isNotEmpty, isSuccess, parseDate, toast } from "../../utils/commonFunction/common";
 import { PSummary } from "../../component/PSumary/PSummary";
 import PTable from "../../component/PTable/PTable";
 import { PostApi } from "../../utils/api/networking";
@@ -45,6 +45,7 @@ import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import HistoryIcon from "@mui/icons-material/History";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import PFileUpload from "../../component/PFileUpload/PFileUpload";
+import PSlaTemplate from "../../component/PSLATemplate/PSLATemplate";
 
 
 const ProjectEnquiry = () => {
@@ -52,9 +53,7 @@ const ProjectEnquiry = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [quoteStartDate, setQuoteStartDate] = useState("");
-    const [phaseDates, setPhaseDates] = useState([]);
-    const [slaTemplateData, setSlaTemplateData] = useState(null);
+    const [dynamicData, setDynamicData] = useState({});
 
     //Global variable
     const currency = localStorage.getItem("currency");
@@ -80,6 +79,7 @@ const ProjectEnquiry = () => {
         inputPS: false,
         isCalculate: true,
         historyTool: false,
+        rfqFlag: true,
         historySearchTool: "",
         quote: "",
         search: "",
@@ -92,7 +92,9 @@ const ProjectEnquiry = () => {
         projectDescription: "",
         managementFee: "",
         savingsType: "",
-        savingsReason: ""
+        savingsReason: "",
+        slaTemplate: ""
+
 
     });
     const [formDataList, setFormDataList] = useState({
@@ -154,7 +156,7 @@ const ProjectEnquiry = () => {
         savingsCalculateColumns: [{ field: "label" }, { field: "value" }],
         savingsCalculateData: [{ label: "Savings Reference Price", value: "0" }, { label: "Total PMG Sell Price (inc.fee)", value: "1,013.70" },
         { label: "Savings ($)", value: "0" }, { label: "Savings %", value: "0 %" }],
-        savingsReasonData: [],
+        savingsReasons: [],
 
         //History Tool
         historySearchesCloumns: [{ field: "enquriyID", header: "Action" }, { field: "qty", header: "Qty" }, { field: "country", header: "Country" }, { field: "specifications", header: "Specifications" },
@@ -209,11 +211,19 @@ const ProjectEnquiry = () => {
             if (projectResponse.calculationDetails != null) {
                 setFormData(prev => ({
                     ...prev,
+                    rfqFlag: false,
                     marginFlag: true,
                     calculateFlag: true
                 }));
             }
-            console.log(projectResponse.calculationDetails, "dsmnvnsm,d");
+            else {
+                setFormData(prev => ({
+                    ...prev,
+                    rfqFlag: true,
+                    marginFlag: false,
+                }));
+            }
+
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -228,20 +238,21 @@ const ProjectEnquiry = () => {
                     { label: getLabel("lbl10"), value: userName || "-" },
                     { label: "Enquiry Id", value: response.enqClientinfo?.enqUId || "-" }
                 ],
-                savingsReasonData: [{ item: "All items", savingType: response.enqlineItems[0].savingstype, savingReason: response.enqlineItems[0].savingsreason }],
+                savingsReasons: projectResponse.savingReasons,
                 historyLogs: projectResponse.historyLogs,
                 lineItemLogs: projectResponse.lineItemLogs,
                 historySearches: projectResponse.historySearches,
                 revisedQuotes: revisedQuotes,
                 requestQuotes: requestQuotes,
-                calculationDetails: projectResponse.calculationDetails ? [projectResponse.calculationDetails] : [],
-                calculationSupplierlogs : projectResponse.calculationSupplierlogs,
+                calculationDetails: projectResponse.calculationDetails,
+                calculationSupplierlogs: projectResponse.calculationSupplierlogs,
             }));
             setFormData(prev => ({
                 ...prev,
-                quote: response.enqProjectinfo?.quoteBy
+                quote: response.enqProjectinfo?.quoteBy,
+                slaTemplate: response.enqProjectinfo.slaId
             }));
-            slaTemplate(response.enqProjectinfo.slaId);
+            //slaTemplate(response.enqProjectinfo.slaId);
             clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -251,18 +262,26 @@ const ProjectEnquiry = () => {
     };
 
     //Change Function
-    const handleChange = (e) => {
+    const handleChange = (e, row) => {
         const { name, value, label } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value
+        }));
+        setFormDataList(prev => ({
+            ...prev,
+            savingsReasons: prev.savingsReasons.map(item => item.itemName === row.itemName
+                ? { ...item, [name]: label } : item
+            )
         }));
         if (name === Labels.lineItems.savingsType) {
             SavingsReasonMaster(label);
         }
     };
 
+
     const SavingsReasonMaster = async (data) => {
+        console.log(data, "djfnmb");
         try {
             setLoading(false);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
@@ -302,102 +321,17 @@ const ProjectEnquiry = () => {
 
     const sections = getSummarySections({ lineItems, getLabel });
 
-    //SLA Template function
-    const calculatePlanByQuote = (selectedDate, updatedPhases = null, startIndex = 0) => {
-        setQuoteStartDate(selectedDate);
-        let data = updatedPhases || phaseDates;
-        let updated = [...data];
-        let startDate = startIndex === 0 ? parseDate(selectedDate) : parseDate(updated[startIndex].startDate);
-        // skip weekends
-        while (startDate.getDay() === 0 || startDate.getDay() === 6) {
-            startDate.setDate(startDate.getDate() + 1);
-        }
-        for (let i = startIndex; i < updated.length; i++) {
-            if (i !== startIndex) {
-                startDate = parseDate(updated[i - 1].endDate);
-            }
-            let tempStart = new Date(startDate);
-            let endDate = new Date(tempStart);
-            let mdays = updated[i].mdays ?? updated[i].days;
-            let count = 0;
-            while (count < mdays) {
-                endDate.setDate(endDate.getDate() + 1);
-                if (endDate.getDay() !== 0 && endDate.getDay() !== 6) {
-                    count++;
-                }
-            }
-            updated[i] = {
-                ...updated[i],
-                startDate: formatDate(tempStart),
-                endDate: formatDate(endDate)
-            };
-            startDate = new Date(endDate);
-        }
-        setPhaseDates(updated);
-    };
-
-    const handleModifiedDays = (index, value) => {
-        if (value === "") {
-            const updated = [...phaseDates];
-            updated[index] = { ...updated[index], mdays: "" };
-            setPhaseDates(updated);
-            return;
-        }
-        const num = Number(value);
-        if (isNaN(num) || num <= 0) return;
-        const updated = phaseDates.map((item, i) =>
-            i === index ? { ...item, mdays: num } : item
-        );
-        setPhaseDates(updated);
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
-    };
-
-    const handleStartDateChange = (index, selectedDate) => {
-        let updated = [...phaseDates];
-        if (index > 0 && parseDate(selectedDate) < parseDate(updated[index - 1].endDate)) return;
-        updated[index] = { ...updated[index], startDate: selectedDate };
-        setPhaseDates(updated);
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
-    };
-
-    const slaTemplate = async (sla) => {
-        try {
-            setLoading(true);
-            const response = await PostApi(EnquiryDetails_API.GetSlatemplateMaster, { SlaId: sla, Enqid: id });
-            setSlaTemplateData(response);
-        } catch (error) {
-            toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (!slaTemplateData) return;
-        const slaData = slaTemplateData;
-        const initialPhases = [
-            { name: getLabel("lbl54"), days: slaData?.defQuote, mdays: slaData?.quote },
-            { name: getLabel("lbl55"), days: slaData?.defProof, mdays: slaData?.proof },
-            { name: getLabel("lbl56"), days: slaData?.defProduction, mdays: slaData?.production },
-            { name: getLabel("lbl57"), days: slaData?.defFileCopies, mdays: slaData?.fileCopies },
-            { name: getLabel("lbl58"), days: slaData?.defInvoices, mdays: slaData?.invoicing }
-        ];
-        setPhaseDates(initialPhases);
-        const startDate = formDataList?.enquiryDetails?.quotestartdate ? formDataList.enquiryDetails.quotestartdate : today;
-        calculatePlanByQuote(startDate, initialPhases);
-    }, [slaTemplateData]);
-
-    const today = formatDate(new Date())
-    const keys = ["quote", "proof", "production", "filecopies", "invoice"];
-    const dynamicData = phaseDates.reduce((acc, item, i) => {
-        const key = keys[i];
-        acc[`${key}startdate`] = item.startDate;
-        acc[`${key}enddate`] = item.endDate;
-        acc[`modified${key.charAt(0).toUpperCase() + key.slice(1)}`] = item.mdays;
-        return acc;
-    }, {});
-
     //Edit & cancel section function
+
+    const handleSlaChange = useCallback((data) => {
+        setDynamicData(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(data)) {
+                return prev;
+            }
+            return data;
+        });
+    }, []);
+
     const handleEdit = (e, flag) => {
         setFormData(prev => ({
             ...prev,
@@ -419,20 +353,11 @@ const ProjectEnquiry = () => {
                 modifiedBy: agancyUserID,
                 status: 2
             });
-            setFormData(prev => ({
-                ...prev,
-                marginFlag: false
-            }));
+            fetchData();
         }
         else {
-            setFormData(prev => ({
-                ...prev,
-                marginFlag: true
-            }));
         }
     }
-
-
 
     const clientInfoMaster = async (globalBUMapping) => {
         try {
@@ -491,6 +416,7 @@ const ProjectEnquiry = () => {
     }
     const data = filteredData;
 
+    //historyToolData Functionlity
     const search = formData.historySearchTool.trim().toLowerCase();
     const historyToolData = formDataList.historySearches.filter(item =>
         !search || [item.brand, item.subCategory, item.qty, item.poNumber, item.enquiryID]
@@ -607,29 +533,46 @@ const ProjectEnquiry = () => {
         { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
 
-    const savingsReasonColumns = [{ field: "item", header: "Item" },
-    {
-        field: "savingType", header: "Savings Type",
-        render: (row) =>
-            formData.project ? (
-                <PDropdown
-                    value={formData.savingsType}
-                    onChange={handleChange}
-                    name={Labels.lineItems.savingsType}
-                    options={formDataList.savingsType}
-                    flag={Labels.flag.auto}
-                />) : row.savingType
-    }, {
-        field: "savingReason", header: "Savings Reason", render: (row) =>
-            formData.project ? (
-                <PDropdown
-                    value={formData.savingsReason}
-                    onChange={handleChange}
-                    name={Labels.lineItems.savingsReason}
-                    options={formDataList.savingsReason}
-                    flag={Labels.flag.auto}
-                />) : row.savingReason
-    }];
+    //savings reason functionality
+
+    useEffect(() => {
+        if (formData.project && formDataList?.savingsReasons?.length) {
+            formDataList.savingsReasons.forEach(item => {
+                SavingsReasonMaster(item.savingstype);
+            });
+        }
+    }, [formData.project]);
+
+    const renderSavingsType = (row) => {
+        if (!formData.project) return row.savingstype;
+        const value = getOptionValue(formDataList.savingsType, row.savingstype)
+        return (
+            <PDropdown
+                value={value}
+                onChange={(e) => handleChange(e, row)}
+                name={Labels.lineItems.savingsType}
+                options={formDataList.savingsType}
+                flag={Labels.flag.auto}
+            />
+        );
+    };
+
+    const renderSavingsReason = (row) => {
+        if (!formData.project) return row.savingsreason;
+        const value = getOptionValue(formDataList.savingsReason, row.savingsreason);
+        return (
+            <PDropdown
+                value={value}
+                onChange={(e) => handleChange(e, row)}
+                name={Labels.lineItems.savingsReason}
+                options={formDataList.savingsReason}
+                flag={Labels.flag.auto}
+            />
+        );
+    };
+    const savingsReasons = [{ field: "itemName", header: "Item" },
+    { field: "savingstype", header: "Savings Type", render: renderSavingsType },
+    { field: "savingsreason", header: "Savings Reason", render: renderSavingsReason }];
 
     //Action button function
     const renderActionButtons = (flag) => (
@@ -686,6 +629,7 @@ const ProjectEnquiry = () => {
     }, [formDataList.clientInfo, formDataList.enquiryDetails]);
 
     const handleSubmit = async (e, flag) => {
+        console.log(dynamicData, "dynamicData");
         let activeTab = "";
         let requests = [];
         const clientInfo = {
@@ -730,62 +674,63 @@ const ProjectEnquiry = () => {
             }))
         );
 
-        if (flag === "sla") {
-            activeTab = "SLA";
-            requests.push(PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
-        }
-        if (flag === "job") {
-            activeTab = "Job summary";
-            requests.push(PostApi(ClientInfo_API.AddUpdateClientInfo, clientInfo),
-                PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails));
-        }
-        if (flag === "rfq") {
-            activeTab = "RFQ";
-            requests.push(PostApi(ProjectEnquiry_API.PostSupplierQuotes, supplierQuotes));
-            handleCancel(null, flag)
-            fetchData();
-        }
-        if (flag === "line") {
-            activeTab = "Line items";
-            handleCancel(null, flag)
-            fetchData();
-        }
-        if (flag == "project") {
-            activeTab = "Project Savings";
-            setFormDataList(prev => ({
-                ...prev,
-                savingsReasonData: [
-                    {
-                        item: "All items",
-                        savingType: getOptionLabel(formDataList.savingsType, formData.savingsType),
-                        savingReason: getOptionLabel(formDataList.savingsReason, formData.savingsReason)
-                    }
-                ]
-            }));
-            handleCancel(null, flag)
-            //fetchData();
-        }
-        if (flag === "sla" || flag === "job") {
-            try {
-                setLoading(true);
-                const response = await Promise.all(requests);
-                const successCount = response.filter(item => item?.status === true).length;
-                const message = successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
-                const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
-                toast(status, message);
-                setFormData(prev => ({
-                    ...prev,
-                    activeTab,
-                }))
-                handleCancel(null, flag)
+        switch (flag) {
+            case "sla":
+                activeTab = "SLA";
+                requests.push(
+                    PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails)
+                );
+                break;
+
+            case "job":
+                activeTab = "Job summary";
+                requests.push(
+                    PostApi(ClientInfo_API.AddUpdateClientInfo, clientInfo),
+                    PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails)
+                );
+                break;
+
+            case "rfq":
+                activeTab = "RFQ";
+                await PostApi(ProjectEnquiry_API.PostSupplierQuotes, supplierQuotes);
+                handleCancel(null, flag);
                 fetchData();
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
-            }
+                return;
+
+            case "line":
+                activeTab = "Line items";
+                handleCancel(null, flag);
+                fetchData();
+                return;
+
+            case "project":
+                activeTab = "Project Savings";
+                handleCancel(null, flag);
+                fetchData();
+                return;
+
+            default:
+                return;
         }
 
+        try {
+            setLoading(true);
+            const response = await Promise.all(requests);
+            const successCount = response.filter(item => item?.status === true).length;
+            const message = successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
+            const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
+            toast(status, message);
+            setFormData(prev => ({
+                ...prev,
+                activeTab,
+            }))
+            handleCancel(null, flag)
+            fetchData();
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -1066,7 +1011,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.marginFlag ? false : true} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} />
+                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.rfqFlag} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
@@ -1140,7 +1085,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb3}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={savingsReasonColumns} rows={formDataList.savingsReasonData} />
+                                <PTable columns={savingsReasons} rows={formDataList.savingsReasons} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb3}>
@@ -1184,63 +1129,9 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
-                        <PGrid container className="fw-semibold mb-4">
-                            <PGrid item md={2} >{getLabel("lbl50")}</PGrid>
-                            <PGrid item md={2}>{getLabel("lbl51")}</PGrid>
-                            <PGrid item md={2}>{getLabel("lbl140")}</PGrid>
-                            <PGrid item md={3} >{getLabel("lbl52")}</PGrid>
-                            <PGrid item md={3} >{getLabel("lbl53")}</PGrid>
-                        </PGrid>
-                        {phaseDates.map((phase, index) => (
-                            <PGrid container className="mb-1 align-items-center" key={index}>
-                                <PGrid item md={2} className="mb-3">
-                                    {phase.name}
-                                </PGrid>
-                                <PGrid item md={2} className="mb-3">
-                                    {phase.days}
-                                </PGrid>
-                                <PGrid item md={2}>
-                                    <PTextField
-                                        value={phase.mdays ?? ""}
-                                        onChange={(e) => handleModifiedDays(index, e.target.value)}
-                                        width={50}
-                                        disabled={formData.sla ? false : true}
-                                    />
-                                </PGrid>
-                                <PGrid item md={3}>
-                                    <PDatepicker
-                                        name={`${phase.name}_start`}
-                                        width={100}
-                                        value={phase.startDate || (index === 0 ? today : "")}
-                                        minDate={
-                                            index === 0
-                                                ? parseDate(today)
-                                                : parseDate(phaseDates[index - 1]?.endDate)
-                                        }
-                                        onChange={(e) => {
-                                            const selectedDate = e?.target?.value
-                                                ? e.target.value
-                                                : formatDate(e);
-                                            if (index === 0) {
-                                                calculatePlanByQuote(selectedDate, phaseDates, 0);
-                                            } else {
-                                                handleStartDateChange(index, selectedDate);
-                                            }
-                                        }}
-                                        allowFuture={true}
-                                        disabled={formData.sla ? false : true}
-                                    />
-                                </PGrid>
-                                <PGrid item md={3}>
-                                    <PTextField
-                                        name={`${phase.name}_end`}
-                                        value={phase.endDate || ""}
-                                        disabled={true}
-                                    />
-                                </PGrid>
-
-                            </PGrid>
-                        ))}
+                        <PSlaTemplate slaId={formData.slaTemplate} enquiryId={id} getLabel={getLabel} quoteStartDate={formDataList?.enquiryDetails?.quotestartdate} disabled={!formData.sla}
+                            onChange={handleSlaChange}
+                        />
                     </Box>
                 )}
 
