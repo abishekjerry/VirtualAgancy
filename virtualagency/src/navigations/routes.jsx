@@ -1,13 +1,14 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate , Outlet } from "react-router-dom";
 import PageLayout from "../container/layout/pageLayout";
 import { labelRoutes } from "./labelRoutes";
 import PageNotFound from "../container/pageNotFound/pageNotFound";
+import { useSelector } from "react-redux";
 
 const UserRoute = () => {
   const verifiedUser = useSelector((state) => state.userDetails.user);
-  //return verifiedUser?.UserName ? <Outlet /> : <Navigate to={labelRoutes.dashboard} replace />;
-  return <Navigate to={labelRoutes.home} replace />;
+  return verifiedUser?.UserName ? <Outlet /> : <Navigate to={labelRoutes.home} replace />;
+  //return <Navigate to={labelRoutes.home} replace />;
 };
 
 const LoginPage = lazy(() => import("../container/login/login"));
@@ -19,8 +20,8 @@ const LineItems = lazy(() => import("../container/enquiry/lineItems"));
 const Suppliers = lazy(() => import("../container/enquiry/suppliers"));
 const Review = lazy(() => import("../container/enquiry/review"));
 const Report = lazy(() => import("../container/report/Report"));
-const EnquirySuccess = lazy(()=> import("../container/enquiry/enquirySuccess"))
-const ProjectEnquiry = lazy(()=> import("../container/enquiry/projectEnquiry"))
+const EnquirySuccess = lazy(() => import("../container/enquiry/enquirySuccess"))
+const ProjectEnquiry = lazy(() => import("../container/enquiry/projectEnquiry"))
 function AppRoutes() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -30,17 +31,19 @@ function AppRoutes() {
         <Route path={labelRoutes.home} element={<LoginPage />} />
 
         {/* Layout Pages */}
-        <Route element={<PageLayout />}>
-          <Route path={labelRoutes.dashboard} element={<Dashboard />} />
-          <Route path={labelRoutes.eqDashboard} element={<EqDashboard />} />
-          <Route path={labelRoutes.report} element={<Report />} />
-          <Route path={labelRoutes.clientInfo} element={<ClientInfo />} />
-          <Route path={labelRoutes.enquiryDetails} element={<EnquiryDetails />} />
-          <Route path={labelRoutes.lineItems} element={<LineItems />} />
-          <Route path={labelRoutes.suppliers} element={<Suppliers />} />
-          <Route path={labelRoutes.review} element={<Review />} />
-          <Route path={labelRoutes.enquirySuceess} element={<EnquirySuccess />} />
-          <Route path={labelRoutes.projectEnquiry} element={<ProjectEnquiry />} />
+        <Route element={<UserRoute />}>
+          <Route element={<PageLayout />}>
+            <Route path={labelRoutes.dashboard} element={<Dashboard />} />
+            <Route path={labelRoutes.eqDashboard} element={<EqDashboard />} />
+            <Route path={labelRoutes.report} element={<Report />} />
+            <Route path={labelRoutes.clientInfo} element={<ClientInfo />} />
+            <Route path={labelRoutes.enquiryDetails} element={<EnquiryDetails />} />
+            <Route path={labelRoutes.lineItems} element={<LineItems />} />
+            <Route path={labelRoutes.suppliers} element={<Suppliers />} />
+            <Route path={labelRoutes.review} element={<Review />} />
+            <Route path={labelRoutes.enquirySuceess} element={<EnquirySuccess />} />
+            <Route path={labelRoutes.projectEnquiry} element={<ProjectEnquiry />} />
+          </Route>
         </Route>
 
         {/* Page Not Found */}

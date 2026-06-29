@@ -132,6 +132,17 @@ function Login(props) {
       });
       if (isLogin) {
         if (isSuccess(res)) {
+          const user = res?.data;
+          props.saveUserDetails({
+            UserName: user?.username,
+            Email: user?.email,
+            fkID: user?.fkID,
+            userID: user?.userID,
+            role: user?.role,
+            currency: user?.currency,
+            country: user?.country,
+            countryID: user?.countryId,
+          });
           localStorage.setItem("user", res?.data?.username);
           localStorage.setItem("email", res?.data?.email);
           localStorage.setItem("agancyUserID", res?.data?.fkID);

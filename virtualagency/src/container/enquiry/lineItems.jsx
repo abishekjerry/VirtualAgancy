@@ -429,8 +429,19 @@ const LineItems = () => {
 
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
+
+    const baseVaildation = () => {
+        return (
+            formData.itemName ||
+            formData.itemNameDescription ||
+            formData.specifications ||
+            formData.printingMethod ||
+            formData.quantityType ||
+            formData.quantity
+        );
+    };
     const handleSubmit = async (e, isSubmit) => {
-        if (lineItems.length > 0 && isSubmit) {
+        if (lineItems.length > 0 && isSubmit && !baseVaildation()) {
             setAllowRedirect(false);
             navigate(labelRoutes.suppliers, { state: { id: id } });
             return;
