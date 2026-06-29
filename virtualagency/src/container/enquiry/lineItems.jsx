@@ -237,7 +237,7 @@ const LineItems = () => {
         }
     };
 
-    const SavingsReasonMaster = async (data) => {
+    const SavingsReasonMaster = async (data, hybird = false) => {
         try {
             setLoading(false);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
@@ -248,13 +248,15 @@ const LineItems = () => {
                 ...prev,
                 savingsReason: response.savingsReason,
             }));
+            if (hybird) {
+                //hybird condition
+                setFormData(prev => ({
+                    ...prev,
+                    savingsType: getOptionValue(response.savingsType, formDataList.lineItems?.[0]?.savingstype),
+                    savingsReason: getOptionValue(response.savingsReason, formDataList.lineItems?.[0]?.savingsreason)
+                }));
+            }
 
-            //hybird condition
-            setFormData(prev => ({
-                ...prev,
-                savingsType: getOptionValue(response.savingsType, formDataList.lineItems?.[0]?.savingstype),
-                savingsReason: getOptionValue(response.savingsReason, formDataList.lineItems?.[0]?.savingsreason)
-            }));
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
@@ -696,14 +698,14 @@ const LineItems = () => {
     }
 
     //hybird functionality
-    const hybird = formDataList?.enquiryDetails?.hybridModel === "No";
+    const hybird = formDataList?.enquiryDetails?.hybridModel === "No" && lineItems?.length > 0;
     const category = hybird && lineItems?.length > 0 ? formDataList.lineItems[0].printornonprint
         : getOptionLabel(formDataList.category, formData.category);
 
     useEffect(() => {
         if (hybird && lineItems.length > 0) {
             LineItemsMaster(category);
-            SavingsReasonMaster(formDataList.lineItems[0].savingstype);
+            SavingsReasonMaster(formDataList.lineItems[0].savingstype, true);
         }
     }, [hybird, lineItems.length]);
 
