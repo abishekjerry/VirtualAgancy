@@ -63,6 +63,7 @@ const ProjectEnquiry = () => {
     const userName = localStorage.getItem("user")
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
+    const today = formatDate(new Date());
     //State & list states
     const [formData, setFormData] = useState({
         activeTab: "Job Summary",
@@ -208,19 +209,32 @@ const ProjectEnquiry = () => {
                     subTitle: x.itemName,
                     items: projectResponse.requestQuotes.filter(y => y.itemNumber === x.itemNumber)
                 }));
-            if (projectResponse.calculationDetails != null) {
+
+            //Calculation Details for RFQ
+            const total = projectResponse.calculationDetails.reduce((a, b) => ({
+                    cost: a.cost + b.cost,
+                    sell: a.sell + b.sell,
+                    margin: a.margin + b.margin
+                }), { cost: 0, sell: 0, margin: 0 }
+            );
+
+            total.markupPercent = +(total.margin / total.cost * 100).toFixed(2);
+            total.marginPercent = +(total.margin / total.sell * 100).toFixed(2);
+            const calculationDetails = [total];
+            
+            if (calculationDetails?.length > 0) {
                 setFormData(prev => ({
                     ...prev,
                     rfqFlag: false,
                     marginFlag: true,
                     calculateFlag: true
                 }));
-            }
-            else {
+            } else {
                 setFormData(prev => ({
                     ...prev,
                     rfqFlag: true,
                     marginFlag: false,
+                    calculateFlag: true
                 }));
             }
 
@@ -244,7 +258,7 @@ const ProjectEnquiry = () => {
                 historySearches: projectResponse.historySearches,
                 revisedQuotes: revisedQuotes,
                 requestQuotes: requestQuotes,
-                calculationDetails: projectResponse.calculationDetails,
+                calculationDetails: calculationDetails,
                 calculationSupplierlogs: projectResponse.calculationSupplierlogs,
             }));
             setFormData(prev => ({
@@ -342,7 +356,6 @@ const ProjectEnquiry = () => {
         setFormData(prev => ({
             ...prev,
             [flag]: false,
-            calculateFlag: flag == "rfq" ? true : false
         }));
     }
     const handleCalculate = async (e, flag) => {
@@ -355,6 +368,26 @@ const ProjectEnquiry = () => {
             fetchData();
         }
         else {
+
+            const quotePrice = formDataList.selectedSupplierRows.reduce((sum, item) => sum + Number(item.negQuote), 0);
+            const payload = {
+                enqid: id,
+                quoteprice: quotePrice,
+                // managementFeeMethod: formData.managementFeeMethod,
+                // managementFeeUnit: Number(formData.managementFeeUnit),
+                // totalManagementFee,
+                // taxPercentage: Number(formData.taxPercentage),
+                // totalTaxAmount,
+                // totalQuoteAmount,
+                ls_getsupplierQuotes: formDataList.selectedSupplierRows.map(item => ({
+                    itemnumber: item.itemNumber,
+                    supplierID: item.supplierId,
+                    initialPrice: item.initialQuote,
+                    negotiatePrice: item.negQuote,
+                    supplierQuotesId: item.supplierQuotesId
+
+                }))
+            }
         }
     }
 
