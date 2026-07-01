@@ -90,7 +90,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                 { name: getLabel("lbl57"), days: response?.defFileCopies, mdays: response?.fileCopies },
                 { name: getLabel("lbl58"), days: response?.defInvoices, mdays: response?.invoicing }
             ];
-            calculatePlanByQuote(quoteStartDate || today, phases);
+            calculatePlanByQuote(quoteStartDate? quoteStartDate : today, phases);
         }
         catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);

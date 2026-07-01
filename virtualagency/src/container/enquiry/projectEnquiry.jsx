@@ -212,17 +212,17 @@ const ProjectEnquiry = () => {
 
             //Calculation Details for RFQ
             const total = projectResponse.calculationDetails.reduce((a, b) => ({
-                    cost: a.cost + b.cost,
-                    sell: a.sell + b.sell,
-                    margin: a.margin + b.margin
-                }), { cost: 0, sell: 0, margin: 0 }
+                cost: a.cost + b.cost,
+                sell: a.sell + b.sell,
+                margin: a.margin + b.margin
+            }), { cost: 0, sell: 0, margin: 0 }
             );
 
             total.markupPercent = +(total.margin / total.cost * 100).toFixed(2);
             total.marginPercent = +(total.margin / total.sell * 100).toFixed(2);
             const calculationDetails = [total];
-            
-            if (calculationDetails?.length > 0) {
+
+            if (projectResponse.calculationDetails?.length > 0) {
                 setFormData(prev => ({
                     ...prev,
                     rfqFlag: false,
@@ -278,16 +278,27 @@ const ProjectEnquiry = () => {
     //Change Function
     const handleChange = (e, row) => {
         const { name, value, label } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
+
+        let field = name;
+
+        if (name === Labels.lineItems.savingsType) {
+            field = "savingstype";
+        } else if (name === Labels.lineItems.savingsReason) {
+            field = "savingsreason";
+        }
+
         setFormDataList(prev => ({
             ...prev,
-            savingsReasons: prev.savingsReasons.map(item => item.itemName === row.itemName
-                ? { ...item, [name]: label } : item
+            savingsReasons: prev.savingsReasons.map(item =>
+                item.itemName === row.itemName
+                    ? {
+                        ...item,
+                        [field]: label // or value, depending on what your dropdown stores
+                    }
+                    : item
             )
         }));
+
         if (name === Labels.lineItems.savingsType) {
             SavingsReasonMaster(label);
         }
