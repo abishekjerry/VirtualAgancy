@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import { useTheme } from "@mui/material/styles";
 import { FontFamily } from "../../utils/constants/fonts";
 import { CommonColors } from "../../utils/constants/colors";
-
+import CircularProgress from "@mui/material/CircularProgress";
 export default function PButton({
   label,
   onClick,
@@ -24,6 +24,7 @@ export default function PButton({
   rounded = "md",
   shadow = true,
   sx = {},
+  loading = false
 }) {
 
   const theme = useTheme();
@@ -32,9 +33,9 @@ export default function PButton({
     CommonColors.gradientBackgrounds?.[color] ||
     "linear-gradient(to right, #4e54c8, #8f94fb)";
 
-//   const solidColor =
-//     theme.palette[color]?.main || CommonColors.primary;
-    const solidColor = color === "primary" ? CommonColors.primary : color;
+  //   const solidColor =
+  //     theme.palette[color]?.main || CommonColors.primary;
+  const solidColor = color === "primary" ? CommonColors.primary : color;
 
   const radiusMap = {
     sm: "8px",
@@ -66,8 +67,8 @@ export default function PButton({
           size === "small"
             ? "0.8rem"
             : size === "large"
-            ? "1rem"
-            : "0.9rem",
+              ? "1rem"
+              : "0.9rem",
 
         borderRadius: radiusMap[rounded],
 
@@ -79,8 +80,8 @@ export default function PButton({
         background: gradient
           ? gradientBackground
           : variant === "contained"
-          ? solidColor
-          : "transparent",
+            ? solidColor
+            : "transparent",
 
         border: variant === "outlined" ? `1px solid ${solidColor}` : "none",
 
@@ -95,8 +96,8 @@ export default function PButton({
           background: gradient
             ? gradientBackground
             : variant === "contained"
-            ? solidColor
-            : "rgba(0,0,0,0.04)",
+              ? solidColor
+              : "rgba(0,0,0,0.04)",
           boxShadow:
             shadow && variant === "contained"
               ? "0px 6px 16px rgba(0,0,0,0.2)"
@@ -113,6 +114,13 @@ export default function PButton({
         ...sx,
       }}
     >
+      {loading && (
+        <CircularProgress
+          size={18}
+          color="inherit"
+          sx={{ mr: 1 }}
+        />
+      )}
       {label || children}
     </Button>
   );

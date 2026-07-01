@@ -146,7 +146,7 @@ const Suppliers = () => {
     const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel });
 
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e, flag) => {
         const rows = formDataList.selectedRows || [];
         const isValid = rows.length > 0;
         setIsValidation(isValid);
@@ -167,7 +167,7 @@ const Suppliers = () => {
                 setAllowRedirect(true);
                 toast(Labels.status.success, response.data.message);
                 setTimeout(() => {
-                    navigate(labelRoutes.review, {
+                    navigate(flag ? labelRoutes.review : labelRoutes.eqDashboard, {
                         state: { id: response.data.enqId }
                     });
                 }, 500);

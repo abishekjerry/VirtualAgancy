@@ -157,7 +157,7 @@ const EnquiryDetails = () => {
         }));
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e, flag) => {
         const isValid = EnquiryDetailsValidation();
         if (isValid) {
             try {
@@ -181,7 +181,7 @@ const EnquiryDetails = () => {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
-                        navigate(labelRoutes.lineItems, {
+                        navigate(flag ? labelRoutes.lineItems : labelRoutes.eqDashboard, {
                             state: { id: response.data.enqId }
                         });
                     }, 500);

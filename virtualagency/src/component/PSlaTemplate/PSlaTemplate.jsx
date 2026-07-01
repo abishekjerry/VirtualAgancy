@@ -58,6 +58,15 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
     };
 
     const handleModifiedDays = (index, value) => {
+        if (value === "") {
+            const updated = [...phaseDates];
+            updated[index] = { ...updated[index], mdays: "" };
+            setPhaseDates(updated);
+            return;
+        }
+        const num = Number(value);
+        // Reject invalid values and 0
+        if (isNaN(num) || num <= 0) return;
         const updated = [...phaseDates];
         updated[index] = { ...updated[index], mdays: value };
         calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
@@ -90,7 +99,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                 { name: getLabel("lbl57"), days: response?.defFileCopies, mdays: response?.fileCopies },
                 { name: getLabel("lbl58"), days: response?.defInvoices, mdays: response?.invoicing }
             ];
-            calculatePlanByQuote(quoteStartDate? quoteStartDate : today, phases);
+            calculatePlanByQuote(quoteStartDate ? quoteStartDate : today, phases);
         }
         catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);

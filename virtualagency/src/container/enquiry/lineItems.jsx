@@ -440,8 +440,8 @@ const LineItems = () => {
             formData.quantity
         );
     };
-    const handleSubmit = async (e, isSubmit) => {
-        if (lineItems.length > 0 && isSubmit && !baseVaildation()) {
+    const handleSubmit = async (e, flag) => {
+        if (lineItems.length > 0 && flag && !baseVaildation()) {
             setAllowRedirect(false);
             navigate(labelRoutes.suppliers, { state: { id: id } });
             return;
@@ -516,13 +516,14 @@ const LineItems = () => {
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
                 if (isSuccess(response)) {
                     setAllowRedirect(true);
+                    const route = flag === true ? labelRoutes.suppliers : flag === false ? labelRoutes.LineItems : labelRoutes.eqDashboard;
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
-                        navigate(isSubmit ? labelRoutes.suppliers : labelRoutes.LineItems, {
+                        navigate(route, {
                             state: { id: response.data.enqId }
                         });
                     }, 500);
-                    if (!isSubmit) {
+                    if (!flag) {
                         await handleCancel();
                         await fetchData();
                     };

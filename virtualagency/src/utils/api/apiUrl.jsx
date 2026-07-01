@@ -58,7 +58,8 @@ export const Suppliers_API = {
 export const ProjectEnquiry_API = {
   GetProjectDetails : Base_Url + "/VA/GetProjectDetails",
   PostSupplierQuotes : Base_Url + "/VA/PostSupplierQuotes",
-  UpdateJobStatus : Base_Url + "/VA/UpdateJobStatus"
+  UpdateJobStatus : Base_Url + "/VA/UpdateJobStatus",
+  CalculateSavings: Base_Url + "/VA/CalculateSavings"
 }
 
 

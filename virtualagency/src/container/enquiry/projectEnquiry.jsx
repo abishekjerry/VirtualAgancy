@@ -278,24 +278,17 @@ const ProjectEnquiry = () => {
     //Change Function
     const handleChange = (e, row) => {
         const { name, value, label } = e.target;
-
-        let field = name;
-
-        if (name === Labels.lineItems.savingsType) {
-            field = "savingstype";
-        } else if (name === Labels.lineItems.savingsReason) {
-            field = "savingsreason";
-        }
-
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
         setFormDataList(prev => ({
             ...prev,
             savingsReasons: prev.savingsReasons.map(item =>
-                item.itemName === row.itemName
-                    ? {
-                        ...item,
-                        [field]: label // or value, depending on what your dropdown stores
-                    }
-                    : item
+                item.itemName === row.itemName ? {
+                    ...item,
+                    [name]: label
+                } : item
             )
         }));
 
@@ -363,11 +356,12 @@ const ProjectEnquiry = () => {
             validateFlag: flag == "rfq" ? true : false
         }));
     };
-    const handleCancel = async (e, flag) => {
+    const handleCancel = async (e, flag) => {   
         setFormData(prev => ({
             ...prev,
             [flag]: false,
         }));
+        await fetchData();
     }
     const handleCalculate = async (e, flag) => {
         if (flag == "reCalculate") {
@@ -376,29 +370,35 @@ const ProjectEnquiry = () => {
                 modifiedBy: agancyUserID,
                 status: 2
             });
-            fetchData();
+            await fetchData();
         }
         else {
-
-            const quotePrice = formDataList.selectedSupplierRows.reduce((sum, item) => sum + Number(item.negQuote), 0);
             const payload = {
                 enqid: id,
-                quoteprice: quotePrice,
-                // managementFeeMethod: formData.managementFeeMethod,
-                // managementFeeUnit: Number(formData.managementFeeUnit),
-                // totalManagementFee,
-                // taxPercentage: Number(formData.taxPercentage),
-                // totalTaxAmount,
-                // totalQuoteAmount,
                 ls_getsupplierQuotes: formDataList.selectedSupplierRows.map(item => ({
                     itemnumber: item.itemNumber,
                     supplierID: item.supplierId,
                     initialPrice: item.initialQuote,
                     negotiatePrice: item.negQuote,
                     supplierQuotesId: item.supplierQuotesId
-
                 }))
             }
+            try {
+                setLoading(true);
+                const response = await PostApi(ProjectEnquiry_API.CalculateSavings, payload);
+                if (isSuccess(response)) {
+                    await fetchData();
+                    setFormDataList(prev => ({
+                        ...prev,
+                        selectedSupplierRows: [],
+                    }));
+                }
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+
         }
     }
 
@@ -581,14 +581,14 @@ const ProjectEnquiry = () => {
     useEffect(() => {
         if (formData.project && formDataList?.savingsReasons?.length) {
             formDataList.savingsReasons.forEach(item => {
-                SavingsReasonMaster(item.savingstype);
+                SavingsReasonMaster(item.savingsType);
             });
         }
     }, [formData.project]);
 
     const renderSavingsType = (row) => {
-        if (!formData.project) return row.savingstype;
-        const value = getOptionValue(formDataList.savingsType, row.savingstype)
+        if (!formData.project) return row.savingsType;
+        const value = getOptionValue(formDataList.savingsType, row.savingsType)
         return (
             <PDropdown
                 value={value}
@@ -601,8 +601,8 @@ const ProjectEnquiry = () => {
     };
 
     const renderSavingsReason = (row) => {
-        if (!formData.project) return row.savingsreason;
-        const value = getOptionValue(formDataList.savingsReason, row.savingsreason);
+        if (!formData.project) return row.savingsReason;
+        const value = getOptionValue(formDataList.savingsReason, row.savingsReason);
         return (
             <PDropdown
                 value={value}
@@ -736,19 +736,16 @@ const ProjectEnquiry = () => {
                 activeTab = "RFQ";
                 await PostApi(ProjectEnquiry_API.PostSupplierQuotes, supplierQuotes);
                 handleCancel(null, flag);
-                fetchData();
                 return;
 
             case "line":
                 activeTab = "Line items";
                 handleCancel(null, flag);
-                fetchData();
                 return;
 
             case "project":
                 activeTab = "Project Savings";
                 handleCancel(null, flag);
-                fetchData();
                 return;
 
             default:
@@ -767,7 +764,6 @@ const ProjectEnquiry = () => {
                 activeTab,
             }))
             handleCancel(null, flag)
-            fetchData();
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
@@ -1077,7 +1073,7 @@ const ProjectEnquiry = () => {
                                         label={"Calculate Project Savings"}
                                         variant="contained"
                                         color={CommonColors.grey.main}
-                                        onClick={() => handleCalculate(null, "calculate")}
+                                        onClick={(e) => handleCalculate(e, "calculate")}
                                         width={250}
                                         disabled={formData.isCalculate}
                                     />
@@ -1085,7 +1081,7 @@ const ProjectEnquiry = () => {
                                         label={"Re-calculate Project Savings"}
                                         variant="contained"
                                         color={CommonColors.red.main}
-                                        onClick={() => handleCalculate(null, "reCalculate")}
+                                        onClick={(e) => handleCalculate(e, "reCalculate")}
                                         width={250}
                                     />
                                 </PGrid>
