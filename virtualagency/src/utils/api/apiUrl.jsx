@@ -29,6 +29,7 @@ export const Dashboard_API = {
   Dashboard: Base_Url + "/VA/Viewdashboard",
   Master: Base_Url + "/VA/MasterDropdowns",
   GetDetails: Base_Url + "/VA/GetDetails",
+  EnqReview: Base_Url + "/VA/EnqReview",
 }
 
 
@@ -59,7 +60,8 @@ export const ProjectEnquiry_API = {
   GetProjectDetails : Base_Url + "/VA/GetProjectDetails",
   PostSupplierQuotes : Base_Url + "/VA/PostSupplierQuotes",
   UpdateJobStatus : Base_Url + "/VA/UpdateJobStatus",
-  CalculateSavings: Base_Url + "/VA/CalculateSavings"
+  CalculateSavings: Base_Url + "/VA/CalculateSavings",
+  PostRefPrice : Base_Url + "/VA/PostRefprice"
 }
 
 

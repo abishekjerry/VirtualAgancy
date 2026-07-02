@@ -10,7 +10,7 @@ import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../../component/PButton/PButton";
 import PStepper from "../../component/PStepper/PStepper";
-import { getEnquirySteps, getOptionLabel, toast } from "../../utils/commonFunction/common";
+import { getEnquirySteps, getOptionLabel, isSuccess, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { useNavigate, useLocation } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
@@ -39,6 +39,8 @@ const Review = () => {
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(0); // first item open by default
     const [openDraft, setOpenDraft] = useState();
+
+    const userID = parseInt(localStorage.getItem("userID"));
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
         enquiryDetails: [],
@@ -105,10 +107,21 @@ const Review = () => {
         });
     };
 
-    const handleSubmit = () => {
-        navigate(labelRoutes.enquirySuceess, {
-            state: { id: state.id }
-        });
+    const handleSubmit = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(`${Dashboard_API.EnqReview}?enqId=${id}&createdBy=${userID}`);
+            if (isSuccess(response)) {
+                navigate(labelRoutes.enquirySuceess, {
+                    state: { id: state.id }
+                });
+            }
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+
     }
     const handleExitDraft = () => {
         setOpenDraft(true);

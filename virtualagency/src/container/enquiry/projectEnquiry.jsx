@@ -64,6 +64,7 @@ const ProjectEnquiry = () => {
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const today = formatDate(new Date());
+
     //State & list states
     const [formData, setFormData] = useState({
         activeTab: "Job Summary",
@@ -85,6 +86,7 @@ const ProjectEnquiry = () => {
         quote: "",
         search: "",
         files: [],
+        calculateProject: false,
         //editable state
         clientContact: "",
         projectNo: "",
@@ -108,14 +110,12 @@ const ProjectEnquiry = () => {
         savingsReason: [],
         status: [{ label: "Job Cancelled", value: 1 }],
         data: [],
-        tabs: [{ label: "Job Summary", icon: <WorkOutlineIcon /> }, { label: "Line Items", icon: <Inventory2Icon /> },
-        { label: "RFQ", icon: <RequestQuoteIcon /> }, { label: "Project Saving", icon: <SavingsIcon /> }, { label: "SLA", icon: <HandshakeIcon /> },
-        { label: "Revised Quotes", icon: <PriceChangeIcon /> }, { label: "Logs", icon: <HistoryIcon /> }, { label: "Attachment", icon: <AttachmentIcon /> }],
         columns: [{ field: "suppliername", header: "Supplier's Name" }, { field: "country", header: "Country" }, { field: "suppliercode", header: "Supplier Code" },],
         supplierMaster: [],
         selectedRows: [],
         statusInfo: [],
         selectedSupplierRows: [],
+        selectedHistroyRows: [],
         extraInfo: [],
 
         //calculations
@@ -135,28 +135,13 @@ const ProjectEnquiry = () => {
         calculationSupplierlogs: [],
 
         //project savings list
+        projectSavings: [],
+        savingsSummary: [],
 
-        projectSavingsData: [{
-            previousPoNumber: "",
-            savingsReason: "NES CA - Urgent Job",
-            baselineQuantity: 0,
-            savingsReferencePrice: 0,
-            currentSellPriceExclFee: 920.00,
-            currentSellPriceInclFee: 1002.80
-        },
-        {
-            previousPoNumber: "",
-            savingsReason: "NES CA - Urgent Job",
-            baselineQuantity: 0,
-            savingsReferencePrice: 0,
-            currentSellPriceExclFee: 10.00,
-            currentSellPriceInclFee: 10.90
-        },],
-        savingsSummaryColumns: [{ field: "savingsInclFee", header: "Savings (Inc. Fee)" }, { field: "savingsPercentInclFee", header: "Savings % (Inc. Fee)" },
-        { field: "savingsExclFee", header: "Savings (Excl. Fee)" }, { field: "savingsPercentExclFee", header: "Savings % (Excl. Fee)" }],
-        savingsCalculateColumns: [{ field: "label" }, { field: "value" }],
-        savingsCalculateData: [{ label: "Savings Reference Price", value: "0" }, { label: "Total PMG Sell Price (inc.fee)", value: "1,013.70" },
-        { label: "Savings ($)", value: "0" }, { label: "Savings %", value: "0 %" }],
+        savingsSummaryColumns: [{ field: "saving", header: "Savings (Inc. Fee)" }, { field: "savingPercent", header: "Savings % (Inc. Fee)" },
+        { field: "savingDisplay", header: "Savings (Excl. Fee)" }, { field: "savingPercentDisplay", header: "Savings % (Excl. Fee)" }],
+        savingsCalculation: [{ field: "label" }, { field: "value" }],
+        savingsResponseDto: { totalPreviousPrice: 0, totalSellPrice: 0, totalSaving: 0, totalSavingPercent: 0 },
         savingsReasons: [],
 
         //History Tool
@@ -173,11 +158,24 @@ const ProjectEnquiry = () => {
         requestQuotes: [],
 
     });
+    const showProjectSaving = formDataList.projectSavings?.length > 0;
+
+    const tabs = [
+        { label: "Job Summary", icon: <WorkOutlineIcon /> },
+        { label: "Line Items", icon: <Inventory2Icon /> },
+        { label: "RFQ", icon: <RequestQuoteIcon /> },
+        ...(showProjectSaving ? [{ label: "Project Saving", icon: <SavingsIcon /> }] : []),
+        { label: "SLA", icon: <HandshakeIcon /> },
+        { label: "Revised Quotes", icon: <PriceChangeIcon /> },
+        { label: "Logs", icon: <HistoryIcon /> },
+        { label: "Attachment", icon: <AttachmentIcon /> }
+    ]
 
     //Master function
     useEffect(() => {
         fetchData();
     }, []);
+
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -196,6 +194,7 @@ const ProjectEnquiry = () => {
                 Currency: currency,
                 Country: countryName
             });
+
             const revisedQuotes = [...new Map(projectResponse.revisedQuotes.map(x => [x.itemNumber, x])).values()]
                 .map(x => ({
                     isSubTitle: true,
@@ -210,13 +209,26 @@ const ProjectEnquiry = () => {
                     items: projectResponse.requestQuotes.filter(y => y.itemNumber === x.itemNumber)
                 }));
 
+            const projectSavings = [...new Map(projectResponse.savingsResponseDto.details.map(x => [x.itemNumber, x])).values()]
+                .map(x => ({
+                    isSubTitle: true,
+                    subTitle: x.itemName,
+                    items: projectResponse.savingsResponseDto.details.filter(y => y.itemNumber === x.itemNumber)
+                }));
+
+            const savingsSummary = [...new Map(projectResponse.savingsResponseDto.itemWiseSummary.map(x => [x.itemNumber, x])).values()]
+                .map(x => ({
+                    isSubTitle: true,
+                    subTitle: "Item - itemName",
+                    items: projectResponse.savingsResponseDto.itemWiseSummary.filter(y => y.itemNumber === x.itemNumber)
+                }));
+
             //Calculation Details for RFQ
             const total = projectResponse.calculationDetails.reduce((a, b) => ({
                 cost: a.cost + b.cost,
                 sell: a.sell + b.sell,
                 margin: a.margin + b.margin
-            }), { cost: 0, sell: 0, margin: 0 }
-            );
+            }), { cost: 0, sell: 0, margin: 0 });
 
             total.markupPercent = +(total.margin / total.cost * 100).toFixed(2);
             total.marginPercent = +(total.margin / total.sell * 100).toFixed(2);
@@ -260,6 +272,9 @@ const ProjectEnquiry = () => {
                 requestQuotes: requestQuotes,
                 calculationDetails: calculationDetails,
                 calculationSupplierlogs: projectResponse.calculationSupplierlogs,
+                projectSavings: projectSavings,
+                savingsSummary: savingsSummary,
+                savingsResponseDto: projectResponse.savingsResponseDto
             }));
             setFormData(prev => ({
                 ...prev,
@@ -269,6 +284,7 @@ const ProjectEnquiry = () => {
             //slaTemplate(response.enqProjectinfo.slaId);
             clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
+            console.log(error);
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
@@ -356,13 +372,15 @@ const ProjectEnquiry = () => {
             validateFlag: flag == "rfq" ? true : false
         }));
     };
-    const handleCancel = async (e, flag) => {   
+
+    const handleCancel = async (e, flag) => {
         setFormData(prev => ({
             ...prev,
             [flag]: false,
         }));
         await fetchData();
-    }
+    };
+
     const handleCalculate = async (e, flag) => {
         if (flag == "reCalculate") {
             const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
@@ -400,7 +418,7 @@ const ProjectEnquiry = () => {
             }
 
         }
-    }
+    };
 
     const clientInfoMaster = async (globalBUMapping) => {
         try {
@@ -466,6 +484,13 @@ const ProjectEnquiry = () => {
             .some(v => v?.toString().toLowerCase().includes(search))
     );
 
+    const handleHistory = async (rows) => {
+        const isValid = rows.length > 0;
+        setFormDataList(prev => ({
+            ...prev,
+            selectedSupplierRows: rows,
+        }));
+    }
     const handleSendChoose = async () => {
         const rows = formDataList.selectedRows || [];
         const supplierIds = rows.map(r => r.supplierId).join(",");
@@ -493,24 +518,112 @@ const ProjectEnquiry = () => {
         }
     };
 
+    //Project Saving Functionlity
+
+    const handleProjectInputChange = (data, Id, enquiryId, field) => {
+        setFormDataList(prev => ({
+            ...prev,
+            projectSavings: prev.projectSavings.map(group => ({
+                ...group,
+                items: group.items.map(item =>
+                    item.id === Id
+                        ? { ...item, [field]: data }
+                        : item
+                )
+            }))
+        }));
+    }
     const renderProjectEditableField = (field) => ({
         render: (row) => (
             <PTextField
                 name={field}
                 value={row[field] || ""}
-                onKeyPress={() =>
-                    setFormData(prev => ({
-                        ...prev,
-                        historyTool: true
-                    }))
-                }
-                width={150}
-                placeHolder={field == "previousPoNumber" ? "Previous Po No" : "0"}
-                disabled={field == "previousPoNumber" ? false : true}
+                onChange={(e) => handleProjectInputChange(e.target.value, row.id, row.enquiryId, field)}
+                width={170}
+                sx={{
+                    "& .MuiInputBase-root": {
+                        height: 50,
+                    }
+                }}
+                //placeHolder={field == "previousSupplier" ? "Previous Po No" : "0"}
+                // onKeyPress={() =>
+                //     setFormData(prev => ({
+                //         ...prev,
+                //         historyTool: true
+                //     }))
+                // }
+                //disabled={field == "previousSupplier" ? false : true}
             />
         )
     });
 
+    const savings = formDataList.savingsResponseDto;
+    const savingsCalculation = [
+        {
+            label: "Savings Reference Price",
+            value: savings.totalPreviousPrice.toFixed(2)
+        },
+        {
+            label: "Total PMG Sell Price (inc.fee)",
+            value: savings.totalSellPrice.toFixed(2)
+        },
+        {
+            label: "Savings ($)",
+            value: savings.totalSaving.toFixed(2)
+        },
+        {
+            label: "Savings %",
+            value: `${savings.totalSavingPercent.toFixed(2)} %`
+        }
+    ];
+    const projectSavings = [
+        {
+            field: "previousSupplier", header: "Previous PO Number",
+            ...(formData.inputPS && renderProjectEditableField("previousSupplier"))
+        },
+        {
+            field: "reasonForSaving", header: "Savings Reason"
+        },
+        {
+            field: "baselineQuantity", header: "Baseline Quantity",
+            ...(formData.inputPS && renderProjectEditableField("baselineQuantity"))
+        },
+        {
+            field: "previousPrice", header: "Savings Reference Price ($)",
+            ...(formData.inputPS && renderProjectEditableField("previousPrice"))
+        },
+        {
+            field: "negItemSellPrice", header: "Current PMG Sell Price (Excl. Fee)"
+        },
+        {
+            field: "itemSellPrice", header: "Current PMG Sell Price (Incl. Fee)"
+        }
+    ];
+
+    const calculateProject = [
+        {
+            details: [
+                {
+                    label: "Total PMG Sell Price",
+                    value: "10.90"
+                },
+                {
+                    label: "Tax (%)",
+                    value: "9"
+                },
+                {
+                    label: "Tax Amount",
+                    value: "0.98"
+                }
+            ],
+            total: {
+                label: "TOTAL SELL PRICE",
+                value: "11.88"
+            }
+        }
+    ];
+
+    //RFQ functionality
     const renderEditableField = (field) => ({
         render: (row) => (
             <PTextField
@@ -518,12 +631,14 @@ const ProjectEnquiry = () => {
                 value={row[field] ?? ""}
                 onChange={(e) => handleInputChange(e.target.value.replace(/[^0-9.]/g, ""), row.supplierQuotesId, row.enquiryId, field)}
                 width={90}
+                sx={{
+                    "& .MuiInputBase-root": {
+                        height: 50,
+                    }
+                }}
             />
         )
     });
-
-    const projectSavingsColumns = [{ field: "previousPoNumber", header: "Previous PO Number", ...(formData.inputPS && renderProjectEditableField("previousPoNumber")) }, { field: "savingsReason", header: "Savings Reason" }, { field: "baselineQuantity", header: "Baseline Quantity", ...(formData.inputPS && renderProjectEditableField("baselineQuantity")) },
-    { field: "savingsReferencePrice", header: "Savings Reference Price ($)", ...(formData.inputPS && renderProjectEditableField("savingsReferencePrice")) }, { field: "currentSellPriceExclFee", header: "Current PMG Sell Price (Excl. Fee)" }, { field: "currentSellPriceInclFee", header: "Current PMG Sell Price (Incl. Fee)" }];
 
     const handleInputChange = (data, Id, enquiryId, field) => {
         setFormDataList(prev => ({
@@ -716,6 +831,16 @@ const ProjectEnquiry = () => {
             }))
         );
 
+        const projectQuotes = formDataList.projectSavings.flatMap(group =>
+            group.items.map(item => ({
+                Id: item.id,
+                previousSupplier: item.previousSupplier,
+                previousPrice: item.previousPrice,
+                note: item.reasonForSaving,
+                BaselineQuantity: item.baselineQuantity
+            }))
+        );
+
         switch (flag) {
             case "sla":
                 activeTab = "SLA";
@@ -745,6 +870,16 @@ const ProjectEnquiry = () => {
 
             case "project":
                 activeTab = "Project Savings";
+                handleCancel(null, flag);
+                return;
+
+            case "inputPS":
+                activeTab = "Project Savings";
+                await PostApi(ProjectEnquiry_API.PostRefPrice, projectQuotes);
+                setFormData(prev => ({
+                    ...prev,
+                    calculateProject,
+                }))
                 handleCancel(null, flag);
                 return;
 
@@ -824,7 +959,7 @@ const ProjectEnquiry = () => {
                 <PGrid container className={Labels.margin.mb1}>
                     <PGrid item xs={12} sm={6} md={12}>
                         <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap", mb: 3 }}>
-                            {formDataList.tabs.map((tab) => (
+                            {tabs.map((tab) => (
                                 <Tooltip title={tab.label} key={tab.label}>
                                     <Box key={tab.label} onClick={() => setFormData(prev => ({ ...prev, activeTab: tab.label }))}
                                         sx={{
@@ -1105,49 +1240,127 @@ const ProjectEnquiry = () => {
                 )}
 
                 {formData.activeTab === "Project Saving" && (
-                    <PCard className={Labels.margin.mb3}>
-                        <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} sm={6} md={6}>
-                                <PTypography
-                                    labelText={"Project Saving"}
-                                    flag={Labels.fontFlags.subHeader}
-                                    color={CommonColors.blue.main}
-                                    weight={FontWeight.bold}
-                                />
+                    <>
+                        <PCard className={Labels.margin.mb3}>
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PTypography
+                                        labelText={"Project Saving"}
+                                        flag={Labels.fontFlags.subHeader}
+                                        color={CommonColors.blue.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
+                                    {renderActionButtons("project")}
+                                </PGrid>
                             </PGrid>
-                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                {renderActionButtons("project")}
-                            </PGrid>
-                        </PGrid>
 
-                        <Divider sx={{ mb: 2 }} />
-                        <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={savingsReasons} rows={formDataList.savingsReasons} />
+                            <Divider sx={{ mb: 2 }} />
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={12}>
+                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} />
+                                </PGrid>
                             </PGrid>
-                        </PGrid>
-                        <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
-                                {renderActionButtons("inputPS")}
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                    {renderActionButtons("inputPS")}
+                                </PGrid>
                             </PGrid>
-                        </PGrid>
-                        <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={projectSavingsColumns} rows={formDataList.projectSavingsData} />
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={12}>
+                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} />
+                                </PGrid>
                             </PGrid>
-                        </PGrid>
-                        <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.data} />
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={12}>
+                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} />
+                                </PGrid>
                             </PGrid>
-                        </PGrid>
-                        <PGrid container className={Labels.margin.mb3}>
-                            <PGrid item xs={12} sm={6} md={6} ></PGrid>
-                            <PGrid item xs={12} sm={6} md={6} >
-                                <PTable columns={formDataList.savingsCalculateColumns} rows={formDataList.savingsCalculateData} showHeader={false} showPagination={false} />
+                            <PGrid container className={Labels.margin.mb3}>
+                                <PGrid item xs={12} sm={6} md={6} ></PGrid>
+                                <PGrid item xs={12} sm={6} md={6} >
+                                    <PTable columns={formDataList.savingsCalculation} rows={savingsCalculation} showHeader={false} showPagination={false} />
+                                </PGrid>
                             </PGrid>
-                        </PGrid>
-                    </PCard>
+                        </PCard>
+
+                        {formData.calculateProject && (
+                            <PCard className={Labels.margin.mb3}>
+                                <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                    <PGrid item xs={12} sm={6} md={6}>
+                                        <PTypography
+                                            labelText={"Step 2. Calculate Project Sell Price"}
+                                            flag={Labels.fontFlags.subHeader}
+                                            color={CommonColors.black.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                        <PTypography
+                                            labelText={"Choose the fee structure and calculate final sell price."}
+                                            flag={Labels.fontFlags.smallText}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                    </PGrid>
+                                </PGrid>
+                                <Divider sx={{ mb: 2 }} />
+                                {calculateProject.map((item, i) => (
+                                    <PGrid key={i} className="ps-2 mt-4">
+                                        {item.details.map((item, index) => (
+                                            <React.Fragment key={index}>
+                                                <PGrid container className={Labels.margin.mb3}>
+                                                    <PGrid item xs={12} sm={6} md={2}>
+                                                        <PTypography
+                                                            labelText={item.label}
+                                                            weight={FontWeight.bold}
+                                                        />
+                                                    </PGrid>
+                                                    <PGrid item xs={12} sm={6} md={1}>
+                                                        <PTypography
+                                                            labelText={":"}
+                                                            weight={FontWeight.bold}
+                                                        />
+                                                    </PGrid>
+                                                    <PGrid item xs={12} sm={6} md={9}>
+                                                        <PTypography
+                                                            labelText={item.value}
+                                                            color={CommonColors.grey.main}
+                                                            weight={FontWeight.bold}
+                                                        />
+                                                    </PGrid>
+
+                                                </PGrid>
+                                            </React.Fragment>
+                                        ))}
+
+                                        <Divider sx={{ my: 2 }} />
+                                        <PGrid container className={Labels.margin.mb3}>
+                                            <PGrid item xs={12} sm={6} md={2}>
+                                                <PTypography
+                                                    labelText={item.total.label}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                            <PGrid item xs={12} sm={6} md={1}>
+                                                <PTypography
+                                                    labelText={":"}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                            <PGrid item xs={12} sm={6} md={9}>
+                                                <PTypography
+                                                    labelText={`$ ${item.total.value}`}
+                                                    color={CommonColors.grey.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                        </PGrid>
+
+                                    </PGrid>
+                                ))}
+                            </PCard>
+                        )}
+                    </>
                 )}
 
 
@@ -1348,6 +1561,7 @@ const ProjectEnquiry = () => {
                             onClick={handleSendChoose}
                             color={CommonColors.green.main}
                             width={200}
+
                         />
                     </PGrid >
                 }
@@ -1363,7 +1577,7 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={12}>
-                    <PTable columns={formDataList.historySearchesCloumns} rows={historyToolData} showCheckbox={true} />
+                    <PTable columns={formDataList.historySearchesCloumns} rows={historyToolData} showCheckbox={true} onValidationChange={handleHistory} selectedRows={formDataList.selectedHistroyRows} />
                 </PGrid>
             </PDialog>
         </>
