@@ -305,7 +305,7 @@ const ClientInfo = () => {
         GlobalBuMappingMaster(divisionId);
     };
 
-    const handleSubmit = async (e, flag) => {
+    const handleSubmit = async (e, submit) => {
         const isValid = ClientInfoValidation();
         if (isValid) {
             try {
@@ -326,7 +326,7 @@ const ClientInfo = () => {
                     setAllowRedirect(true);
                     toast(Labels.status.success, response.data.message);
                     setTimeout(() => {
-                        navigate(flag ? labelRoutes.enquiryDetails : labelRoutes.eqDashboard, {
+                        navigate(submit ? labelRoutes.enquiryDetails : labelRoutes.eqDashboard, {
                             state: { id: response.data.enqId }
                         });
                     }, 500);

@@ -55,9 +55,13 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   // Show only selected rows when global checkbox checked
   const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : (Array.isArray(rows) ? rows : []);
 
+  const renderText = (value) => {
+    const text = value == null || value === 0 ? "" : typeof value === "number" ? value.toFixed(2) : String(value);
+    return <Tooltip title={text}><span>{text.length > 30 ? `${text.slice(0, 30)}...` : text}</span></Tooltip>;
+  };
+
   const renderCell = (col, data, rowIndex, meta = {}) => {
-    const text = String(typeof data[col.field] === "number" ? data[col.field].toFixed(2) : (data[col.field] ?? ""));
-    const content = col.render ? col.render(data, rowIndex) : text.length > 30 ? (<Tooltip title={text}> <span>{text.substring(0, 30)}...</span>  </Tooltip>) : text;
+    const content = col.render ? col.render(data, rowIndex) : renderText(data[col.field]);
     if (showCheckbox && meta.isFirstCol) {
       return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -136,7 +140,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
                 sx={{
                   fontSize: Labels.fontSize.xs, py: 1.8,
                   verticalAlign: "middle", borderLeft: col.rowSpan ? "1px solid #e5e7eb" : "",
-                  backgroundColor : col.rowSpan ? "#fff" : "",
+                  backgroundColor: col.rowSpan ? "#fff" : "",
                 }}
               >
                 {renderCell(col, item, item.rowId, { isFirstCol: cIndex === 0 })}

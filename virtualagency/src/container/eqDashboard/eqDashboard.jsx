@@ -420,8 +420,8 @@ const EqDashboard = () => {
 
         <PGrid container className={Labels.margin.mb3}>
           <PGrid item xs={12} sm={6} md={8}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between",  margin: "6px 0px", width: "100%" }}>
-              <Box sx={{width : 180}}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "6px 0px", width: "100%" }}>
+              <Box sx={{ width: 180 }}>
                 {icons.length > 0 && (
                   <PToggle options={[{ ...icons[0], value: formData.createEnquiry, label: icons[0].tooltip }]}
                     value={formData.createEnquiry}
@@ -443,7 +443,7 @@ const EqDashboard = () => {
                   </Tooltip>
                 ))}
               </Box>
-            </Box>   
+            </Box>
           </PGrid>
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "6px 0px", }}>
             <div style={{ display: "flex", justifyContent: "flex-end", }} >
@@ -498,9 +498,12 @@ const EqDashboard = () => {
                     columns={columns}
                     rows={data}
                     onClick={(row) => {
-                      navigate(stepRoutes[row.stepID], {
-                        state: { id: row.id }
-                      });
+                      navigate(
+                        row.statusName === "Draft"
+                          ? (stepRoutes[row.stepID] || labelRoutes.clientInfo)
+                          : labelRoutes.projectEnquiry,
+                        { state: { id: row.id } }
+                      );
                     }}
                   />
                 )}

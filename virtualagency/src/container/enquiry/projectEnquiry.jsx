@@ -96,7 +96,7 @@ const ProjectEnquiry = () => {
         managementFee: "",
         savingsType: "",
         savingsReason: "",
-        slaTemplate: ""
+        //slaTemplate: ""
 
 
     });
@@ -185,15 +185,16 @@ const ProjectEnquiry = () => {
             const enqResponse = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
                 TypeOfJob: response.enqlineItems[0].printornonprint,
             });
-            const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
-                currency: currency,
-                Country: countryName
-            });
             const projectResponse = await PostApi(ProjectEnquiry_API.GetProjectDetails, {
                 enquiryid: id,
                 Currency: currency,
                 Country: countryName
             });
+            const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
+                currency: currency,
+                Country: countryName
+            });
+
 
             const revisedQuotes = [...new Map(projectResponse.revisedQuotes.map(x => [x.itemNumber, x])).values()]
                 .map(x => ({
@@ -234,22 +235,6 @@ const ProjectEnquiry = () => {
             total.marginPercent = +(total.margin / total.sell * 100).toFixed(2);
             const calculationDetails = [total];
 
-            if (projectResponse.calculationDetails?.length > 0) {
-                setFormData(prev => ({
-                    ...prev,
-                    rfqFlag: false,
-                    marginFlag: true,
-                    calculateFlag: true
-                }));
-            } else {
-                setFormData(prev => ({
-                    ...prev,
-                    rfqFlag: true,
-                    marginFlag: false,
-                    calculateFlag: true
-                }));
-            }
-
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -279,12 +264,12 @@ const ProjectEnquiry = () => {
             setFormData(prev => ({
                 ...prev,
                 quote: response.enqProjectinfo?.quoteBy,
-                slaTemplate: response.enqProjectinfo.slaId
+                calculateFlag: projectResponse.requestQuotes[0].initialQuote > 0,
+                rfqFlag: projectResponse.calculationDetails?.length === 0,
+                marginFlag: projectResponse.calculationDetails?.length > 0
             }));
-            //slaTemplate(response.enqProjectinfo.slaId);
-            clientInfoMaster(response.enqClientinfo.divisionid);
+            await clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
-            console.log(error);
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
@@ -545,14 +530,14 @@ const ProjectEnquiry = () => {
                         height: 50,
                     }
                 }}
-                //placeHolder={field == "previousSupplier" ? "Previous Po No" : "0"}
-                // onKeyPress={() =>
-                //     setFormData(prev => ({
-                //         ...prev,
-                //         historyTool: true
-                //     }))
-                // }
-                //disabled={field == "previousSupplier" ? false : true}
+            //placeHolder={field == "previousSupplier" ? "Previous Po No" : "0"}
+            // onKeyPress={() =>
+            //     setFormData(prev => ({
+            //         ...prev,
+            //         historyTool: true
+            //     }))
+            // }
+            //disabled={field == "previousSupplier" ? false : true}
             />
         )
     });
@@ -647,15 +632,17 @@ const ProjectEnquiry = () => {
                 ...group,
                 items: group.items.map(item =>
                     item.supplierQuotesId === Id
-                        ? { ...item, [field]: data }
-                        : item
+                        ? (field === "negQuote" && Number(data) > Number(item.initialQuote))
+                            ? item : { ...item, [field]: data === "0" ? "" : data } : item
                 )
             }))
         }));
 
+
+        console.log(validateFlag)
         setFormData(prev => ({
             ...prev,
-            validateFlag: data.trim() === ""
+            validateFlag: validateFlag
         }));
     };
 
@@ -830,6 +817,8 @@ const ProjectEnquiry = () => {
                 negoUnitprice: item.negUnitPrice?.toString()
             }))
         );
+
+        console.log(supplierQuotes, "supplierQuotes");
 
         const projectQuotes = formDataList.projectSavings.flatMap(group =>
             group.items.map(item => ({
@@ -1380,7 +1369,7 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
-                        <PSlaTemplate slaId={formData.slaTemplate} enquiryId={id} getLabel={getLabel} quoteStartDate={formDataList?.enquiryDetails?.quotestartdate} disabled={!formData.sla}
+                        <PSlaTemplate slaId={formDataList?.enquiryDetails?.slaId} enquiryId={id} getLabel={getLabel} quoteStartDate={formDataList?.enquiryDetails?.quotestartdate} disabled={!formData.sla}
                             onChange={handleSlaChange}
                         />
                     </Box>
