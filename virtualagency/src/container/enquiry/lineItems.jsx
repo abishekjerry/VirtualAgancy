@@ -383,6 +383,13 @@ const LineItems = () => {
         const formattedValue = config?.type === "number"
             ? allowOnlyNumbers(value) : config?.type === "decimal" ? allowDecimal(value) : value;
 
+        // Restrict No. of Materials to 1-5
+        if (name === Labels.lineItems.noOfMaterials && formattedValue !== ""
+            && (Number(formattedValue) < 1 || Number(formattedValue) > 5)
+        ) {
+            return;
+        }
+
         // Handle special field logic
         if (name === Labels.lineItems.category) {
             LineItemsMaster(label);
@@ -415,6 +422,7 @@ const LineItems = () => {
             };
         }
 
+
         // Update states
         setFormData(prev => ({
             ...prev,
@@ -431,7 +439,7 @@ const LineItems = () => {
     const id = state?.id > 0 ? state.id : 0;
 
     const handleSubmit = async (e, flag) => {
-        if (lineItems.length > 0 && flag && formData.itemCategory != "") {
+        if (lineItems.length > 0 && flag && !formData.itemCategory) {
             setAllowRedirect(false);
             navigate(labelRoutes.suppliers, { state: { id: id } });
             return;
@@ -537,9 +545,10 @@ const LineItems = () => {
 
     const handleBack = () => {
         if (window.history.length > 1) {
-            navigate(labelRoutes.enquiryDetails, {
-                state: { id: id }
-            });
+            navigate(-1);
+            // navigate(labelRoutes.enquiryDetails, {
+            //     state: { id: id }
+            // });
         } else {
             navigate(labelRoutes.home); // fallback route
         }
@@ -696,6 +705,7 @@ const LineItems = () => {
             length: "",
             width: "",
             depth: "",
+            files: []
         }))
     }
 
@@ -1180,7 +1190,6 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.noOfMaterials}
                                         name={Labels.lineItems.noOfMaterials}
-                                        max={5} min={1}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>

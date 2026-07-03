@@ -383,6 +383,11 @@ const EqDashboard = () => {
     4: labelRoutes.review,
   }
 
+  const handleRoute = (row) => {
+    const route = row.status === "Draft" ? (stepRoutes[row.stepID]) : labelRoutes.projectEnquiry;
+    navigate(route, { state: { id: row.id } });
+  }
+
   return (
     <>
       <Box sx={{ px: 3, py: 3 }}>
@@ -497,14 +502,7 @@ const EqDashboard = () => {
                   <PTable
                     columns={columns}
                     rows={data}
-                    onClick={(row) => {
-                      navigate(
-                        row.statusName === "Draft"
-                          ? (stepRoutes[row.stepID] || labelRoutes.clientInfo)
-                          : labelRoutes.projectEnquiry,
-                        { state: { id: row.id } }
-                      );
-                    }}
+                    onClick={(row) => { handleRoute(row) }}
                   />
                 )}
               </div>
