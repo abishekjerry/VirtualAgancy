@@ -43,9 +43,11 @@ import HandshakeIcon from "@mui/icons-material/Handshake";
 import SavingsIcon from "@mui/icons-material/Savings";
 import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import HistoryIcon from "@mui/icons-material/History";
+import BoltIcon from "@mui/icons-material/Bolt";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import PFileUpload from "../../component/PFileUpload/PFileUpload";
 import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
+import PSpotSection from "../../component/PSpotSection/PSpotSection";
 
 
 const ProjectEnquiry = () => {
@@ -163,6 +165,7 @@ const ProjectEnquiry = () => {
     const tabs = [
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
+        { label: "SPOT", icon: <BoltIcon /> },
         { label: "RFQ", icon: <RequestQuoteIcon /> },
         ...(showProjectSaving ? [{ label: "Project Saving", icon: <SavingsIcon /> }] : []),
         { label: "SLA", icon: <HandshakeIcon /> },
@@ -266,7 +269,8 @@ const ProjectEnquiry = () => {
                 quote: response.enqProjectinfo?.quoteBy,
                 calculateFlag: projectResponse.requestQuotes[0].initialQuote > 0,
                 rfqFlag: projectResponse.calculationDetails?.length === 0,
-                marginFlag: projectResponse.calculationDetails?.length > 0
+                marginFlag: projectResponse.calculationDetails?.length > 0,
+                calculateProject: projectResponse.savingsResponseDto.details.length > 0
             }));
             await clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
@@ -283,17 +287,17 @@ const ProjectEnquiry = () => {
             ...prev,
             [name]: value
         }));
-        setFormDataList(prev => ({
-            ...prev,
-            savingsReasons: prev.savingsReasons.map(item =>
-                item.itemName === row.itemName ? {
-                    ...item,
-                    [name]: label
-                } : item
-            )
-        }));
 
         if (name === Labels.lineItems.savingsType) {
+            setFormDataList(prev => ({
+                ...prev,
+                savingsReasons: prev.savingsReasons.map(item =>
+                    item.itemName === row.itemName ? {
+                        ...item,
+                        [name]: label
+                    } : item
+                )
+            }));
             SavingsReasonMaster(label);
         }
     };
@@ -585,25 +589,42 @@ const ProjectEnquiry = () => {
         }
     ];
 
+    const summary = formDataList.savingsSummary || [];
+    const totals = summary.flatMap(x => x.items).reduce(
+            (acc, item) => {
+                acc.totalSellPrice += Number(item.totalSellPrice || 0);
+                acc.taxamount += Number(item.taxamount || 0);
+                acc.totalsellpricewithtax += Number(item.totalsellpricewithtax || 0);
+                // If tax percentage is the same for all items
+                acc.taxpercentage = item.taxpercentage;
+                return acc;
+            },
+            {
+                totalSellPrice: 0,
+                taxpercentage: 0,
+                taxamount: 0,
+                totalsellpricewithtax: 0
+            }
+        );
     const calculateProject = [
         {
             details: [
                 {
                     label: "Total PMG Sell Price",
-                    value: "10.90"
+                    value: totals.totalSellPrice.toFixed(2)
                 },
                 {
                     label: "Tax (%)",
-                    value: "9"
+                    value: totals.taxpercentage.toFixed(2)
                 },
                 {
                     label: "Tax Amount",
-                    value: "0.98"
+                    value: totals.taxamount.toFixed(2)
                 }
             ],
             total: {
                 label: "TOTAL SELL PRICE",
-                value: "11.88"
+                value: totals.totalsellpricewithtax.toFixed(2)
             }
         }
     ];
@@ -633,16 +654,14 @@ const ProjectEnquiry = () => {
                 items: group.items.map(item =>
                     item.supplierQuotesId === Id
                         ? (field === "negQuote" && Number(data) > Number(item.initialQuote))
-                            ? item : { ...item, [field]: data === "0" ? "" : data } : item
+                            ? item : { ...item, [field]: data } : item
                 )
             }))
         }));
 
-
-        console.log(validateFlag)
         setFormData(prev => ({
             ...prev,
-            validateFlag: validateFlag
+            validateFlag: data === ""
         }));
     };
 
@@ -807,7 +826,7 @@ const ProjectEnquiry = () => {
             group.items.map(item => ({
                 enqId: item.enquiryId,
                 quoteId: item.supplierQuotesId,
-                supplierQuoteAmountPriceOrQuantity: item.quantity,
+                supplierQuoteAmountPriceOrQuantity: formData.quote,
                 itemNumber: item.enquiryDetailsId,
                 qty: item.quantity,
                 modifiedBy: agancyUserID,
@@ -817,8 +836,6 @@ const ProjectEnquiry = () => {
                 negoUnitprice: item.negUnitPrice?.toString()
             }))
         );
-
-        console.log(supplierQuotes, "supplierQuotes");
 
         const projectQuotes = formDataList.projectSavings.flatMap(group =>
             group.items.map(item => ({
@@ -1137,6 +1154,10 @@ const ProjectEnquiry = () => {
                         </PGrid>
 
                     </PCard>
+                )}
+
+                {formData.activeTab === "SPOT" && (
+                    <PSpotSection></PSpotSection>
                 )}
 
                 {formData.activeTab === "RFQ" && (
