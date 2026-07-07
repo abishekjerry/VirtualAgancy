@@ -13,7 +13,7 @@ const UserRoute = () => {
 
 const LoginPage = lazy(() => import("../container/login/login"));
 const Dashboard = lazy(() => import("../container/dashboard/dashboard"));
-const EqDashboard = lazy(() => import("../container/eqDashboard/eqDashboard"));
+const EqDashboard = lazy(() => import("../container/dashboard/eqDashboard"));
 const ClientInfo = lazy(() => import("../container/enquiry/clientInfo"));
 const EnquiryDetails = lazy(() => import("../container/enquiry/enquiryDetails"));
 const LineItems = lazy(() => import("../container/enquiry/lineItems"));
