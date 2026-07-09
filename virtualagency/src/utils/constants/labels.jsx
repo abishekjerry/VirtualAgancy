@@ -16,7 +16,7 @@ export const Labels = {
     password: "password",
     newPassword: "newPassword",
     confirmPassword: "confirmPassword",
-    resetUsername : "resetUsername"
+    resetUsername: "resetUsername"
   },
 
   dashboard: {
@@ -43,7 +43,7 @@ export const Labels = {
     jobRole: "jobRole",
     brandName: "brandName",
 
-    summary:"Summary"
+    summary: "Summary"
   },
 
   enquiryDetails: {
@@ -95,11 +95,11 @@ export const Labels = {
     regionalOrderWindowCatalogue: "regionalOrderWindowCatalogue",
     localCatalogueName: "localCatalogueName",
     eAuction: "eAuction",
-    competitiveBiddingWinningSupplierCost : "competitiveBiddingWinningSupplierCost",
+    competitiveBiddingWinningSupplierCost: "competitiveBiddingWinningSupplierCost",
     printingMethod: "printingMethod",
     typeOfItem: "typeOfItem",
     noOfMaterials: "noOfMaterials",
-    harmonizedOrder : "harmonizedOrder",
+    harmonizedOrder: "harmonizedOrder",
     digitalInnovation: "digitalInnovation",
     innovation: "innovation",
     sourcingLocation: "sourcingLocation",
@@ -151,7 +151,9 @@ export const Labels = {
   },
   symbols: {
     required: "*",
-    optional: "?"
+    optional: "?",
+    important: "!",
+    percent: "%"
   },
 
   buttonLabel: {

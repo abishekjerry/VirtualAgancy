@@ -1195,7 +1195,7 @@ const LineItems = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
-                                        label={`${"Harmonized Order"} ${Labels.symbols.required}`}
+                                        label={`${getLabel("lbl159")} ${Labels.symbols.required}`}
                                         value={formData.harmonizedOrder}
                                         onChange={handleChange}
                                         helperText={errors?.harmonizedOrder}
