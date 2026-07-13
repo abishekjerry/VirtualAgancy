@@ -48,6 +48,8 @@ import AttachmentIcon from "@mui/icons-material/Attachment";
 import PFileUpload from "../../component/PFileUpload/PFileUpload";
 import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
 import PSpotSection from "../../component/PSpotSection/PSpotSection";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import PDeliveryOrder from "../../component/PDeliveryOrder/PDeliveryOrder";
 
 
 const ProjectEnquiry = () => {
@@ -98,7 +100,7 @@ const ProjectEnquiry = () => {
         managementFee: "",
         savingsType: "",
         savingsReason: "",
-        //slaTemplate: ""
+        sap: ""
 
 
     });
@@ -146,6 +148,8 @@ const ProjectEnquiry = () => {
         savingsResponseDto: { totalPreviousPrice: 0, totalSellPrice: 0, totalSaving: 0, totalSavingPercent: 0 },
         savingsReasons: [],
 
+        yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
+
         //History Tool
         historySearchesCloumns: [{ field: "enquriyID", header: "Action" }, { field: "qty", header: "Qty" }, { field: "country", header: "Country" }, { field: "specifications", header: "Specifications" },
         { field: "referencePrice", header: "Reference Price" }, { field: "materialUsed", header: "Material Used" }, { field: "poNumber", header: "PO Number" }, { field: "subCategory", header: "Sub Category" }, { field: "brand", header: "Brand" }],
@@ -166,6 +170,7 @@ const ProjectEnquiry = () => {
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
         { label: "SPOT", icon: <BoltIcon /> },
+        { label: "Delivery Order", icon: <LocalShippingIcon /> },
         { label: "RFQ", icon: <RequestQuoteIcon /> },
         ...(showProjectSaving ? [{ label: "Project Saving", icon: <SavingsIcon /> }] : []),
         { label: "SLA", icon: <HandshakeIcon /> },
@@ -591,21 +596,21 @@ const ProjectEnquiry = () => {
 
     const summary = formDataList.savingsSummary || [];
     const totals = summary.flatMap(x => x.items).reduce(
-            (acc, item) => {
-                acc.totalSellPrice += Number(item.totalSellPrice || 0);
-                acc.taxamount += Number(item.taxamount || 0);
-                acc.totalsellpricewithtax += Number(item.totalsellpricewithtax || 0);
-                // If tax percentage is the same for all items
-                acc.taxpercentage = item.taxpercentage;
-                return acc;
-            },
-            {
-                totalSellPrice: 0,
-                taxpercentage: 0,
-                taxamount: 0,
-                totalsellpricewithtax: 0
-            }
-        );
+        (acc, item) => {
+            acc.totalSellPrice += Number(item.totalSellPrice || 0);
+            acc.taxamount += Number(item.taxamount || 0);
+            acc.totalsellpricewithtax += Number(item.totalsellpricewithtax || 0);
+            // If tax percentage is the same for all items
+            acc.taxpercentage = item.taxpercentage;
+            return acc;
+        },
+        {
+            totalSellPrice: 0,
+            taxpercentage: 0,
+            taxamount: 0,
+            totalsellpricewithtax: 0
+        }
+    );
     const calculateProject = [
         {
             details: [
@@ -629,6 +634,19 @@ const ProjectEnquiry = () => {
         }
     ];
 
+    const handleQuotation = async (e, flag) => {
+        if (flag == "reCalculate") {
+            const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
+                enqId: id,
+                modifiedBy: agancyUserID,
+                status: 2
+            });
+            await fetchData();
+        }
+        else {
+            
+        }
+    };
     //RFQ functionality
     const renderEditableField = (field) => ({
         render: (row) => (
@@ -1156,8 +1174,12 @@ const ProjectEnquiry = () => {
                     </PCard>
                 )}
 
+                {formData.activeTab === "Delivery Order" && (
+                    <PDeliveryOrder />
+                )}
+
                 {formData.activeTab === "SPOT" && (
-                    <PSpotSection></PSpotSection>
+                    <PSpotSection />
                 )}
 
                 {formData.activeTab === "RFQ" && (
@@ -1296,79 +1318,169 @@ const ProjectEnquiry = () => {
                         </PCard>
 
                         {formData.calculateProject && (
-                            <PCard className={Labels.margin.mb3}>
-                                <PGrid container className="d-flex align-items-center justify-content-between mb-3">
-                                    <PGrid item xs={12} sm={6} md={6}>
-                                        <PTypography
-                                            labelText={getLabel("lbl176")}
-                                            flag={Labels.fontFlags.subHeader}
-                                            color={CommonColors.black.main}
-                                            weight={FontWeight.bold}
-                                        />
-                                        <PTypography
-                                            labelText={getLabel("lbl177")}
-                                            flag={Labels.fontFlags.smallText}
-                                            color={CommonColors.grey.main}
-                                            weight={FontWeight.bold}
-                                        />
-                                    </PGrid>
-                                </PGrid>
-                                <Divider sx={{ mb: 2 }} />
-                                {calculateProject.map((item, i) => (
-                                    <PGrid key={i} className="ps-2 mt-4">
-                                        {item.details.map((item, index) => (
-                                            <React.Fragment key={index}>
-                                                <PGrid container className={Labels.margin.mb3}>
-                                                    <PGrid item xs={12} sm={6} md={2}>
-                                                        <PTypography
-                                                            labelText={item.label}
-                                                            weight={FontWeight.bold}
-                                                        />
-                                                    </PGrid>
-                                                    <PGrid item xs={12} sm={6} md={1}>
-                                                        <PTypography
-                                                            labelText={":"}
-                                                            weight={FontWeight.bold}
-                                                        />
-                                                    </PGrid>
-                                                    <PGrid item xs={12} sm={6} md={9}>
-                                                        <PTypography
-                                                            labelText={item.value}
-                                                            color={CommonColors.grey.main}
-                                                            weight={FontWeight.bold}
-                                                        />
-                                                    </PGrid>
-
-                                                </PGrid>
-                                            </React.Fragment>
-                                        ))}
-
-                                        <Divider sx={{ my: 2 }} />
-                                        <PGrid container className={Labels.margin.mb3}>
-                                            <PGrid item xs={12} sm={6} md={2}>
-                                                <PTypography
-                                                    labelText={item.total.label}
-                                                    weight={FontWeight.bold}
-                                                />
-                                            </PGrid>
-                                            <PGrid item xs={12} sm={6} md={1}>
-                                                <PTypography
-                                                    labelText={":"}
-                                                    weight={FontWeight.bold}
-                                                />
-                                            </PGrid>
-                                            <PGrid item xs={12} sm={6} md={9}>
-                                                <PTypography
-                                                    labelText={`$ ${item.total.value}`}
-                                                    color={CommonColors.grey.main}
-                                                    weight={FontWeight.bold}
-                                                />
-                                            </PGrid>
+                            <>
+                                <PCard className={Labels.margin.mb3}>
+                                    <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                        <PGrid item xs={12} sm={6} md={6}>
+                                            <PTypography
+                                                labelText={getLabel("lbl176")}
+                                                flag={Labels.fontFlags.subHeader}
+                                                color={CommonColors.black.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                            <PTypography
+                                                labelText={getLabel("lbl177")}
+                                                flag={Labels.fontFlags.smallText}
+                                                color={CommonColors.grey.main}
+                                                weight={FontWeight.bold}
+                                            />
                                         </PGrid>
-
                                     </PGrid>
-                                ))}
-                            </PCard>
+                                    <Divider sx={{ mb: 2 }} />
+                                    {calculateProject.map((item, i) => (
+                                        <PGrid key={i} className="ps-2 mt-4">
+                                            {item.details.map((item, index) => (
+                                                <React.Fragment key={index}>
+                                                    <PGrid container className={Labels.margin.mb3}>
+                                                        <PGrid item xs={12} sm={6} md={2}>
+                                                            <PTypography
+                                                                labelText={item.label}
+                                                                weight={FontWeight.bold}
+                                                            />
+                                                        </PGrid>
+                                                        <PGrid item xs={12} sm={6} md={1}>
+                                                            <PTypography
+                                                                labelText={":"}
+                                                                weight={FontWeight.bold}
+                                                            />
+                                                        </PGrid>
+                                                        <PGrid item xs={12} sm={6} md={9}>
+                                                            <PTypography
+                                                                labelText={item.value}
+                                                                color={CommonColors.grey.main}
+                                                                weight={FontWeight.bold}
+                                                            />
+                                                        </PGrid>
+
+                                                    </PGrid>
+                                                </React.Fragment>
+                                            ))}
+
+                                            <Divider sx={{ my: 2 }} />
+                                            <PGrid container className={Labels.margin.mb3}>
+                                                <PGrid item xs={12} sm={6} md={2}>
+                                                    <PTypography
+                                                        labelText={item.total.label}
+                                                        weight={FontWeight.bold}
+                                                    />
+                                                </PGrid>
+                                                <PGrid item xs={12} sm={6} md={1}>
+                                                    <PTypography
+                                                        labelText={":"}
+                                                        weight={FontWeight.bold}
+                                                    />
+                                                </PGrid>
+                                                <PGrid item xs={12} sm={6} md={9}>
+                                                    <PTypography
+                                                        labelText={`$ ${item.total.value}`}
+                                                        color={CommonColors.grey.main}
+                                                        weight={FontWeight.bold}
+                                                    />
+                                                </PGrid>
+                                            </PGrid>
+
+                                        </PGrid>
+                                    ))}
+                                </PCard>
+
+                                <PCard className={Labels.margin.mb3}>
+                                    <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                        <PGrid item xs={12} sm={6} md={6}>
+                                            <PTypography
+                                                labelText={"Step 3.Submit to client"}
+                                                flag={Labels.fontFlags.subHeader}
+                                                color={CommonColors.black.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                            <PTypography
+                                                labelText={"Once all is in order, please preview the quotation before submitting it to your client."}
+                                                flag={Labels.fontFlags.smallText}
+                                                color={CommonColors.grey.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                        </PGrid>
+                                    </PGrid>
+                                    <Divider sx={{ mb: 2 }} />
+                                    <PGrid container className={Labels.margin.mb3}>
+                                        <PGrid item xs={12} sm={6} md={2} className={Labels.margin.mt3}>
+                                            <PTypography
+                                                labelText={`${"Send to SAP"} ${Labels.symbols.optional}`}
+                                                flag={Labels.fontFlags.subHeader}
+                                                color={CommonColors.black.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                        </PGrid>
+                                        <PGrid item xs={12} sm={6} md={2}>
+                                            <PDropdown
+                                                value={formData.sap}
+                                                onChange={(e) => setFormData((prev) => ({
+                                                    ...prev,
+                                                    sap: e.target.value
+                                                }))}
+                                                options={formDataList.yesOrNo}
+                                                width={Labels.fontSize.xxxxl}
+                                                disabled={true}
+                                            />
+                                        </PGrid>
+                                    </PGrid>
+                                    <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                        <PButton
+                                            label={"Preview quotation"}
+                                            variant="contained"
+                                            color={CommonColors.grey.main}
+                                            onClick={(e) => handleQuotation(e, "")}
+                                            width={250}
+                                        />
+                                        <PButton
+                                            label={"Submit quotation to client"}
+                                            variant="contained"
+                                            color={CommonColors.green.main}
+                                            onClick={(e) => handleQuotation(e, "")}
+                                            width={250}
+                                        />
+                                    </PGrid>
+                                </PCard>
+                                <PCard className={Labels.margin.mb3}>
+                                    <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                        <PGrid item xs={12} sm={6} md={6}>
+                                            <PTypography
+                                                labelText={"Step 4.Client/PM Approval"}
+                                                flag={Labels.fontFlags.subHeader}
+                                                color={CommonColors.black.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                        </PGrid>
+                                    </PGrid>
+                                    <Divider sx={{ mb: 2 }} />
+                                    <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                        <PButton
+                                            label={"Approve quotation"}
+                                            variant="contained"
+                                            color={CommonColors.green.main}
+                                            onClick={(e) => handleQuotation(e, "")}
+                                            width={250}
+                                        />
+                                        <PButton
+                                            label={"Request adjustment"}
+                                            variant="contained"
+                                            color={CommonColors.red.main}
+                                            onClick={(e) => handleQuotation(e, "reCalculate")}
+                                            width={250}
+                                        />
+                                    </PGrid>
+                                </PCard>
+
+                            </>
                         )}
                     </>
                 )}

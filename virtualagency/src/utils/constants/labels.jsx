@@ -125,6 +125,16 @@ export const Labels = {
     required: "Please select at least one supplier to proceed."
   },
 
+  deliveryOrder: {
+    company: "company",
+    addressOne: "addressOne",
+    addressTwo: "addressTwo",
+    addressThree: "addressThree",
+    deptName: "deptName",
+    contactNo: "contactNo",
+    remarks: "remarks"
+  },
+
   commonLabel: {
     dashboard: "Dashboard",
     logo: "logo",
