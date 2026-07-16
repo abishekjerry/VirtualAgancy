@@ -21,26 +21,33 @@ import { useLanguage } from "../../utils/constants/language";
 import PTextField from "../PTextField/PTextField";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
+import { isSuccess, toast } from "../../utils/commonFunction/common";
+import { PostApi } from "../../utils/api/networking";
+import ProjectEnquiry from "../../container/enquiry/projectEnquiry";
+import { ProjectEnquiry_API } from "../../utils/api/apiUrl";
+import { useLocation } from "react-router-dom";
 
-const PDeliveryOrder = () => {
+const PDeliveryOrder = (props) => {
     const [loading, setLoading] = useState(true);
     const { getLabel } = useLanguage();
+    const { state } = useLocation();
+    const id = state?.id > 0 ? state.id : 0;
     const [formData, setFormData] = useState({
-        company: "",
-        addressOne: "",
-        addressTwo: "",
-        addressThree: "",
-        deptName: "",
+        companyName: "",
+        addressLineOne: "",
+        addressLineTwo: "",
+        addressLineThree: "",
+        nameorDept: "",
         contactNo: "",
         remarks: "",
         id: 0
     });
     const [errors, setErrors] = useState({
-        company: "",
-        addressOne: "",
-        addressTwo: "",
-        addressThree: "",
-        deptName: "",
+        companyName: "",
+        addressLineOne: "",
+        addressLineTwo: "",
+        addressLineThree: "",
+        nameorDept: "",
         contactNo: "",
         remarks: ""
     });
@@ -64,20 +71,13 @@ const PDeliveryOrder = () => {
     };
 
     const [formDataList, setFormDataList] = useState({
-        deliveryOrder: [{ field: "company", header: "Company Name" }, { field: "addressOne", header: "Address Line1" }
-            , { field: "addressTwo", header: "Address Line2" }, { field: "addressThree", header: "Address Line3" }
-            , { field: "deptName", header: "Name/Dept" }, { field: "contactNo", header: "Contact No" }, {
+        deliveryOrder: [{ field: "companyName", header: "Company Name" }, { field: "addressLineOne", header: "Address Line1" }
+            , { field: "addressLineTwo", header: "Address Line2" }, { field: "addressLineThree", header: "Address Line3" }
+            , { field: "nameorDept", header: "Name/Dept" }, { field: "contactNo", header: "Contact No" }, { field: "remarks", header: "Remarks" }
+            , {
             field: "id", header: "", render: (row) => (
-                <EditIcon onClick={() => handleEdit(row)} style={{ cursor: "pointer" }} color={CommonColors.yellow.main} variant="outlined"/>)
+                <EditIcon onClick={() => handleEdit(row)} style={{ cursor: "pointer" }} color={CommonColors.yellow.main} variant="outlined" />)
         }],
-
-        data: [{
-            id: 2,
-            company: "XYZ",
-            addressOne: "Coimbatore",
-            contactNo: "9123456789",
-            deptName : "Order"
-        }]
     })
 
 
@@ -85,32 +85,89 @@ const PDeliveryOrder = () => {
     //     fetchData();
     // }, []);
 
-    // const fetchData = async () => {
-    //     try {
-    //         setLoading(true);
-    //         // const response = await PostApi(Dashboard_API.GetDetails, {
-    //         //     Enquiryid: id,
-    //         // });
-    //     } catch (error) {
-    //         toast(Labels.status.failure, Labels.message.somethingWentWrong);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+    const handleSearch = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(ProjectEnquiry_API.CheckDeliveryAddress, {
+                CompanyName: formData.companyName
+            });
+            if (response.status) {
+                setFormData({
+                    companyName: response.data.companyName,
+                    addressLineOne: response.data.adressLine1,
+                    addressLineTwo: response.data.adressLine2,
+                    addressLineThree: response.data.adressLine3,
+                    nameorDept: response.data.nameorDept,
+                    contactNo: response.data.contactNo,
+                    remarks: response.data.remarks,
+                    id: 0
+                });
+            }
+            else {
+                setFormData({
+                    companyName: formData.companyName,
+                    addressLineOne: "",
+                    addressLineTwo: "",
+                    addressLineThree: "",
+                    nameorDept: "",
+                    contactNo: "",
+                    remarks: "",
+                    id: 0
+                });
+            }
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
+        try {
+            setLoading(true);
+            const response = await PostApi(ProjectEnquiry_API.AddUpdateDeliveryAddress,
+                {
+                    Enqid : id,
+                    id: formData.id,
+                    companyName: formData.companyName,
+                    addressLineOne: formData.addressLineOne,
+                    addressLineTwo: formData.addressLineTwo,
+                    addressLineThree: formData.addressLineThree,
+                    nameorDept: formData.nameorDept,
+                    contactNo: formData.contactNo,
+                    remarks: formData.remarks
+                }
+            );
+            if (response.status) {
+                await props.fetchData();
+                await props.setFormData(prev => ({
+                    ...prev,
+                    activeTab : "Delivery Order",
+                }))
+                await handleCancel();
+                toast(Labels.status.success, response.data);
+            }
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+        
+    }
 
+    const handleCancel = async (e) => {
         setFormData({
-            company: "",
-            addressOne: "",
-            addressTwo: "",
-            addressThree: "",
-            deptName: "",
+            companyName: "",
+            addressLineOne: "",
+            addressLineTwo: "",
+            addressLineThree: "",
+            nameorDept: "",
             contactNo: "",
             remarks: "",
             id: 0
         });
     }
+
     return (
         <>
             <PCard className={Labels.margin.mb3}>
@@ -129,17 +186,17 @@ const PDeliveryOrder = () => {
                     <PGrid item xs={12} sm={6} md={7}>
                         <PTextField
                             label={`${"Company Name"} ${Labels.symbols.required}`}
-                            value={formData.company}
+                            value={formData.companyName}
                             onChange={handleChange}
-                            helperText={errors?.company}
-                            name={Labels.deliveryOrder.company}
+                            helperText={errors?.companyName}
+                            name={Labels.deliveryOrder.companyName}
                         />
                     </PGrid>
                     <PGrid item xs={12} sm={6} md={1} className={Labels.margin.mt3}>
                         <PButton
                             label={"Search"}
                             variant="outlined"
-                            //onClick={(e) => handleExitDraft(e)}
+                            onClick={handleSearch}
                             width={95}
                             startIcon={<SearchIcon />}
                         />
@@ -150,19 +207,19 @@ const PDeliveryOrder = () => {
                     <PGrid item xs={12} sm={6} md={4}>
                         <PTextField
                             label={`${"Address Line1"} ${Labels.symbols.required}`}
-                            value={formData.addressOne}
+                            value={formData.addressLineOne}
                             onChange={handleChange}
-                            helperText={errors?.addressOne}
-                            name={Labels.deliveryOrder.addressOne}
+                            helperText={errors?.addressLineOne}
+                            name={Labels.deliveryOrder.addressLineOne}
                         />
                     </PGrid>
                     <PGrid item xs={12} sm={6} md={4}>
                         <PTextField
                             label={`${"Name/Dept"} ${Labels.symbols.required}`}
-                            value={formData.deptName}
+                            value={formData.nameorDept}
                             onChange={handleChange}
-                            helperText={errors?.deptName}
-                            name={Labels.deliveryOrder.deptName}
+                            helperText={errors?.nameorDept}
+                            name={Labels.deliveryOrder.nameorDept}
                         />
                     </PGrid>
                 </PGrid>
@@ -170,10 +227,10 @@ const PDeliveryOrder = () => {
                     <PGrid item xs={12} sm={6} md={4}>
                         <PTextField
                             label={`${"Address Line2"}`}
-                            value={formData.addressTwo}
+                            value={formData.addressLineTwo}
                             onChange={handleChange}
-                            helperText={errors?.addressTwo}
-                            name={Labels.deliveryOrder.addressTwo}
+                            helperText={errors?.addressLineTwo}
+                            name={Labels.deliveryOrder.addressLineTwo}
                         />
                     </PGrid>
                     <PGrid item xs={12} sm={6} md={4}>
@@ -191,10 +248,10 @@ const PDeliveryOrder = () => {
                     <PGrid item xs={12} sm={6} md={4}>
                         <PTextField
                             label={`${"Address Line3"}`}
-                            value={formData.addressThree}
+                            value={formData.addressLineThree}
                             onChange={handleChange}
-                            helperText={errors?.addressThree}
-                            name={Labels.deliveryOrder.addressThree}
+                            helperText={errors?.addressLineThree}
+                            name={Labels.deliveryOrder.addressLineThree}
                         />
                     </PGrid>
                     <PGrid item xs={12} sm={6} md={4}>
@@ -210,11 +267,20 @@ const PDeliveryOrder = () => {
 
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2" >
+                        {formData.id ? (
+                            <PButton
+                                label={getLabel("lbl125")}
+                                variant="outlined"
+                                color={CommonColors.blue.main}
+                                onClick={() => handleCancel()}
+                                width={120}
+                            />
+                        ) : null}
                         <PButton
                             label={formData.id ? "Update Delivery Order" : "Save Delivery Order"}
                             variant="contained"
                             color={CommonColors.green.main}
-                            onClick={(e) => handleSave(e, true)}
+                            onClick={(e) => handleSave()}
                             width={200}
                         />
                     </PGrid>
@@ -223,7 +289,7 @@ const PDeliveryOrder = () => {
 
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={6} md={12}>
-                        <PTable columns={formDataList.deliveryOrder} rows={formDataList.data} />
+                        <PTable columns={formDataList.deliveryOrder} rows={props.response} />
                     </PGrid>
                 </PGrid>
 

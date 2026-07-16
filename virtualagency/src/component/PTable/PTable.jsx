@@ -15,7 +15,6 @@ import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
 const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true, bgColor = false }) => {
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const isPageLoad = useRef(false);

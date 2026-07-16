@@ -126,11 +126,11 @@ export const Labels = {
   },
 
   deliveryOrder: {
-    company: "company",
-    addressOne: "addressOne",
-    addressTwo: "addressTwo",
-    addressThree: "addressThree",
-    deptName: "deptName",
+    companyName: "companyName",
+    addressLineOne: "addressLineOne",
+    addressLineTwo: "addressLineTwo",
+    addressLineThree: "addressLineThree",
+    nameorDept: "nameorDept",
     contactNo: "contactNo",
     remarks: "remarks"
   },

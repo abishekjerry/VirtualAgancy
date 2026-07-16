@@ -73,6 +73,7 @@ const ProjectEnquiry = () => {
     const [formData, setFormData] = useState({
         activeTab: "Job Summary",
         status: "",
+        statusId: 0,
         sla: false,
         rfq: false,
         line: false,
@@ -120,7 +121,6 @@ const ProjectEnquiry = () => {
         statusInfo: [],
         selectedSupplierRows: [],
         selectedHistroyRows: [],
-        extraInfo: [],
 
         //calculations
         calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
@@ -147,7 +147,6 @@ const ProjectEnquiry = () => {
         savingsCalculation: [{ field: "label" }, { field: "value" }],
         savingsResponseDto: { totalPreviousPrice: 0, totalSellPrice: 0, totalSaving: 0, totalSavingPercent: 0 },
         savingsReasons: [],
-
         yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
 
         //History Tool
@@ -163,14 +162,17 @@ const ProjectEnquiry = () => {
         //RequestQuotes
         requestQuotes: [],
 
+        //Delivery Order
+        deliveryOrder: [],
+
     });
     const showProjectSaving = formDataList.projectSavings?.length > 0;
-
+    const deliveryFlag = formData.statusId > 6;
     const tabs = [
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
         { label: "SPOT", icon: <BoltIcon /> },
-        { label: "Delivery Order", icon: <LocalShippingIcon /> },
+        ...(deliveryFlag ? [{ label: "Delivery Order", icon: <LocalShippingIcon /> }] : []),
         { label: "RFQ", icon: <RequestQuoteIcon /> },
         ...(showProjectSaving ? [{ label: "Project Saving", icon: <SavingsIcon /> }] : []),
         { label: "SLA", icon: <HandshakeIcon /> },
@@ -252,11 +254,6 @@ const ProjectEnquiry = () => {
                 supplierMaster: supplierResponse,
                 savingsType: enqResponse.savingsType,
                 statusInfo: [{ label: "Enquiry ID", value: response.enqClientinfo?.enqUId || "-" }, { label: "Project Number", value: response.enqProjectinfo?.projectNo || "-" }],
-                extraInfo: [
-                    { label: "Created Date", value: response.enqProjectinfo?.estdate || "-" },
-                    { label: getLabel("lbl10"), value: userName || "-" },
-                    { label: "Enquiry Id", value: response.enqClientinfo?.enqUId || "-" }
-                ],
                 savingsReasons: projectResponse.savingReasons,
                 historyLogs: projectResponse.historyLogs,
                 lineItemLogs: projectResponse.lineItemLogs,
@@ -267,7 +264,8 @@ const ProjectEnquiry = () => {
                 calculationSupplierlogs: projectResponse.calculationSupplierlogs,
                 projectSavings: projectSavings,
                 savingsSummary: savingsSummary,
-                savingsResponseDto: projectResponse.savingsResponseDto
+                savingsResponseDto: projectResponse.savingsResponseDto,
+                deliveryOrder: projectResponse.deliveryOrder,
             }));
             setFormData(prev => ({
                 ...prev,
@@ -275,7 +273,8 @@ const ProjectEnquiry = () => {
                 calculateFlag: projectResponse.requestQuotes[0].initialQuote > 0,
                 rfqFlag: projectResponse.calculationDetails?.length === 0,
                 marginFlag: projectResponse.calculationDetails?.length > 0,
-                calculateProject: projectResponse.savingsResponseDto.details.length > 0
+                calculateProject: projectResponse.savingsResponseDto.details.length > 0,
+                statusId: response.statusId
             }));
             await clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
@@ -286,46 +285,57 @@ const ProjectEnquiry = () => {
     };
 
     //Change Function
-    const handleChange = (e, row) => {
+    const handleChange = async (e) => {
         const { name, value, label } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleSaveReasonChange = async (e, row, field) => {
+        const { name, value, label } = e.target;
+        setFormDataList(prev => ({
+            ...prev,
+            savingsReasons: prev.savingsReasons.map(item =>
+                item.id === row.id ? {
+                    ...item,
+                    [field]: label,
+                    ...(field === Labels.lineItems.savingsType && {
+                        savingsReason: "",
+                        savingsReasonOptions: []
+                    })
+                } : item)
+        }));
 
         if (name === Labels.lineItems.savingsType) {
-            setFormDataList(prev => ({
-                ...prev,
-                savingsReasons: prev.savingsReasons.map(item =>
-                    item.itemName === row.itemName ? {
-                        ...item,
-                        [name]: label
-                    } : item
-                )
-            }));
-            SavingsReasonMaster(label);
+            await SavingsReasonMaster(label, row.id);
         }
     };
 
-
-    const SavingsReasonMaster = async (data) => {
+    const SavingsReasonMaster = async (data, rowId) => {
         try {
-            setLoading(false);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
                 TypeOfJob: formDataList.lineItems[0].printornonprint,
                 Savingstype: data,
             });
+
             setFormDataList(prev => ({
                 ...prev,
-                savingsReason: response.savingsReason,
+                savingsReasons: prev.savingsReasons.map(item => item.id === rowId ? {
+                    ...item,
+                    savingsReasonOptions: response.savingsReason
+                } : item)
             }));
 
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
-        } finally {
+        }
+        finally {
             setLoading(false);
         }
     };
+
 
     const attachments = [
         { field: "enquiryId", header: "File Name" },
@@ -337,7 +347,10 @@ const ProjectEnquiry = () => {
         { field: "enquiryId", header: "Status" }
     ]
 
-    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo, formDataList.extraInfo);
+    const extraInfo = [{ label: getLabel("lbl164"), value: formDataList.enquiryDetails?.estdate },
+    { label: getLabel("lbl10"), value: userName }, { label: getLabel("lbl162"), value: formDataList.enquiryDetails?.enqUId }]
+
+    const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo, extraInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails, false);
     const rawLineItems = getLineneItems({}, formDataList, getLabel, getOptionLabel, formDataList.lineItems);
     const lineItems = rawLineItems.map((item, index) => ({
@@ -635,16 +648,16 @@ const ProjectEnquiry = () => {
     ];
 
     const handleQuotation = async (e, flag) => {
-        if (flag == "reCalculate") {
+        if (flag) {
             const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
                 enqId: id,
                 modifiedBy: agancyUserID,
-                status: 2
+                status: flag
             });
             await fetchData();
         }
         else {
-            
+
         }
     };
     //RFQ functionality
@@ -718,43 +731,51 @@ const ProjectEnquiry = () => {
     //savings reason functionality
 
     useEffect(() => {
-        if (formData.project && formDataList?.savingsReasons?.length) {
-            formDataList.savingsReasons.forEach(item => {
-                SavingsReasonMaster(item.savingsType);
-            });
-        }
+        if (!formData.project) return;
+        const load = async () => {
+            await Promise.all(
+                formDataList.savingsReasons.filter(row => row.savingsType).map(row =>
+                    SavingsReasonMaster(row.savingsType, row.id)
+                )
+            );
+        };
+        load();
     }, [formData.project]);
 
-    const renderSavingsType = (row) => {
-        if (!formData.project) return row.savingsType;
-        const value = getOptionValue(formDataList.savingsType, row.savingsType)
-        return (
-            <PDropdown
-                value={value}
-                onChange={(e) => handleChange(e, row)}
-                name={Labels.lineItems.savingsType}
-                options={formDataList.savingsType}
-                flag={Labels.flag.auto}
-            />
-        );
-    };
+    const renderSavingsType = (field) => ({
+        render: (row) => {
+            const value = getOptionValue(formDataList.savingsType, row[field]);
+            return (
+                <PDropdown
+                    value={value}
+                    onChange={(e) => handleSaveReasonChange(e, row, field)}
+                    name={field}
+                    options={formDataList.savingsType}
+                    flag={Labels.flag.auto}
+                />
+            );
+        }
+    });
 
-    const renderSavingsReason = (row) => {
-        if (!formData.project) return row.savingsReason;
-        const value = getOptionValue(formDataList.savingsReason, row.savingsReason);
-        return (
-            <PDropdown
-                value={value}
-                onChange={(e) => handleChange(e, row)}
-                name={Labels.lineItems.savingsReason}
-                options={formDataList.savingsReason}
-                flag={Labels.flag.auto}
-            />
-        );
-    };
+    const renderSavingsReason = (field) => ({
+        render: (row) => {
+            const value = getOptionValue(row.savingsReasonOptions, row[field]);
+            return (
+                <PDropdown
+                    value={value}
+                    onChange={(e) => handleSaveReasonChange(e, row, field)}
+                    name={field}
+                    options={row.savingsReasonOptions}
+                    flag={Labels.flag.auto}
+                />
+            );
+        }
+    });
+
+
     const savingsReasons = [{ field: "itemName", header: "Item" },
-    { field: "savingstype", header: "Savings Type", render: renderSavingsType },
-    { field: "savingsreason", header: "Savings Reason", render: renderSavingsReason }];
+    { field: "savingsType", header: "Savings Type", ...(formData.project ? renderSavingsType("savingsType") : {}) },
+    { field: "savingsReason", header: "Savings Reason", ...(formData.project ? renderSavingsReason("savingsReason") : {}) }];
 
     //Action button function
     const renderActionButtons = (flag) => (
@@ -865,6 +886,13 @@ const ProjectEnquiry = () => {
             }))
         );
 
+        const savingsReasons = formDataList.savingsReasons.map(item => ({
+            Id: item.id,
+            savingsReason: item.savingsReason,
+            savingsType: item.savingsType,
+            enquiryId: id,
+        }));
+
         switch (flag) {
             case "sla":
                 activeTab = "SLA";
@@ -894,6 +922,7 @@ const ProjectEnquiry = () => {
 
             case "project":
                 activeTab = "Project Savings";
+                await PostApi(ProjectEnquiry_API.UpdateSavingsReasons, savingsReasons);
                 handleCancel(null, flag);
                 return;
 
@@ -1175,7 +1204,7 @@ const ProjectEnquiry = () => {
                 )}
 
                 {formData.activeTab === "Delivery Order" && (
-                    <PDeliveryOrder />
+                    <PDeliveryOrder response={formDataList.deliveryOrder} fetchData={fetchData} setFormData={setFormData} />
                 )}
 
                 {formData.activeTab === "SPOT" && (
@@ -1392,93 +1421,108 @@ const ProjectEnquiry = () => {
                                         </PGrid>
                                     ))}
                                 </PCard>
+                                {formData.statusId >= 2 && (
+                                    <PCard className={Labels.margin.mb3} readOnly={formData.statusId == 3}>
+                                        <PGrid container className="d-flex align-items-center justify-content-between mb-2">
+                                            <PGrid item xs={12} sm={6} md={6}>
+                                                <PTypography
+                                                    labelText={"Step 3.Submit to client"}
+                                                    flag={Labels.fontFlags.subHeader}
+                                                    color={CommonColors.black.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                                <PTypography
+                                                    labelText={"Once all is in order, please preview the quotation before submitting it to your client."}
+                                                    flag={Labels.fontFlags.smallText}
+                                                    color={CommonColors.grey.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                        </PGrid>
+                                        <PGrid container className={Labels.margin.mb3}>
+                                            <PGrid item xs={12} sm={6} md={6}>
+                                                <PTypography
+                                                    labelText={"Please input environmental specification with comparison / no comparison"}
+                                                    flag={Labels.fontFlags.smallText}
+                                                    color={CommonColors.red.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                        </PGrid>
 
-                                <PCard className={Labels.margin.mb3}>
-                                    <PGrid container className="d-flex align-items-center justify-content-between mb-3">
-                                        <PGrid item xs={12} sm={6} md={6}>
-                                            <PTypography
-                                                labelText={"Step 3.Submit to client"}
-                                                flag={Labels.fontFlags.subHeader}
-                                                color={CommonColors.black.main}
-                                                weight={FontWeight.bold}
-                                            />
-                                            <PTypography
-                                                labelText={"Once all is in order, please preview the quotation before submitting it to your client."}
-                                                flag={Labels.fontFlags.smallText}
+                                        <Divider sx={{ mb: 2 }} />
+                                        <PGrid container className={Labels.margin.mb3}>
+                                            <PGrid item xs={12} sm={6} md={2} className={Labels.margin.mt3}>
+                                                <PTypography
+                                                    labelText={`${"Send to SAP"} ${Labels.symbols.optional}`}
+                                                    flag={Labels.fontFlags.subHeader}
+                                                    color={CommonColors.black.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                            <PGrid item xs={12} sm={6} md={2}>
+                                                <PDropdown
+                                                    value={formData.sap}
+                                                    onChange={(e) => setFormData((prev) => ({
+                                                        ...prev,
+                                                        sap: e.target.value
+                                                    }))}
+                                                    options={formDataList.yesOrNo}
+                                                    width={Labels.fontSize.xxxxl}
+                                                    disabled={true}
+                                                />
+                                            </PGrid>
+                                        </PGrid>
+                                        <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                            <PButton
+                                                label={"Preview quotation"}
+                                                variant="contained"
                                                 color={CommonColors.grey.main}
-                                                weight={FontWeight.bold}
+                                                onClick={(e) => handleQuotation(e, "")}
+                                                width={250}
+                                            />
+                                            <PButton
+                                                label={"Submit quotation to client"}
+                                                variant="contained"
+                                                color={CommonColors.green.main}
+                                                onClick={(e) => handleQuotation(e, 3)}
+                                                width={250}
                                             />
                                         </PGrid>
-                                    </PGrid>
-                                    <Divider sx={{ mb: 2 }} />
-                                    <PGrid container className={Labels.margin.mb3}>
-                                        <PGrid item xs={12} sm={6} md={2} className={Labels.margin.mt3}>
-                                            <PTypography
-                                                labelText={`${"Send to SAP"} ${Labels.symbols.optional}`}
-                                                flag={Labels.fontFlags.subHeader}
-                                                color={CommonColors.black.main}
-                                                weight={FontWeight.bold}
+                                    </PCard>
+                                )}
+
+                                {formData.statusId >= 3 && (
+                                    <PCard className={Labels.margin.mb3}>
+                                        <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                            <PGrid item xs={12} sm={6} md={6}>
+                                                <PTypography
+                                                    labelText={"Step 4.Client/PM Approval"}
+                                                    flag={Labels.fontFlags.subHeader}
+                                                    color={CommonColors.black.main}
+                                                    weight={FontWeight.bold}
+                                                />
+                                            </PGrid>
+                                        </PGrid>
+                                        <Divider sx={{ mb: 2 }} />
+                                        <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                            <PButton
+                                                label={"Approve quotation"}
+                                                variant="contained"
+                                                color={CommonColors.green.main}
+                                                onClick={(e) => handleQuotation(e, 6)}
+                                                width={250}
+                                            />
+                                            <PButton
+                                                label={"Request adjustment"}
+                                                variant="contained"
+                                                color={CommonColors.red.main}
+                                                onClick={(e) => handleQuotation(e, 4)}
+                                                width={250}
                                             />
                                         </PGrid>
-                                        <PGrid item xs={12} sm={6} md={2}>
-                                            <PDropdown
-                                                value={formData.sap}
-                                                onChange={(e) => setFormData((prev) => ({
-                                                    ...prev,
-                                                    sap: e.target.value
-                                                }))}
-                                                options={formDataList.yesOrNo}
-                                                width={Labels.fontSize.xxxxl}
-                                                disabled={true}
-                                            />
-                                        </PGrid>
-                                    </PGrid>
-                                    <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
-                                        <PButton
-                                            label={"Preview quotation"}
-                                            variant="contained"
-                                            color={CommonColors.grey.main}
-                                            onClick={(e) => handleQuotation(e, "")}
-                                            width={250}
-                                        />
-                                        <PButton
-                                            label={"Submit quotation to client"}
-                                            variant="contained"
-                                            color={CommonColors.green.main}
-                                            onClick={(e) => handleQuotation(e, "")}
-                                            width={250}
-                                        />
-                                    </PGrid>
-                                </PCard>
-                                <PCard className={Labels.margin.mb3}>
-                                    <PGrid container className="d-flex align-items-center justify-content-between mb-3">
-                                        <PGrid item xs={12} sm={6} md={6}>
-                                            <PTypography
-                                                labelText={"Step 4.Client/PM Approval"}
-                                                flag={Labels.fontFlags.subHeader}
-                                                color={CommonColors.black.main}
-                                                weight={FontWeight.bold}
-                                            />
-                                        </PGrid>
-                                    </PGrid>
-                                    <Divider sx={{ mb: 2 }} />
-                                    <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
-                                        <PButton
-                                            label={"Approve quotation"}
-                                            variant="contained"
-                                            color={CommonColors.green.main}
-                                            onClick={(e) => handleQuotation(e, "")}
-                                            width={250}
-                                        />
-                                        <PButton
-                                            label={"Request adjustment"}
-                                            variant="contained"
-                                            color={CommonColors.red.main}
-                                            onClick={(e) => handleQuotation(e, "reCalculate")}
-                                            width={250}
-                                        />
-                                    </PGrid>
-                                </PCard>
+                                    </PCard>
+                                )}
 
                             </>
                         )}
