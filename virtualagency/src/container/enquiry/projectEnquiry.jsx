@@ -60,7 +60,7 @@ const ProjectEnquiry = () => {
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
     const { country, userName, userID, fkID, currency } = useSelector((state) => state.userDetails.user);
-    
+
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const today = formatDate(new Date());
@@ -898,7 +898,7 @@ const ProjectEnquiry = () => {
                 break;
 
             case "job":
-                activeTab = "Job summary";
+                activeTab = "Job Summary";
                 requests.push(
                     PostApi(ClientInfo_API.AddUpdateClientInfo, clientInfo),
                     PostApi(EnquiryDetails_API.AddUpdateEnquiryDetails, enquiryDetails)
@@ -912,7 +912,7 @@ const ProjectEnquiry = () => {
                 return;
 
             case "line":
-                activeTab = "Line items";
+                activeTab = "Line Items";
                 handleCancel(null, flag);
                 return;
 

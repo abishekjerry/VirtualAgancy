@@ -12,6 +12,7 @@ import PTextField from "../../component/PTextField/PTextField";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const UpdateLineItems = ({ open, onClose, data = {}, step, refreshSummary }) => {
     const { getLabel } = useLanguage();

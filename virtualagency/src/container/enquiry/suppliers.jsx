@@ -29,7 +29,7 @@ const Suppliers = () => {
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [showSelected, setShowSelected] = useState(false);
     const [isValidation, setIsValidation] = useState(true);
-    const [country, setCountry] = useState("");
+    const [countryName, setCountry] = useState("");
     const [print, setPrint] = useState("");
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
@@ -105,9 +105,9 @@ const Suppliers = () => {
 
     let filteredData = formDataList.suppliers;
     // Country filter
-    if (country) {
+    if (countryName) {
         filteredData = filteredData.filter(
-            (item) => item.countryId === country
+            (item) => item.countryId === countryName
         );
     }
 
@@ -223,7 +223,7 @@ const Suppliers = () => {
                                 <PGrid item xs={12} sm={6} md={3}>
                                     <PDropdown
                                         label={getLabel("lbl09")}
-                                        value={country}
+                                        value={countryName}
                                         onChange={(e) => setCountry(e.target.value)}
                                         options={formDataList.country}
                                         width={Labels.fontSize.xxxxl}
