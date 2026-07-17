@@ -10,7 +10,7 @@ export const PostApi = (url, data = "", isDashboard = false) => {
     withCredentials: true,
     headers: {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      //...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...API_HEADERS
     },
     body: isFormData ? data : JSON.stringify(data),
@@ -52,7 +52,7 @@ export const GetApi = (url, headers = {}, isDashboard = false) => {
     headers: {
       "Content-Type": "application/json",
       ...headers,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      //...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...API_HEADERS
     },
   })

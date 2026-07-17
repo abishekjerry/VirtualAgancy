@@ -29,6 +29,7 @@ import { getClientInfo, getEnquiryDetails, getLineneItems } from "../../utils/co
 import { labelRoutes } from "../../navigations/labelRoutes";
 import UpdateLineItems from "./updateLineItems";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
+import { useSelector } from "react-redux";
 
 const Review = () => {
     const { getLabel } = useLanguage();
@@ -39,8 +40,8 @@ const Review = () => {
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(0); // first item open by default
     const [openDraft, setOpenDraft] = useState();
+    const { userID } = useSelector((state) => state.userDetails.user);
 
-    const userID = parseInt(localStorage.getItem("userID"));
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
         enquiryDetails: [],

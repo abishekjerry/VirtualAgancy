@@ -27,8 +27,7 @@ function PSidebar({
                 arrow
               >
                 <div
-                  className={`nav-item ${location.pathname === item.route ? "active" : ""
-                    }`}
+                  className={`nav-item ${location.pathname === item.route ? "active" : "" }`}
                   onClick={() => {
                     //   if (item.children) {
                     //     setOpenMenu(openMenu === item.name ? null : item.name);

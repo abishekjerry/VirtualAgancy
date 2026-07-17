@@ -19,6 +19,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step, refreshSummary }) => 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [allowRedirect, setAllowRedirect] = useState(false);
+    const { fkID } = useSelector((state) => state.userDetails.user);
     const [formData, setFormData] = useState({
         enquiryId: "",
         itemName: "",
@@ -177,7 +178,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step, refreshSummary }) => 
                     SpecNote: formData.specifications,
                     SNote: formData.notesComments,
                     QuoteQtyOrSize: formData.quantity,
-                    ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+                    ModifiedBy: fkID,
                 };
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);
                 if (isSuccess(response)) {

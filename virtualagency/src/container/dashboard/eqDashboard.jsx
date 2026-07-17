@@ -35,6 +35,7 @@ import { exportToExcel, isNotEmpty, isSuccess } from "../../utils/commonFunction
 import { useNavigate } from "react-router-dom";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import PDialog from "../../component/PDialog/PDialog";
+import { useSelector } from "react-redux";
 
 const EqDashboard = () => {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ const EqDashboard = () => {
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
   const [chartOrginalData, setChartOrginalData] = useState([]);
+  const { countryID, role, userName } = useSelector((state) => state.userDetails.user);
   const [formData, setFormData] = useState({
     country: "",
     user: "",
@@ -62,8 +64,7 @@ const EqDashboard = () => {
     startDate: "",
     endDate: "",
   })
-  const role = localStorage.getItem("role");
-  const countryID = parseInt(localStorage.getItem("countryID"))
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -85,7 +86,7 @@ const EqDashboard = () => {
           statusId: "",
           jobposition: "",
           client: "",
-          username: localStorage.getItem("user"),
+          username: userName, //localStorage.getItem("user"),
         });
 
         if (isSuccess(res)) {
@@ -394,7 +395,7 @@ const EqDashboard = () => {
         <PGrid container className={Labels.margin.mb3}>
           <PGrid item xs={12} sm={6} md={7}>
             <PTypography
-              labelText={`${getLabel("lbl08")}, ${localStorage.getItem("user")}`}
+              labelText={`${getLabel("lbl08")}, ${userName}`}
               weight={FontWeight.bold}
               flag={Labels.fontFlags.subHeader}
               color={CommonColors.red}

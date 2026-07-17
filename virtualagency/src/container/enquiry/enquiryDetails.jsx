@@ -18,9 +18,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Dashboard_API, EnquiryDetails_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
-import { PSummary } from "../../component/PSumary/PSummary";
+import { PSummary } from "../../component/PSummary/PSummary";
 import { getClientInfo, getEnquiryDetails, getSummarySections } from "../../utils/constants/summary";
 import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
+import { useSelector } from "react-redux";
 const EnquiryDetails = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -30,6 +31,7 @@ const EnquiryDetails = () => {
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
     const [open, setOpen] = useState(false);
+    const { countryID, role, fkID } = useSelector((state) => state.userDetails.user);
     const [formData, setFormData] = useState({
         projectNo: "",
         estdeliveryDate: "",
@@ -76,8 +78,8 @@ const EnquiryDetails = () => {
             try {
                 setLoading(true);
                 const response = await PostApi(Dashboard_API.Master, {
-                    userCountryId: parseInt(localStorage.getItem("countryID")),
-                    role: localStorage.getItem("role")
+                    userCountryId: countryID ,
+                    role: role
                 });
                 setFormDataList(prev => ({
                     ...prev,
@@ -168,7 +170,7 @@ const EnquiryDetails = () => {
                     projectDesc: formData.projectDescription,
                     estdate: formatDate(parseDate(formData.estdeliveryDate)),
                     briefdate: formatDate(parseDate(formData.briefReceivedDate)),
-                    modifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+                    modifiedBy: fkID,
                     quoteBy: formData.projectQuoteType,
                     slaId: formData.slaTemplate,
                     managementfeetypeId: formData.managementFeeType,

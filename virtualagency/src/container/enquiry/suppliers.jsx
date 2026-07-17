@@ -19,7 +19,8 @@ import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import { PostApi } from "../../utils/api/networking";
 import { Dashboard_API, Suppliers_API } from "../../utils/api/apiUrl";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections, getSuppliers } from "../../utils/constants/summary";
-import { PSummary } from "../../component/PSumary/PSummary";
+import { PSummary } from "../../component/PSummary/PSummary";
+import { useSelector } from "react-redux";
 const Suppliers = () => {
     const { getLabel } = useLanguage();
     const enquirySteps = getEnquirySteps(getLabel);
@@ -33,9 +34,8 @@ const Suppliers = () => {
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-
-    const currency = localStorage.getItem("currency");
-    const countryName = localStorage.getItem("country");
+    const { country, currency, fkID } = useSelector((state) => state.userDetails.user);
+ 
     const [formDataList, setFormDataList] = useState({
         country: [],
         print: [],
@@ -57,12 +57,12 @@ const Suppliers = () => {
             const response = await PostApi(Dashboard_API.Master, {});
             const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
                 currency: currency,
-                Country: countryName
+                Country: country
             });
             setFormDataList(prev => ({
                 ...prev,
-                country:  [ { label: "All", value: 0 ,  selected: true}, ...(response.country || [])],
-                print: [ { label: "All", value: 0 , selected: true}, ...(response.printcapabilities || [])],
+                country: [{ label: "All", value: 0, selected: true }, ...(response.country || [])],
+                print: [{ label: "All", value: 0, selected: true }, ...(response.printcapabilities || [])],
                 suppliers: supplierResponse,
             }));
             if (id !== 0) {
@@ -97,7 +97,7 @@ const Suppliers = () => {
             setFormDataList(prev => ({
                 ...prev,
                 selectedRows: formDataList.supplier.map(item => ({
-                    supplierId: item.supplierID , suppliername : item.suppliername
+                    supplierId: item.supplierID, suppliername: item.suppliername
                 }))
             }));
         }
@@ -160,7 +160,7 @@ const Suppliers = () => {
             const payload = {
                 EnqId: id,
                 SelectedSuppliers: supplierIds,
-                ModifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+                ModifiedBy: fkID,
             };
             const response = await PostApi(Suppliers_API.AddUpdateSuppliers, payload);
             if (isSuccess(response)) {
@@ -312,7 +312,7 @@ const Suppliers = () => {
                         </PCard>
                     </PGrid>
                     <PGrid item xs={12} sm={12} md={3}>
-                        <PSummary sections={sections} currentStep={4} refreshSummary={fetchData} duplicate={true} lineItems = {formDataList.lineItems}/>
+                        <PSummary sections={sections} currentStep={4} refreshSummary={fetchData} duplicate={true} lineItems={formDataList.lineItems} />
                     </PGrid>
                 </PGrid>
             </Box>

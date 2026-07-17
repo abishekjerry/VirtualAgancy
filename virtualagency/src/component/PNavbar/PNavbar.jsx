@@ -96,7 +96,7 @@ const PNavbar = ({
           </IconButton>
 
           <Box className="mt-1">
-            <img src={Logo} alt="Logo" style={{ height: 55,width: 60 }} />
+            <img src={Logo} alt="Logo" style={{ height: 55, width: 60 }} />
           </Box>
         </Box>
 
