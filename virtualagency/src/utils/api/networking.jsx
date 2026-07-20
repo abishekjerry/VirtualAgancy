@@ -1,18 +1,15 @@
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { API_HEADERS } from "../commonFunction/common";
-
+import { Labels } from "../constants/labels";
 
 const handleUnauthorized = (isDashboard) => {
-  localStorage.removeItem("token");
-  localStorage.setItem("unAuthorized", "true"); 
-
+  localStorage.setItem("unAuthorized", "true");
   if (isDashboard) return;
   window.location.href = labelRoutes.dashboard;
 };
 
 export const PostApi = (url, data = "", isDashboard = false) => {
   const isFormData = data instanceof FormData;
-  const token = localStorage.getItem("token");
   const headers = { ...API_HEADERS };
 
   if (isFormData) {
@@ -20,10 +17,6 @@ export const PostApi = (url, data = "", isDashboard = false) => {
     delete headers["content-type"];
   } else {
     headers["Content-Type"] = "application/json";
-  }
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const targetUrl = url instanceof URL ? url.href : url.toString();
@@ -48,37 +41,24 @@ export const PostApi = (url, data = "", isDashboard = false) => {
       if (contentType && contentType.includes("application/json")) {
         return response.json();
       } else {
-        return { status: "F", message: "Unexpected response format" };
+        return { status: Labels.status.failure, message: "Unexpected response format" };
       }
     })
     .catch((error) => {
       return {
-        status: "F",
+        status: Labels.status.failure,
         message: error.message || "No response from server",
       };
     });
 };
 
+
 export const GetApi = (url, customHeaders = {}, isDashboard = false) => {
-  const token = localStorage.getItem("token");
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...API_HEADERS,
-    ...customHeaders,
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+  const headers = { "Content-Type": "application/json", ...API_HEADERS, ...customHeaders, };
 
   const targetUrl = url instanceof URL ? url.href : url.toString();
 
-  return fetch(targetUrl, {
-    method: "GET",
-    credentials: "include", 
-    headers: headers,
-  })
+  return fetch(targetUrl, { method: "GET", credentials: "include", headers: headers })
     .then(async (response) => {
       if (response.status === 401) {
         handleUnauthorized(isDashboard);
@@ -89,18 +69,21 @@ export const GetApi = (url, customHeaders = {}, isDashboard = false) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const raw = await response.text();
-      if (!raw || raw.trim() === "") return { status: "S", data: null };
-      
+      const data = await response.json();
+
+      if (!data || data.trim() === "") {
+        return { status: "S", data: null };
+      }
+
       try {
-        return { status: "S", data: JSON.parse(raw) };
-      } catch (err) {
-        return { status: "F", message: "Invalid JSON from server" };
+        return { status: Labels.status.success, data: data };
+      } catch(error) {
+        return { status: Labels.status.failure, message: "Invalid JSON from server" };
       }
     })
     .catch((error) => {
       return {
-        status: "F",
+        status: Labels.status.failure,
         message: error.message || "Network request failed",
       };
     });

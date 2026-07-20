@@ -74,30 +74,33 @@ const EnquiryDetails = () => {
     const id = state?.id > 0 ? state.id : 0;
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await PostApi(Dashboard_API.Master, {
-                    userCountryId: countryID ,
-                    role: role
-                });
-                setFormDataList(prev => ({
-                    ...prev,
-                    managementFeeType: response.managementFeetype,
-                    projectAttribute: response.projectAttribute,
-                    year: response.year,
-                    slaTemplate: response.sla
-                }));
-                await GetData(response);
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchData();
     }, []);
-    
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(Dashboard_API.Master, {
+                userCountryId: countryID,
+                role: role
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                managementFeeType: response.managementFeetype,
+                projectAttribute: response.projectAttribute,
+                year: response.year,
+                slaTemplate: response.sla
+            }));
+            if (id !== 0) {
+                await GetData(response);
+            }
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
             const hybrid = formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
@@ -415,7 +418,7 @@ const EnquiryDetails = () => {
 
                             </PGrid>
 
-                            <PSlaTemplate slaId={formData.slaTemplate} enquiryId={id} getLabel={getLabel}
+                            <PSlaTemplate sla={formData.slaTemplate} enquiryId={id} getLabel={getLabel}
                                 quoteStartDate={formDataList?.enquiryDetails?.quotestartdate}
                                 onChange={handleSlaChange}
                             />

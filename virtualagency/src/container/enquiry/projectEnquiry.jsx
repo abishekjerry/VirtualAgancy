@@ -1560,7 +1560,7 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
-                        <PSlaTemplate slaId={formDataList?.enquiryDetails?.slaId} enquiryId={id} getLabel={getLabel} quoteStartDate={formDataList?.enquiryDetails?.quotestartdate} disabled={!formData.sla}
+                        <PSlaTemplate sla={formDataList?.enquiryDetails?.slaId} enquiryId={id} getLabel={getLabel} quoteStartDate={formDataList?.enquiryDetails?.quotestartdate} disabled={!formData.sla}
                             onChange={handleSlaChange}
                         />
                     </Box>
