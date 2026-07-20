@@ -768,7 +768,6 @@ const ProjectEnquiry = () => {
         }
     });
 
-
     const savingsReasons = [{ field: "itemName", header: "Item" },
     { field: "savingsType", header: "Savings Type", ...(formData.project ? renderSavingsType("savingsType") : {}) },
     { field: "savingsReason", header: "Savings Reason", ...(formData.project ? renderSavingsReason("savingsReason") : {}) }];
@@ -855,7 +854,20 @@ const ProjectEnquiry = () => {
             hybridModel: formDataList.enquiryDetails.hybridModel,
             attribute: formDataList.enquiryDetails.attribute,
             year: formDataList.enquiryDetails.year,
-            ...dynamicData
+            ...(flag === "job"
+                ? {
+                    quotestartdate: formDataList.enquiryDetails.quotestartdate,
+                    quoteenddate: formDataList.enquiryDetails.quoteenddate,
+                    proofstartdate: formDataList.enquiryDetails.proofstartdate,
+                    proofenddate: formDataList.enquiryDetails.proofenddate,
+                    productionstartdate: formDataList.enquiryDetails.productionstartdate,
+                    productionenddate: formDataList.enquiryDetails.productionenddate,
+                    filecopiesstartdate: formDataList.enquiryDetails.filecopiesstartdate,
+                    filecopiesenddate: formDataList.enquiryDetails.filecopiesenddate,
+                    invoicestartdate: formDataList.enquiryDetails.invoicestartdate,
+                    invoiceenddate: formDataList.enquiryDetails.invoiceenddate,
+                }
+                : dynamicData),
         };
         const supplierQuotes = formDataList.requestQuotes.flatMap(group =>
             group.items.map(item => ({
