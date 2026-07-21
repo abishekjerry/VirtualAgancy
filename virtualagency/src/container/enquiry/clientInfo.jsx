@@ -36,7 +36,7 @@ const ClientInfo = () => {
     const [disible, setDisible] = useState(true);
     const [type, setType] = useState("");
     const [openSummary, setOpenSummary] = useState(true);
-    const { countryID, userID, fkID } = useSelector((state) => state.userDetails.user);
+    const { countryID, userID, fkID , role} = useSelector((state) => state.userDetails.user);
     const [formData, setFormData] = useState({
         division: "",
         brand: "",
