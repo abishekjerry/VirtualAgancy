@@ -6,7 +6,8 @@ import {
     Grid,
     Button,
     Divider,
-    Avatar, Tooltip
+    Avatar, Tooltip,
+    IconButton
 } from "@mui/material";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -50,6 +51,7 @@ import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
 import PSpotSection from "../../component/PSpotSection/PSpotSection";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PDeliveryOrder from "../../component/PDeliveryOrder/PDeliveryOrder";
+import PostAddIcon from "@mui/icons-material/PostAdd";
 import { useSelector } from "react-redux";
 
 
@@ -97,7 +99,8 @@ const ProjectEnquiry = () => {
         managementFee: "",
         savingsType: "",
         savingsReason: "",
-        sap: ""
+        sap: "",
+        poNo: ""
 
 
     });
@@ -109,7 +112,6 @@ const ProjectEnquiry = () => {
         clientContact: [],
         savingsType: [],
         savingsReason: [],
-        status: [{ label: "Job Cancelled", value: 1 }],
         data: [],
         columns: [{ field: "suppliername", header: "Supplier's Name" }, { field: "country", header: "Country" }, { field: "suppliercode", header: "Supplier Code" },],
         supplierMaster: [],
@@ -117,6 +119,8 @@ const ProjectEnquiry = () => {
         statusInfo: [],
         selectedSupplierRows: [],
         selectedHistroyRows: [],
+        //project status
+        status: [],
 
         //calculations
         calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
@@ -163,7 +167,8 @@ const ProjectEnquiry = () => {
 
     });
     const showProjectSaving = formDataList.projectSavings?.length > 0;
-    const deliveryFlag = formData.statusId > 6;
+    const deliveryFlag = formData.statusId >= 6;
+    const createOrderFlag = formDataList.deliveryOrder?.length > 0;
     const tabs = [
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
@@ -177,6 +182,12 @@ const ProjectEnquiry = () => {
         { label: "Attachment", icon: <AttachmentIcon /> }
     ]
 
+
+    const iconStyle = {
+        border: createOrderFlag ? "1px solid #e2e8f0" : "1px solid #f90707",
+        color: "#64748b",
+        "&:hover": { bgcolor: "#f8fafc" }
+    };
     //Master function
     useEffect(() => {
         fetchData();
@@ -262,6 +273,7 @@ const ProjectEnquiry = () => {
                 savingsSummary: savingsSummary,
                 savingsResponseDto: projectResponse.savingsResponseDto,
                 deliveryOrder: projectResponse.deliveryOrder,
+                status: projectResponse.projectStatus,
             }));
             setFormData(prev => ({
                 ...prev,
@@ -344,7 +356,9 @@ const ProjectEnquiry = () => {
     ]
 
     const extraInfo = [{ label: getLabel("lbl164"), value: formDataList.enquiryDetails?.estdate },
-    { label: getLabel("lbl10"), value: userName }, { label: getLabel("lbl162"), value: formDataList.enquiryDetails?.enqUId }]
+    { label: getLabel("lbl10"), value: userName }, { label: getLabel("lbl162"), value: formDataList.enquiryDetails?.enqUId },
+    ...(deliveryFlag ? [{ label: "D/O No or PO No", value: "" }, { label: "PO Order raised Date", value: "" },
+    { label: "Invoice Number", value: "" }] : [])]
 
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo, extraInfo);
     const enquiryDetails = getEnquiryDetails({}, {}, {}, getLabel, getOptionLabel, formDataList.enquiryDetails, false);
@@ -661,7 +675,7 @@ const ProjectEnquiry = () => {
         render: (row) => (
             <PTextField
                 name={field}
-                value={row[field] ?? ""}
+                value={row[field] == null || row[field] === 0 ? "" : row[field]}
                 onChange={(e) => handleInputChange(e.target.value.replace(/[^0-9.]/g, ""), row.supplierQuotesId, row.enquiryId, field)}
                 width={90}
                 sx={{
@@ -901,7 +915,20 @@ const ProjectEnquiry = () => {
             enquiryId: id,
         }));
 
+        const updateJobStatus = {
+            enqId: id,
+            modifiedBy: fkID,
+            status: formData.status
+        }
+
         switch (flag) {
+            case "status":
+                activeTab = "Job Summary";
+                requests.push(
+                    PostApi(ProjectEnquiry_API.UpdateJobStatus, updateJobStatus)
+                );
+                break;
+
             case "sla":
                 activeTab = "SLA";
                 requests.push(
@@ -997,7 +1024,7 @@ const ProjectEnquiry = () => {
                     <PGrid item xs={12} md={12} sm={12}>
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
                             <PDropdown
-                                name={"status"}
+                                name={Labels.commonLabel.status}
                                 value={formData.status}
                                 label={getLabel("lbl166")}
                                 onChange={handleChange}
@@ -1009,9 +1036,10 @@ const ProjectEnquiry = () => {
                                 label={getLabel("lbl40")}
                                 variant="contained"
                                 color={CommonColors.green.main}
-                                //onClick={(e) => handleSubmit(e, true)}
+                                onClick={(e) => handleSubmit(e, "status")}
                                 width={150}
                                 height={45}
+                                disabled={!formData.status}
                             />
                         </Box>
                     </PGrid>
@@ -1069,18 +1097,69 @@ const ProjectEnquiry = () => {
                                                 options={formDataList.clientContact}
                                                 width={100}
                                             />
+                                        ) : formData.job && item.label === "D/O No or PO No" ? (
+                                            <>
+                                                <PGrid container>
+                                                    <PGrid item xs={12} md={6} xl={9}>
+                                                        <PTextField
+                                                            name="poNo"
+                                                            label={`${item.label} ${Labels.symbols.required}`}
+                                                            value={formData.poNo}
+                                                            onChange={handleChange}
+                                                        //width={100}
+                                                        />
+                                                    </PGrid>
+                                                    {[6].includes(formData.statusId) && (
+                                                        <PGrid item xs={12} md={6} xl={3} className={Labels.margin.mt2}>
+                                                            <Tooltip title={createOrderFlag ? "Create Order"
+                                                                : "Input D/O No or PO No and select Delivery Order to activate the 'Create Order' Icon."
+                                                            } arrow>
+                                                                <IconButton
+                                                                    sx={iconStyle}
+                                                                    onClick={(e) => createOrderFlag ? handleQuotation(e, 7)
+                                                                        : setFormData(prev => ({ ...prev, activeTab: "Delivery Order" }))
+                                                                    }
+                                                                >
+                                                                    <PostAddIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+
+                                                        </PGrid>
+                                                    )}
+                                                </PGrid>
+                                            </>
+                                        ) : formData.job && item.label === "PO Order raised Date" ? (
+                                            <PDatepicker
+                                                name={item.label}
+                                                label={item.label}
+                                                value={formData.poNo}
+                                                onChange={handleChange}
+                                                width={100}
+                                                allowFuture
+                                            />
+                                        ) : formData.job && item.label === "Invoice Number" ? (
+                                            <PTextField
+                                                name={item.label}
+                                                label={item.label}
+                                                value={formData.poNo}
+                                                onChange={handleChange}
+                                            />
                                         ) : (
-                                            <PGrid className={`ps-2 mb-4`}>
-                                                <PTypography
-                                                    labelText={item.label}
-                                                    weight={FontWeight.bold}
-                                                />
-                                                <PTypography
-                                                    labelText={item.value}
-                                                    color={CommonColors.grey.main}
-                                                    weight={FontWeight.bold}
-                                                />
-                                            </PGrid>
+                                            <>
+                                                <PGrid className={`ps-2 mb-4`}>
+                                                    <PTypography
+                                                        labelText={item.label}
+                                                        weight={FontWeight.bold}
+                                                    />
+                                                    <PTypography
+                                                        labelText={item.value}
+                                                        color={CommonColors.grey.main}
+                                                        weight={FontWeight.bold}
+                                                    />
+                                                </PGrid>
+
+                                            </>
+
                                         )
                                     }
                                 </PGrid>
@@ -1435,7 +1514,7 @@ const ProjectEnquiry = () => {
                                         </PGrid>
                                     ))}
                                 </PCard>
-                                {formData.statusId >= 2 && (
+                                {[2, 3, 4, 5].includes(formData.statusId) && (
                                     <PCard className={Labels.margin.mb3} readOnly={formData.statusId == 3}>
                                         <PGrid container className="d-flex align-items-center justify-content-between mb-2">
                                             <PGrid item xs={12} sm={6} md={6}>
@@ -1506,7 +1585,7 @@ const ProjectEnquiry = () => {
                                     </PCard>
                                 )}
 
-                                {formData.statusId >= 3 && (
+                                {[3, 4, 5].includes(formData.statusId) && (
                                     <PCard className={Labels.margin.mb3}>
                                         <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                                             <PGrid item xs={12} sm={6} md={6}>
