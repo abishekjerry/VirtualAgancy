@@ -7,7 +7,8 @@ import {
     Button,
     Divider,
     Avatar, Tooltip,
-    IconButton
+    IconButton,
+    Skeleton
 } from "@mui/material";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -1084,150 +1085,156 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
-                        <PGrid container className={Labels.margin.mb3}>
-                            {clientInfo.map((item, i) => (
-                                <PGrid item xs={12} md={6} xl={3} key={i}>
-                                    {
-                                        formData.job && item.label === getLabel("lbl35") ? (
-                                            <PDropdown
-                                                name={Labels.clientInfo.clientContact}
-                                                label={item.label}
-                                                value={formData.clientContact}
-                                                onChange={(e) => handleChange(e)}
-                                                options={formDataList.clientContact}
-                                                width={100}
-                                            />
-                                        ) : formData.job && item.label === "D/O No or PO No" ? (
-                                            <>
-                                                <PGrid container>
-                                                    <PGrid item xs={12} md={6} xl={9}>
-                                                        <PTextField
-                                                            name="poNo"
-                                                            label={`${item.label} ${Labels.symbols.required}`}
-                                                            value={formData.poNo}
-                                                            onChange={handleChange}
-                                                        //width={100}
+                        {loading ? (
+                            <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
+                        ) : (
+                            <>
+                                <PGrid container className={Labels.margin.mb3}>
+                                    {clientInfo.map((item, i) => (
+                                        <PGrid item xs={12} md={6} xl={3} key={i}>
+                                            {
+                                                formData.job && item.label === getLabel("lbl35") ? (
+                                                    <PDropdown
+                                                        name={Labels.clientInfo.clientContact}
+                                                        label={item.label}
+                                                        value={formData.clientContact}
+                                                        onChange={(e) => handleChange(e)}
+                                                        options={formDataList.clientContact}
+                                                        width={100}
+                                                    />
+                                                ) : formData.job && item.label === "D/O No or PO No" ? (
+                                                    <>
+                                                        <PGrid container>
+                                                            <PGrid item xs={12} md={6} xl={9}>
+                                                                <PTextField
+                                                                    name="poNo"
+                                                                    label={`${item.label} ${Labels.symbols.required}`}
+                                                                    value={formData.poNo}
+                                                                    onChange={handleChange}
+                                                                />
+                                                            </PGrid>
+                                                            {[6].includes(formData.statusId) && (
+                                                                <PGrid item xs={12} md={6} xl={3} className={Labels.margin.mt2}>
+                                                                    <Tooltip title={createOrderFlag ? "Create Order"
+                                                                        : "Input D/O No or PO No and select Delivery Order to activate the 'Create Order' Icon."
+                                                                    } arrow>
+                                                                        <IconButton
+                                                                            sx={iconStyle}
+                                                                            onClick={(e) => createOrderFlag ? handleQuotation(e, 7)
+                                                                                : setFormData(prev => ({ ...prev, activeTab: "Delivery Order" }))
+                                                                            }
+                                                                        >
+                                                                            <PostAddIcon />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+
+                                                                </PGrid>
+                                                            )}
+                                                        </PGrid>
+                                                    </>
+                                                ) : formData.job && item.label === "PO Order raised Date" ? (
+                                                    <PDatepicker
+                                                        name={item.label}
+                                                        label={item.label}
+                                                        value={formData.poNo}
+                                                        onChange={handleChange}
+                                                        width={100}
+                                                        allowFuture
+                                                    />
+                                                ) : formData.job && item.label === "Invoice Number" ? (
+                                                    <PTextField
+                                                        name={item.label}
+                                                        label={item.label}
+                                                        value={formData.poNo}
+                                                        onChange={handleChange}
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        <PGrid className={`ps-2 mb-4`}>
+                                                            <PTypography
+                                                                labelText={item.label}
+                                                                weight={FontWeight.bold}
+                                                            />
+                                                            <PTypography
+                                                                labelText={item.value}
+                                                                color={CommonColors.grey.main}
+                                                                weight={FontWeight.bold}
+                                                            />
+                                                        </PGrid>
+
+                                                    </>
+
+                                                )
+                                            }
+                                        </PGrid>
+                                    ))}
+                                </PGrid>
+                                <PGrid container className={Labels.margin.mb3}>
+                                    {enquiryDetails.map((item, i) => (
+
+                                        <PGrid item xs={12} md={6} xl={3} key={i}>
+                                            {
+                                                formData.job && item.label === getLabel("lbl42") ? (
+                                                    <PTextField
+                                                        name={Labels.enquiryDetails.projectNo}
+                                                        label={item.label}
+                                                        value={formData.projectNo}
+                                                        onChange={(e) => handleChange(e)}
+                                                    />
+
+                                                ) : formData.job && (item.label === getLabel("lbl43") || item.label === getLabel("lbl44")) ? (
+                                                    <PDatepicker
+                                                        name={
+                                                            getLabel("lbl43") === item.label
+                                                                ? Labels.enquiryDetails.estdeliveryDate
+                                                                : getLabel("lbl44") === item.label
+                                                                    ? Labels.enquiryDetails.briefReceivedDate
+                                                                    : ""
+                                                        }
+                                                        label={item.label}
+                                                        value={
+                                                            getLabel("lbl43") === item.label
+                                                                ? formData.estdeliveryDate
+                                                                : getLabel("lbl44") === item.label
+                                                                    ? formData.briefReceivedDate
+                                                                    : null
+                                                        }
+                                                        onChange={handleChange}
+                                                        width={100}
+                                                        allowFuture
+                                                        maxDate={getLabel("lbl44") === item.label ? formData.estdeliveryDate : null}
+                                                        minDate={getLabel("lbl43") === item.label ? today : null}
+                                                    />
+                                                ) : formData.job && item.label === getLabel("lbl45") ? (
+                                                    <PTextField
+                                                        name={Labels.enquiryDetails.projectDescription}
+                                                        label={item.label}
+                                                        value={formData.projectDescription}
+                                                        onChange={handleChange}
+                                                        multiline={true}
+                                                        rows={2.0}
+                                                    />
+                                                ) : (
+
+                                                    <PGrid className={`ps-2 mt-4`}>
+                                                        <PTypography
+                                                            labelText={item.label}
+                                                            weight={FontWeight.bold}
+                                                        />
+                                                        <PTypography
+                                                            labelText={item.value}
+                                                            color={CommonColors.grey.main}
+                                                            weight={FontWeight.bold}
                                                         />
                                                     </PGrid>
-                                                    {[6].includes(formData.statusId) && (
-                                                        <PGrid item xs={12} md={6} xl={3} className={Labels.margin.mt2}>
-                                                            <Tooltip title={createOrderFlag ? "Create Order"
-                                                                : "Input D/O No or PO No and select Delivery Order to activate the 'Create Order' Icon."
-                                                            } arrow>
-                                                                <IconButton
-                                                                    sx={iconStyle}
-                                                                    onClick={(e) => createOrderFlag ? handleQuotation(e, 7)
-                                                                        : setFormData(prev => ({ ...prev, activeTab: "Delivery Order" }))
-                                                                    }
-                                                                >
-                                                                    <PostAddIcon />
-                                                                </IconButton>
-                                                            </Tooltip>
-
-                                                        </PGrid>
-                                                    )}
-                                                </PGrid>
-                                            </>
-                                        ) : formData.job && item.label === "PO Order raised Date" ? (
-                                            <PDatepicker
-                                                name={item.label}
-                                                label={item.label}
-                                                value={formData.poNo}
-                                                onChange={handleChange}
-                                                width={100}
-                                                allowFuture
-                                            />
-                                        ) : formData.job && item.label === "Invoice Number" ? (
-                                            <PTextField
-                                                name={item.label}
-                                                label={item.label}
-                                                value={formData.poNo}
-                                                onChange={handleChange}
-                                            />
-                                        ) : (
-                                            <>
-                                                <PGrid className={`ps-2 mb-4`}>
-                                                    <PTypography
-                                                        labelText={item.label}
-                                                        weight={FontWeight.bold}
-                                                    />
-                                                    <PTypography
-                                                        labelText={item.value}
-                                                        color={CommonColors.grey.main}
-                                                        weight={FontWeight.bold}
-                                                    />
-                                                </PGrid>
-
-                                            </>
-
-                                        )
-                                    }
+                                                )}
+                                        </PGrid>
+                                    ))}
                                 </PGrid>
-                            ))}
-                        </PGrid>
-                        <PGrid container className={Labels.margin.mb3}>
-                            {enquiryDetails.map((item, i) => (
-
-                                <PGrid item xs={12} md={6} xl={3} key={i}>
-                                    {
-                                        formData.job && item.label === getLabel("lbl42") ? (
-                                            <PTextField
-                                                name={Labels.enquiryDetails.projectNo}
-                                                label={item.label}
-                                                value={formData.projectNo}
-                                                onChange={(e) => handleChange(e)}
-                                            />
-
-                                        ) : formData.job && (item.label === getLabel("lbl43") || item.label === getLabel("lbl44")) ? (
-                                            <PDatepicker
-                                                name={
-                                                    getLabel("lbl43") === item.label
-                                                        ? Labels.enquiryDetails.estdeliveryDate
-                                                        : getLabel("lbl44") === item.label
-                                                            ? Labels.enquiryDetails.briefReceivedDate
-                                                            : ""
-                                                }
-                                                label={item.label}
-                                                value={
-                                                    getLabel("lbl43") === item.label
-                                                        ? formData.estdeliveryDate
-                                                        : getLabel("lbl44") === item.label
-                                                            ? formData.briefReceivedDate
-                                                            : null
-                                                }
-                                                onChange={handleChange}
-                                                width={100}
-                                                allowFuture
-                                                maxDate={getLabel("lbl44") === item.label ? formData.estdeliveryDate : null}
-                                                minDate={getLabel("lbl43") === item.label ? today : null}
-                                            />
-                                        ) : formData.job && item.label === getLabel("lbl45") ? (
-                                            <PTextField
-                                                name={Labels.enquiryDetails.projectDescription}
-                                                label={item.label}
-                                                value={formData.projectDescription}
-                                                onChange={handleChange}
-                                                multiline={true}
-                                                rows={2.0}
-                                            />
-                                        ) : (
-
-                                            <PGrid className={`ps-2 mt-4`}>
-                                                <PTypography
-                                                    labelText={item.label}
-                                                    weight={FontWeight.bold}
-                                                />
-                                                <PTypography
-                                                    labelText={item.value}
-                                                    color={CommonColors.grey.main}
-                                                    weight={FontWeight.bold}
-                                                />
-                                            </PGrid>
-                                        )}
-                                </PGrid>
-                            ))}
-                        </PGrid>
+                            </>
+                        )}
                     </PCard>
+
                 )}
 
                 {formData.activeTab === "Line Items" && (
