@@ -101,7 +101,9 @@ const ProjectEnquiry = () => {
         savingsType: "",
         savingsReason: "",
         sap: "",
-        poNo: ""
+        poNo: "",
+        raisedDate : "",
+        invoicenumber : ""
 
 
     });
@@ -979,8 +981,9 @@ const ProjectEnquiry = () => {
         try {
             setLoading(true);
             const response = await Promise.all(requests);
+            console.log(response);
             const successCount = response.filter(item => item?.status === true).length;
-            const message = successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
+            const message = flag === "status" ? response?.[0]?.data : successCount > 1 ? Labels.message.updatedSuccessfully : response?.[0]?.data?.message;
             const status = successCount === response.length ? Labels.status.success : Labels.status.failure;
             toast(status, message);
             setFormData(prev => ({
@@ -1134,18 +1137,18 @@ const ProjectEnquiry = () => {
                                                     </>
                                                 ) : formData.job && item.label === "PO Order raised Date" ? (
                                                     <PDatepicker
-                                                        name={item.label}
+                                                        name={"raisedDate"}
                                                         label={item.label}
-                                                        value={formData.poNo}
+                                                        value={formData.raisedDate}
                                                         onChange={handleChange}
                                                         width={100}
                                                         allowFuture
                                                     />
                                                 ) : formData.job && item.label === "Invoice Number" ? (
                                                     <PTextField
-                                                        name={item.label}
+                                                        name={"invoicenumber"}
                                                         label={item.label}
-                                                        value={formData.poNo}
+                                                        value={formData.invoicenumber}
                                                         onChange={handleChange}
                                                     />
                                                 ) : (
