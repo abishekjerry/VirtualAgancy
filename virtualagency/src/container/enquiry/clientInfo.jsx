@@ -245,7 +245,6 @@ const ClientInfo = () => {
         // Division logic
         if (name === Labels.clientInfo.division) {
             handleDivisionSelection(value, label);
-
         }
 
         if (name == Labels.clientInfo.globalBUMapping) {

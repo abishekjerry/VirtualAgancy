@@ -140,8 +140,8 @@ const EnquiryDetails = () => {
                     hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
                     projectAttribute: getOptionValue(response.projectAttribute, data.enqProjectinfo.attribute),
                     slaTemplate: data?.enqProjectinfo?.slaId,
-                }));
-                localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId);
+                }));   
+                localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId ?? ""); 
             }
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);

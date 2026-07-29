@@ -241,7 +241,7 @@ const LineItems = () => {
 
     const SavingsReasonMaster = async (data, hybird = false) => {
         try {
-            setLoading(false);
+            setLoading(true);
             const response = await PostApi(LineItems_API.GetEnqLineItemsMaster, {
                 TypeOfJob: category,
                 Savingstype: data,
@@ -250,6 +250,7 @@ const LineItems = () => {
                 ...prev,
                 savingsReason: response.savingsReason,
             }));
+
             if (hybird) {
                 //hybird condition
                 setFormData(prev => ({
@@ -711,6 +712,7 @@ const LineItems = () => {
             files: []
         }))
     }
+
 
     //hybird functionality
     const hybird = formDataList?.enquiryDetails?.hybridModel === "No" && lineItems?.length > 0;
