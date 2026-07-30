@@ -8,7 +8,8 @@ import {
     Divider,
     Avatar, Tooltip,
     IconButton,
-    Skeleton
+    Skeleton,
+    Alert
 } from "@mui/material";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -54,7 +55,6 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PDeliveryOrder from "../../component/PDeliveryOrder/PDeliveryOrder";
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import { useSelector } from "react-redux";
-
 
 const ProjectEnquiry = () => {
     const { state } = useLocation();
@@ -398,6 +398,11 @@ const ProjectEnquiry = () => {
         setFormData(prev => ({
             ...prev,
             [flag]: false,
+            actualDeliveryDate: "",
+            invoicenumber: "",
+            poNumber: "",
+            raisedDate: "",
+            status: ""
         }));
         await fetchData();
     };
@@ -958,7 +963,7 @@ const ProjectEnquiry = () => {
             modifiedBy: fkID,
             status: formData.status
         }
-        
+
         try {
             //setLoading(true);
             setLoader(flag);
@@ -1032,7 +1037,7 @@ const ProjectEnquiry = () => {
         }
     };
 
-
+    console.log(formData.status, formData.actualDeliveryDate);
     return (
         <>
             <Box sx={{ px: 1, py: 1 }}>
@@ -1078,11 +1083,21 @@ const ProjectEnquiry = () => {
                                 onClick={(e) => handleSubmit(e, "status")}
                                 width={150}
                                 height={45}
-                                disabled={!formData.status}
+                                disabled={!formData.status || !formData.actualDeliveryDate}
                             />
                         </Box>
                     </PGrid>
                 </PGrid>
+
+                {[7, 8].includes(formData.statusId) && !formData.actualDeliveryDate && (
+                    <PGrid container className={Labels.margin.mb3}>
+                        <PGrid item xs={12} md={12} sm={8}>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
+                                <Alert severity="error">Enter the Actual Delivery Date in Job Summary to activate the 'Submit' button.</Alert>
+                            </Box>
+                        </PGrid>
+                    </PGrid>
+                )}
 
                 <PGrid container className={Labels.margin.mb1}>
                     <PGrid item xs={12} sm={6} md={12}>
@@ -1194,7 +1209,7 @@ const ProjectEnquiry = () => {
                                                         : formData.statusId > 6 && formData.job && item.label === "Actual Delivery Date" ? (
                                                             <PDatepicker
                                                                 name={"actualDeliveryDate"}
-                                                                label={item.label}
+                                                                label={`${item.label} ${Labels.symbols.required}`}
                                                                 value={formData.actualDeliveryDate}
                                                                 onChange={handleChange}
                                                                 width={100}
@@ -1205,7 +1220,16 @@ const ProjectEnquiry = () => {
                                                                 <>
                                                                     <PGrid className={`ps-2 mb-4`}>
                                                                         <PTypography
-                                                                            labelText={item.label}
+                                                                            labelText={
+                                                                                <>
+                                                                                    {item.label}
+                                                                                    {(item.label === "D/O No or PO No" || item.label === "Actual Delivery Date") && (
+                                                                                          <span style={{ color: "red" }}>{" "}{Labels.symbols.required}</span>
+                                                                                    )}
+
+                                                                                </>
+                                                                            }
+                                                                            //${Labels.symbols.required}`}
                                                                             weight={FontWeight.bold}
                                                                         />
                                                                         <PTypography
