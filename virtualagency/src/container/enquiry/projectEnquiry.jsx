@@ -76,7 +76,7 @@ const ProjectEnquiry = () => {
         statusId: 0,
         sla: false,
         rfq: false,
-        line: false,
+        fee: false,
         job: false,
         suppliers: false,
         calculateFlag: false,
@@ -852,6 +852,9 @@ const ProjectEnquiry = () => {
             ...(formDataList.clientInfo?.actualdeliverydate && {
                 actualDeliveryDate: formDataList.clientInfo.actualdeliverydate
             }),
+            ...(formDataList.clientInfo?.managementFee && {
+                managementFee: formDataList.clientInfo.managementFee
+            }),
             ...(formDataList.enquiryDetails?.projectNo && {
                 projectNo: formDataList.enquiryDetails.projectNo
             }),
@@ -871,6 +874,7 @@ const ProjectEnquiry = () => {
         let activeTab = "";
         let response;
 
+        //job summary
         const updateSummary = {
             enqId: id,
             modifiedBy: fkID,
@@ -885,9 +889,19 @@ const ProjectEnquiry = () => {
             poNumber: formData.poNo,
             actualdeliverydate: formData.actualDeliveryDate === undefined ? "" : formData.actualDeliveryDate,
             raisedDate: formData.raisedDate,
+            invoiceDate: "",
             statusId: flag === "order" ? 7 : formData.statusId
         }
 
+        //management fee 
+        const updateFeeSummary = {
+            enqId: id,
+            managementFee: formData.managementFee,
+            Action: flag,
+            statusId: formData.statusId
+        }
+
+        //sla 
         const enquiryDetails = {
             enqId: id,
             projectNo: formDataList.enquiryDetails.projectNo,
@@ -904,6 +918,7 @@ const ProjectEnquiry = () => {
             ...dynamicData,
         };
 
+        //RFQ Suppliers
         const supplierQuotes = formDataList.requestQuotes.flatMap(group =>
             group.items.map(item => ({
                 enqId: item.enquiryId,
@@ -919,6 +934,7 @@ const ProjectEnquiry = () => {
             }))
         );
 
+        //input project savings
         const projectQuotes = formDataList.projectSavings.flatMap(group =>
             group.items.map(item => ({
                 Id: item.id,
@@ -936,13 +952,15 @@ const ProjectEnquiry = () => {
             enquiryId: id,
         }));
 
+        //project status
         const updateJobStatus = {
             enqId: id,
             modifiedBy: fkID,
             status: formData.status
         }
+        
         try {
-            setLoading(true);
+            //setLoading(true);
             setLoader(flag);
             switch (flag) {
                 case "status":
@@ -966,10 +984,10 @@ const ProjectEnquiry = () => {
                     response = await PostApi(ProjectEnquiry_API.PostSupplierQuotes, supplierQuotes);
                     break;
 
-                case "line":
-                    activeTab = "Line Items";
-                    handleCancel(null, flag);
-                    return;
+                case "fee":
+                    activeTab = "SPOT";
+                    response = await PostApi(ProjectEnquiry_API.UpdateJobSummary, updateFeeSummary);
+                    break;
 
                 case "project":
                     activeTab = "Project Savings";
@@ -1010,7 +1028,7 @@ const ProjectEnquiry = () => {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoader("");
-            setLoading(false);
+            //setLoading(false);
         }
     };
 
@@ -1317,7 +1335,7 @@ const ProjectEnquiry = () => {
                                 </PGrid>
                                 {[1].includes(formData.statusId) && (
                                     <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                        {renderActionButtons("line")}
+                                        {renderActionButtons("fee")}
                                     </PGrid>
                                 )}
                             </PGrid>
@@ -1329,7 +1347,7 @@ const ProjectEnquiry = () => {
                                             labelText={`${getLabel("lbl168")} ( ${(Labels.symbols.percent)} )`}
                                             weight={FontWeight.bold}
                                         />
-                                        {formData.line ? (
+                                        {formData.fee ? (
                                             <PTextField
                                                 name="managementFee"
                                                 value={formData.managementFee}
@@ -1383,7 +1401,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.rfqFlag} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} />
+                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.rfqFlag} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} showPagination={false} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
@@ -1425,7 +1443,7 @@ const ProjectEnquiry = () => {
                             <>
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12} sm={6} md={12}>
-                                        <PTable columns={formDataList.calculateRows} rows={formDataList.calculationDetails} />
+                                        <PTable columns={formDataList.calculateRows} rows={formDataList.calculationDetails} showPagination={false} />
                                     </PGrid>
                                 </PGrid>
                                 <PGrid container className={Labels.margin.mb4}>
@@ -1458,7 +1476,7 @@ const ProjectEnquiry = () => {
                             <Divider sx={{ mb: 2 }} />
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} />
+                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} showPagination={false} />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
@@ -1468,12 +1486,12 @@ const ProjectEnquiry = () => {
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} />
+                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} showPagination={false} />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} />
+                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} showPagination={false} />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
