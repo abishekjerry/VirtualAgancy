@@ -221,6 +221,7 @@ function Login(props) {
                   startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
                   flag={Labels.flag.password}
                   onChange={handleChange}
+                  sx={{ mb: 3 }}
                 />
 
                 <PTextField
@@ -231,6 +232,7 @@ function Login(props) {
                   startIcon={<LockIcon sx={{ color: "#9CA3AF" }} />}
                   flag={Labels.flag.password}
                   onChange={handleChange}
+                  sx={{ mb: 3 }}
                 />
 
                 <PButton
@@ -261,6 +263,7 @@ function Login(props) {
                       passwordRef.current?.focus();
                     }
                   }}
+                  sx={{ mb: 3 }}
                 />
 
                 <PTextField
@@ -272,6 +275,7 @@ function Login(props) {
                   flag={Labels.flag.password}
                   onChange={handleChange}
                   inputRef={passwordRef}
+                  sx={{ mb: 3 }}
                 />
 
                 <div className="forgot-password">

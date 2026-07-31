@@ -184,10 +184,10 @@ const ClientInfo = () => {
                     setFormData(prev => ({
                         ...prev,
                         division: getOptionValue(response.division,data.enqClientinfo.divisionname),
+                        globalBUMapping: data.enqClientinfo.divisionid,
                         clientContact: data.enqClientinfo.clientContactId,
                         pmgEntity: data.enqClientinfo.pmgEntity,
                         deliveryCountry: data.enqClientinfo.deliveryCountryId,
-                        globalBUMapping: data.enqClientinfo.divisionid,
                         aboveAtMarket: aboveAtMarket,
                     }));
                 }
@@ -204,7 +204,7 @@ const ClientInfo = () => {
 
     useEffect(() => {
         if (formDataList.brand?.length && formDataList.clientInfo.brand) {
-            const brandId = getOptionValue( formDataList.brand, formDataList.clientInfo.brand);
+            const brandId = getOptionValue(formDataList.brand, formDataList.clientInfo.brand);
             setFormData(prev => ({
                 ...prev,
                 brand: brandId,

@@ -20,7 +20,7 @@ import PTextField from "../../component/PTextField/PTextField";
 import { allowDecimal, allowOnlyNumbers, getEnquirySteps, getOptionLabel, getOptionValue, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Dashboard_API, LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
@@ -31,6 +31,7 @@ import PDialog from "../../component/PDialog/PDialog";
 import PFileUpload from "../../component/PFileUpload/PFileUpload";
 import PAttachment from "../../component/PAttachment/PAttachment";
 import { useSelector } from "react-redux";
+import PSearch from "../../component/PSearch/PSearch";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
@@ -133,7 +134,11 @@ const LineItems = () => {
         length: "",
         width: "",
         depth: "",
-        files: []
+        files: [],
+
+        //flags
+        specification: false,
+        search :""
     });
 
     const [errors, setErrors] = useState({
@@ -926,6 +931,7 @@ const LineItems = () => {
                                         onChange={handleChange}
                                         helperText={errors?.itemName}
                                         name={Labels.lineItems.itemName}
+                                        sx={{ mb: 3 }}
                                     />
                                     {[3].includes(formData.category) && (
                                         // <PGrid item xs={12} sm={6} md={4}>
@@ -1101,8 +1107,8 @@ const LineItems = () => {
                                 />
 
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={4}>
+                            <PGrid container className={`${Labels.margin.mb4} ${"g-4"}`}>
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl106")} ${Labels.symbols.required}`}
                                         value={formData.ratecardCatalogueItemDeclined}
@@ -1113,7 +1119,8 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl110")} ${Labels.symbols.required}`}
                                         value={formData.eAuction}
@@ -1124,7 +1131,20 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                {[1].includes(formData.eAuction) && (
+                                    <PGrid item xs={12} sm={6} md={4} >
+                                        <PTextField
+                                            label={`${getLabel("lbl153")}`}
+                                            value={formData.competitiveBiddingWinningSupplierCost}
+                                            onChange={handleChange}
+                                            //helperText={errors?.competitiveBiddingWinningSupplierCost}
+                                            name={Labels.lineItems.competitiveBiddingWinningSupplierCost}
+                                        />
+                                    </PGrid>
+                                )}
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl107")} ${Labels.symbols.required}`}
                                         value={formData.globalOrderWindowCatalogueName}
@@ -1136,9 +1156,10 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb3}>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                {/* </PGrid> */}
+                                {/* <PGrid container className={Labels.margin.mb3}> */}
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl108")} ${Labels.symbols.required}`}
                                         value={formData.regionalOrderWindowCatalogue}
@@ -1150,7 +1171,8 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl109")} ${Labels.symbols.required}`}
                                         value={formData.localCatalogueName}
@@ -1162,7 +1184,8 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl111")} ${Labels.symbols.required}`}
                                         value={formData.printingMethod}
@@ -1174,9 +1197,10 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb3}>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                {/* </PGrid> */}
+                                {/* <PGrid container className={Labels.margin.mb3}> */}
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl112")} ${Labels.symbols.required}`}
                                         value={formData.typeOfItem}
@@ -1188,16 +1212,20 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
-                                    <PTextField
-                                        label={`${getLabel("lbl113")} ${Labels.symbols.required}`}
-                                        value={formData.noOfMaterials}
-                                        onChange={handleChange}
-                                        helperText={errors?.noOfMaterials}
-                                        name={Labels.lineItems.noOfMaterials}
-                                    />
-                                </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                {["", 1, 2, 3].includes(formData.typeOfJob) && (
+                                    <PGrid item xs={12} sm={6} md={4} >
+                                        <PTextField
+                                            label={`${getLabel("lbl113")} ${Labels.symbols.required}`}
+                                            value={formData.noOfMaterials}
+                                            onChange={handleChange}
+                                            helperText={errors?.noOfMaterials}
+                                            name={Labels.lineItems.noOfMaterials}
+                                        />
+                                    </PGrid>
+                                )}
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl159")} ${Labels.symbols.required}`}
                                         value={formData.harmonizedOrder}
@@ -1209,9 +1237,8 @@ const LineItems = () => {
                                         readOnly={formData.harmonizedOrder == 1 ? true : false}
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl114")} ${Labels.symbols.required}`}
                                         value={formData.digitalInnovation}
@@ -1222,7 +1249,10 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+                                {/* </PGrid> */}
+                                {/* <PGrid container > */}
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl115")} ${Labels.symbols.required}`}
                                         value={formData.innovation}
@@ -1233,6 +1263,7 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
+
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl116")} ${Labels.symbols.required}`}
@@ -1245,8 +1276,7 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                            </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl117")} ${Labels.symbols.required}`}
@@ -1259,7 +1289,9 @@ const LineItems = () => {
                                         readOnly={hybird}
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+                                {/* </PGrid> */}
+                                {/* <PGrid container > */}
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl118")} ${Labels.symbols.required}`}
                                         value={formData.savingsReason}
@@ -1272,7 +1304,8 @@ const LineItems = () => {
 
                                     />
                                 </PGrid>
-                                <PGrid item xs={12} sm={6} md={4}>
+
+                                <PGrid item xs={12} sm={6} md={4} >
                                     <PDropdown
                                         label={`${getLabel("lbl119")} ${Labels.symbols.required}`}
                                         value={formData.owWithLink}
@@ -1283,17 +1316,7 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                {["Not Applicable"].includes(formData.eAuction) && (
-                                    <PGrid item xs={12} sm={6} md={4}>
-                                        <PTextField
-                                            label={`${getLabel("lbl152")}`}
-                                            value={formData.competitiveBiddingWinningSupplierCost}
-                                            onChange={handleChange}
-                                            //helperText={errors?.competitiveBiddingWinningSupplierCost}
-                                            name={Labels.lineItems.competitiveBiddingWinningSupplierCost}
-                                        />
-                                    </PGrid>
-                                )}
+
                             </PGrid>
 
 
@@ -1307,14 +1330,24 @@ const LineItems = () => {
                                     weight={FontWeight.bold}
                                 />
                                 <PTypography
-                                    labelText={getLabel("lbl84")}
+                                    labelText={<>
+                                        {getLabel("lbl84").split("populate from an existing item")[0]}
+                                        <span style={{ color: CommonColors.blue.main }} onClick={() => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                specification: formData.itemCategory
+                                            }))
+                                        }}>
+                                            populate from an existing item
+                                        </span>
+                                        {getLabel("lbl84").split("populate from an existing item")[1]}
+                                    </>}
                                     flag={Labels.fontFlags.smallText}
                                     color={CommonColors.grey.main}
                                     weight={FontWeight.bold}
                                 />
-
                             </PGrid>
-                            <PGrid container>
+                            <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTextField
                                         label={`${getLabel("lbl85")} ${Labels.symbols.required}`}
@@ -1572,6 +1605,29 @@ const LineItems = () => {
                 onSave={handleSubmit}
                 onDelete={handleSubmit}
             />
+
+            <PDialog
+                open={formData.specification}
+                onClose={() => setFormData((prev) => ({
+                    ...prev,
+                    specification: false,
+                    search: ""
+                }))}
+                title={"Specifications"}
+                showCloseIcon={true}
+                maxWidth="md"
+                //actions={}
+            >
+                <PGrid container className={Labels.margin.mb4}>
+                    <PGrid item xs={12} sm={6} md={12}>
+                        <PSearch width="100%" placeholder={"Search a enquiry, item category, specifications"}
+                            onChange={(e) => setFormData((prev) => ({
+                                ...prev,
+                                search: e.target.value
+                            }))} />
+                    </PGrid>
+                </PGrid>
+            </PDialog>
         </>
     );
 };

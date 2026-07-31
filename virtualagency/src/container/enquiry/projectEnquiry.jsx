@@ -73,6 +73,7 @@ const ProjectEnquiry = () => {
     const [formData, setFormData] = useState({
         activeTab: "Job Summary",
         status: "",
+        statusFlag: false,
         statusId: 0,
         sla: false,
         rfq: false,
@@ -241,7 +242,7 @@ const ProjectEnquiry = () => {
             const savingsSummary = [...new Map(projectResponse.savingsResponseDto.itemWiseSummary.map(x => [x.itemNumber, x])).values()]
                 .map(x => ({
                     isSubTitle: true,
-                    subTitle: "Item - itemName",
+                    subTitle: x.itemName,
                     items: projectResponse.savingsResponseDto.itemWiseSummary.filter(y => y.itemNumber === x.itemNumber)
                 }));
 
@@ -714,7 +715,9 @@ const ProjectEnquiry = () => {
                 ...group,
                 items: group.items.map(item =>
                     item.supplierQuotesId === Id
-                        ? (field === "negQuote" && Number(data) > Number(item.initialQuote))
+                        ? ((field === "negQuote" && Number(data) > Number(item.initialQuote)) ||
+                           (field === "negUnitPrice" && Number(data) > Number(item.iniUnitPrice))
+                          )  
                             ? item : { ...item, [field]: data } : item
                 )
             }))
@@ -971,6 +974,10 @@ const ProjectEnquiry = () => {
                 case "status":
                     activeTab = "Job Summary";
                     response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, updateJobStatus);
+                    setFormData(prev => ({
+                        ...prev,
+                        statusFlag: false,
+                    }))
                     break;
 
                 case "sla":
@@ -1080,7 +1087,10 @@ const ProjectEnquiry = () => {
                                 label={getLabel("lbl40")}
                                 variant="contained"
                                 color={CommonColors.green.main}
-                                onClick={(e) => handleSubmit(e, "status")}
+                                onClick={() => setFormData((prev) => ({
+                                    ...prev,
+                                    statusFlag: true
+                                }))}
                                 width={150}
                                 height={45}
                                 disabled={!formData.status || !formData.actualDeliveryDate}
@@ -1224,7 +1234,7 @@ const ProjectEnquiry = () => {
                                                                                 <>
                                                                                     {item.label}
                                                                                     {(item.label === "D/O No or PO No" || item.label === "Actual Delivery Date") && (
-                                                                                          <span style={{ color: "red" }}>{" "}{Labels.symbols.required}</span>
+                                                                                        <span style={{ color: "red" }}>{" "}{Labels.symbols.required}</span>
                                                                                     )}
 
                                                                                 </>
@@ -1829,6 +1839,53 @@ const ProjectEnquiry = () => {
                     </PCard>
                 )}
             </Box >
+
+            <PDialog
+                open={formData.statusFlag}
+                onClose={() => setFormData((prev) => ({
+                    ...prev,
+                    statusFlag: false,
+                }))}
+                title={"Change Project Status"}
+                showCloseIcon={true}
+                maxWidth="sm"
+                actions={
+                    < PGrid className="d-flex align-items-center justify-content-end gap-2" >
+                        <PButton
+                            fullWidth
+                            label={getLabel("lbl125")}
+                            variant="outlined"
+                            onClick={() => setFormData((prev) => ({
+                                ...prev,
+                                statusFlag: false
+                            }))}
+                            color={CommonColors.grey.main}
+                            width={120}
+                        />
+                        <PButton
+                            fullWidth
+                            label={"Yes"}
+                            variant={Labels.contained}
+                            onClick={(e) => handleSubmit(e, "status")}
+                            color={CommonColors.green.main}
+                            width={120}
+                        />
+                    </PGrid >
+                }
+
+            >
+                <PGrid container className={Labels.margin.mb4}>
+                    <PGrid item xs={12} sm={6} md={12}>
+                        <PTypography
+                            labelText={`${"Are you sure you want to change the project status"} ${Labels.symbols.optional}`}
+                            flag={Labels.fontFlags.errorLbl}
+                            color={CommonColors.grey.main}
+                            weight={FontWeight.light}
+                        />
+                    </PGrid>
+                </PGrid>
+            </PDialog>
+
 
             <PDialog
                 open={formData.suppliers}

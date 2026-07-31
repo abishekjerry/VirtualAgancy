@@ -284,7 +284,7 @@ const EnquiryDetails = () => {
                                     weight={FontWeight.bold}
                                 />
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+                            <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PTextField
                                         name={Labels.enquiryDetails.projectNo}
@@ -292,6 +292,7 @@ const EnquiryDetails = () => {
                                         value={formData.projectNo}
                                         onChange={handleChange}
                                         helperText={errors?.projectNo}
+                                        sx ={{mb : 3}}
                                     />
                                     <PDatepicker
                                         name={Labels.enquiryDetails.estdeliveryDate}
@@ -316,7 +317,7 @@ const EnquiryDetails = () => {
                                     />
                                 </PGrid>
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+                            <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDatepicker
                                         name={Labels.enquiryDetails.briefReceivedDate}
@@ -354,7 +355,7 @@ const EnquiryDetails = () => {
                                     />
                                 </PGrid>
                             </PGrid>
-                            <PGrid container className={Labels.margin.mb4}>
+                            <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         name={Labels.enquiryDetails.managementFeeType}
@@ -363,7 +364,6 @@ const EnquiryDetails = () => {
                                         onChange={handleChange}
                                         helperText={errors?.managementFeeType}
                                         options={formDataList.managementFeeType}
-                                        width={100}
                                         flag={Labels.flag.auto}
                                     />
                                 </PGrid>
@@ -374,8 +374,7 @@ const EnquiryDetails = () => {
                                         value={formData.hybrid}
                                         onChange={handleChange}
                                         helperText={errors?.hybrid}
-                                        options={formDataList.hybird}
-                                        width={100}
+                                        options={formDataList.hybird}  
                                         disabled={true}
                                     />
                                 </PGrid>
