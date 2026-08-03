@@ -138,7 +138,7 @@ const LineItems = () => {
 
         //flags
         specification: false,
-        search :""
+        search: ""
     });
 
     const [errors, setErrors] = useState({
@@ -507,6 +507,7 @@ const LineItems = () => {
                     savingsreason: getOptionLabel(formDataList.savingsReason, formData.savingsReason),
                     OWlink: getOptionLabel(formDataList.yesNoNa, formData.owWithLink),
                     CompetetiveWinningSupplier: formData.competitiveBiddingWinningSupplierCost,
+                    HarmonizedOrder : getOptionLabel(formDataList.yesOrNo, formData.harmonizedOrder), 
                     // Specifications
                     Version: formData.noOfVersion,
                     SpecNote: formData.specifications,
@@ -553,11 +554,10 @@ const LineItems = () => {
     };
 
     const handleBack = () => {
-        if (window.history.length > 1) {
-            navigate(-1);
-            // navigate(labelRoutes.enquiryDetails, {
-            //     state: { id: id }
-            // });
+        if (window.history.length > 1) {  
+            navigate(labelRoutes.enquiryDetails, {
+                state: { id: id }
+            });
         } else {
             navigate(labelRoutes.home); // fallback route
         }
@@ -729,7 +729,7 @@ const LineItems = () => {
             LineItemsMaster(category);
             SavingsReasonMaster(formDataList.lineItems[0].savingstype, true);
         }
-    }, [hybird, lineItems.length]);
+    }, [hybird, lineItems.length, category, formDataList]);
 
     return (
         <>
@@ -1616,7 +1616,7 @@ const LineItems = () => {
                 title={"Specifications"}
                 showCloseIcon={true}
                 maxWidth="md"
-                //actions={}
+            //actions={}
             >
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={6} md={12}>

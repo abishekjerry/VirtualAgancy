@@ -29,7 +29,7 @@ function Login(props) {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(false);
   const [openRecover, setOpenRecover] = useState(false);
-  const [isForgetPassword, setIsForgetPassword] = useState(false);
+
   // ✅ Refs for focus
   const userNameRef = useRef(null);
   const passwordRef = useRef(null);
@@ -39,7 +39,8 @@ function Login(props) {
     password: "",
     resetUsername: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    default: false,
   })
 
   const [errors, setErrors] = useState({
@@ -126,6 +127,14 @@ function Login(props) {
   const handleLogin = async (e, isLogin) => {
     e.preventDefault();
     const isValid = loginValidation();
+    if (formData.password === "password" || formData.password === "Password") {
+      setFormData((prev) => ({
+        ...prev,
+        default: true,
+      }));
+      return; 
+    }
+
     if (isValid) {
       const res = await PostApi(Account_API.Login, {
         userName: formData.userName,
@@ -208,7 +217,7 @@ function Login(props) {
             <img src={LoginImg} alt="Login" className="login-image" />
           </div>
 
-          {isForgetPassword ? (
+          {formData.default ? (
             <div className="login-left">
               <div className="login-box">
                 <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />

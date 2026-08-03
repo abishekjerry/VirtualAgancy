@@ -43,12 +43,19 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
             const apiStartDate = response?.[`${key}startdate`];
             const apiEndDate = response?.[`${key}enddate`];
 
-            updated[i] = {
-                ...updated[i],
-                startDate: res && apiStartDate && String(apiStartDate).trim() !== "" ? apiStartDate : formatDate(tempStart),
-                endDate: res && apiEndDate && String(apiEndDate).trim() !== "" ? apiEndDate : formatDate(endDate),
-            };
-
+            if (res && apiStartDate?.trim() && apiEndDate?.trim()) {
+                updated[i] = {
+                    ...updated[i],
+                    startDate: apiStartDate,
+                    endDate: apiEndDate
+                };
+            } else {
+                updated[i] = {
+                    ...updated[i],
+                    startDate: formatDate(tempStart),
+                    endDate: formatDate(endDate)
+                };
+            }
             startDate = parseDate(updated[i].endDate);
             // updated[i] = {
             //     ...updated[i],
@@ -80,7 +87,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
         if (isNaN(num) || num <= 0) return;
         const updated = [...phaseDates];
         updated[index] = { ...updated[index], mdays: value };
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index , false);
+        calculatePlanByQuote(updated[0]?.startDate || today, updated, index, false);
     };
 
     const handleStartDateChange = (index, selectedDate) => {
@@ -92,7 +99,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
             ...updated[index],
             startDate: selectedDate
         };
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index , false);
+        calculatePlanByQuote(updated[0]?.startDate || today, updated, index, false);
     };
 
     const slaTemplate = async (slaId) => {
@@ -113,17 +120,20 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
             calculatePlanByQuote(quoteStartDate ? quoteStartDate : today, phases, 0, true);
         }
         catch (error) {
-            console.log(error,"dahsgdhg");
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         }
         finally {
             setLoading(false);
         }
     };
+    // useEffect(() => {
+    //     if (!sla && response) return;
+    //     slaTemplate(sla);
+    // }, [sla]);
     useEffect(() => {
-        if (!sla) return;
+        if (!sla || !response || Object.keys(response).length === 0) return;
         slaTemplate(sla);
-    }, [sla]);
+    }, [sla, response]);
 
     return (
         <>
@@ -159,20 +169,14 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                             width={100}
                             value={phase.startDate}
                             disabled={disabled}
-                            minDate={
-                                index === 0
-                                    ? parseDate(today)
-                                    : parseDate(
-                                        phaseDates[index - 1]?.endDate
-                                    )
-                            }
+                            minDate={index === 0 ? parseDate(today) : parseDate(phaseDates[index - 1]?.endDate)}
                             allowFuture={true}
                             onChange={(e) => {
                                 const selectedDate = e?.target?.value
                                     ? e.target.value
                                     : formatDate(e);
                                 if (index === 0) {
-                                    calculatePlanByQuote(selectedDate, phaseDates, 0 , false);
+                                    calculatePlanByQuote(selectedDate, phaseDates, 0, false);
                                 } else {
                                     handleStartDateChange(index, selectedDate);
                                 }

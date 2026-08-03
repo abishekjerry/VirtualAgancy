@@ -106,6 +106,7 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
     { key: "noofmaterials", label: "lbl113" },
     { key: "digitalInnovation", label: "lbl114" },
     { key: "innovation", label: "lbl115" },
+    //{ key: "harmonizedOrder", label: "lbl159" },
     { key: "sourcinglocation", label: "lbl116" },
     { key: "savingstype", label: "lbl117" },
     { key: "savingsreason", label: "lbl118" },

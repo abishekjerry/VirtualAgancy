@@ -175,6 +175,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step, refreshSummary }) => 
                     DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
                     Innovation: getOptionLabel(formDataList.yesNoNa, formData.innovation),
                     Sourcinglocation: getOptionLabel(formDataList.sourcingLocation, formData.sourcingLocation),
+                    harmonizedOrder  : formData.globalOrderWindowCatalogueName == 1 ? "No" : "Yes",
                     Version: formData.noOfVersion,
                     SpecNote: formData.specifications,
                     SNote: formData.notesComments,
@@ -247,6 +248,7 @@ const UpdateLineItems = ({ open, onClose, data = {}, step, refreshSummary }) => 
                         onChange={handleChange}
                         helperText={errors?.itemName}
                         name={Labels.lineItems.itemName}
+                        sx ={{mb : 3}}
                     />
                     <PTextField
                         label={`${getLabel("lbl87")} ${Labels.symbols.required}`}
