@@ -7,13 +7,13 @@ import { Labels } from "../../utils/constants/labels";
 import { EnquiryDetails_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 
-function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChange, getLabel , response}) {
+function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChange, getLabel, response }) {
     const keys = ["quote", "proof", "production", "filecopies", "invoice"];
     const today = formatDate(new Date());
     const [loading, setLoading] = useState(false);
     const [phaseDates, setPhaseDates] = useState([]);
 
-    const calculatePlanByQuote = (selectedDate, updatedPhases = null, startIndex = 0) => {
+    const calculatePlanByQuote = (selectedDate, updatedPhases = null, startIndex = 0, res = false) => {
         const data = updatedPhases || phaseDates;
         const updated = [...data];
 
@@ -40,14 +40,16 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                 }
             }
             const key = keys[i];
+            const apiStartDate = response?.[`${key}startdate`];
+            const apiEndDate = response?.[`${key}enddate`];
 
             updated[i] = {
                 ...updated[i],
-                startDate: response?.[`${key}startdate`] || formatDate(tempStart),
-                endDate: response?.[`${key}enddate`] || formatDate(endDate),
+                startDate: res && apiStartDate && String(apiStartDate).trim() !== "" ? apiStartDate : formatDate(tempStart),
+                endDate: res && apiEndDate && String(apiEndDate).trim() !== "" ? apiEndDate : formatDate(endDate),
             };
 
-            startDate = new Date(updated[i].endDate);
+            startDate = parseDate(updated[i].endDate);
             // updated[i] = {
             //     ...updated[i],
             //     startDate: formatDate(tempStart),
@@ -78,7 +80,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
         if (isNaN(num) || num <= 0) return;
         const updated = [...phaseDates];
         updated[index] = { ...updated[index], mdays: value };
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
+        calculatePlanByQuote(updated[0]?.startDate || today, updated, index , false);
     };
 
     const handleStartDateChange = (index, selectedDate) => {
@@ -90,7 +92,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
             ...updated[index],
             startDate: selectedDate
         };
-        calculatePlanByQuote(updated[0]?.startDate || today, updated, index);
+        calculatePlanByQuote(updated[0]?.startDate || today, updated, index , false);
     };
 
     const slaTemplate = async (slaId) => {
@@ -108,9 +110,10 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                 { name: getLabel("lbl57"), days: response?.defFileCopies, mdays: response?.fileCopies },
                 { name: getLabel("lbl58"), days: response?.defInvoices, mdays: response?.invoicing }
             ];
-            calculatePlanByQuote(quoteStartDate ? quoteStartDate : today, phases);
+            calculatePlanByQuote(quoteStartDate ? quoteStartDate : today, phases, 0, true);
         }
         catch (error) {
+            console.log(error,"dahsgdhg");
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         }
         finally {
@@ -147,7 +150,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                             value={phase.mdays}
                             disabled={disabled}
                             onChange={(e) => handleModifiedDays(index, e.target.value)}
-                            sx ={{mb : 2}}
+                            sx={{ mb: 2 }}
                         />
                     </PGrid>
 
@@ -169,7 +172,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                                     ? e.target.value
                                     : formatDate(e);
                                 if (index === 0) {
-                                    calculatePlanByQuote(selectedDate, phaseDates, 0);
+                                    calculatePlanByQuote(selectedDate, phaseDates, 0 , false);
                                 } else {
                                     handleStartDateChange(index, selectedDate);
                                 }
@@ -181,7 +184,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                         <PTextField
                             value={phase.endDate}
                             disabled
-                            sx ={{mb : 2}}
+                            sx={{ mb: 2 }}
                         />
                     </PGrid>
                 </PGrid>
