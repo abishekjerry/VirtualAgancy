@@ -61,7 +61,6 @@ const ProjectEnquiry = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [loader, setLoader] = useState("");
     const [dynamicData, setDynamicData] = useState({});
     const { country, userName, userID, fkID, currency } = useSelector((state) => state.userDetails.user);
 
@@ -201,6 +200,12 @@ const ProjectEnquiry = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
+
+            //loader
+            handleLoading("rfq", true);
+            handleLoading("savingReason", true);
+            handleLoading("projectSavings", true);
+
             const response = await PostApi(Dashboard_API.GetDetails, {
                 Enquiryid: id,
             });
@@ -280,6 +285,7 @@ const ProjectEnquiry = () => {
                 deliveryOrder: projectResponse.deliveryOrder,
                 status: projectResponse.projectStatus,
             }));
+
             setFormData(prev => ({
                 ...prev,
                 quote: response.enqProjectinfo?.quoteBy,
@@ -289,11 +295,17 @@ const ProjectEnquiry = () => {
                 calculateProject: projectResponse.savingsResponseDto.details.length > 0,
                 statusId: response.statusId
             }));
+
             await clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
+
+             //loader
+            handleLoading("rfq", false);
+            handleLoading("savingReason", false);
+            handleLoading("projectSavings", false);
         }
     };
 
@@ -303,6 +315,22 @@ const ProjectEnquiry = () => {
         setFormData((prev) => ({
             ...prev,
             [name]: value
+        }));
+    };
+
+    //loader functionality
+    const [tableLoading, setTableLoading] = useState({
+        rfq: false,
+        savingReason: false,
+        projectSavings: false,
+        approveQuotation: false,
+        submitQuotation: false,
+    });
+
+    const handleLoading = (key, value) => {
+        setTableLoading(prev => ({
+            ...prev,
+            [key]: value
         }));
     };
 
@@ -494,6 +522,7 @@ const ProjectEnquiry = () => {
             ...prev,
             isCalculate: isValid === true ? false : true
         }))
+
     };
 
     let filteredData = formDataList.supplierMaster;
@@ -670,7 +699,7 @@ const ProjectEnquiry = () => {
     const handleQuotation = async (e, flag) => {
         if (flag) {
             try {
-                setLoading(true);
+                handleLoading([3, 6].includes(flag) ? "approveQuotation" : "submitQuotation", true);
                 const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
                     enqId: id,
                     modifiedBy: fkID,
@@ -683,7 +712,7 @@ const ProjectEnquiry = () => {
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
-                setLoading(false);
+                handleLoading([3, 6].includes(flag) ? "approveQuotation" : "submitQuotation", false);
             }
         }
         else {
@@ -716,8 +745,8 @@ const ProjectEnquiry = () => {
                 items: group.items.map(item =>
                     item.supplierQuotesId === Id
                         ? ((field === "negQuote" && Number(data) > Number(item.initialQuote)) ||
-                           (field === "negUnitPrice" && Number(data) > Number(item.iniUnitPrice))
-                          )  
+                            (field === "negUnitPrice" && Number(data) > Number(item.iniUnitPrice))
+                        )
                             ? item : { ...item, [field]: data } : item
                 )
             }))
@@ -761,8 +790,8 @@ const ProjectEnquiry = () => {
         { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
 
-    //savings reason functionality
 
+    //savings reason functionality
     useEffect(() => {
         if (!formData.project) return;
         const load = async () => {
@@ -968,8 +997,6 @@ const ProjectEnquiry = () => {
         }
 
         try {
-            //setLoading(true);
-            setLoader(flag);
             switch (flag) {
                 case "status":
                     activeTab = "Job Summary";
@@ -1039,12 +1066,10 @@ const ProjectEnquiry = () => {
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
-            setLoader("");
-            //setLoading(false);
+            setLoading(false);
         }
     };
 
-    console.log(formData.status, formData.actualDeliveryDate);
     return (
         <>
             <Box sx={{ px: 1, py: 1 }}>
@@ -1402,7 +1427,7 @@ const ProjectEnquiry = () => {
                 )}
 
                 {formData.activeTab === "RFQ" && (
-                    <PCard className={Labels.margin.mb3} loading={loader == "rfq"}>
+                    <PCard className={Labels.margin.mb3} >
                         <PGrid container className={Labels.margin.mb1}>
                             <PGrid item xs={12} sm={6} md={6}>
                                 <PTypography
@@ -1435,7 +1460,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.rfqFlag} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} showPagination={false} />
+                                <PTable columns={requestQuotes} rows={formDataList.requestQuotes} showCheckbox={formData.rfqFlag} selectedRows={formDataList.selectedSupplierRows} onValidationChange={handleRFQ} disabled={formData.rfq} bgColor={true} showPagination={false} loading={tableLoading.rfq} />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
@@ -1473,6 +1498,7 @@ const ProjectEnquiry = () => {
                                 </PGrid>
                             ) : <></>}
                         </PGrid>
+
                         {formData.marginFlag ? (
                             <>
                                 <PGrid container className={Labels.margin.mb4}>
@@ -1492,7 +1518,7 @@ const ProjectEnquiry = () => {
 
                 {formData.activeTab === "Project Savings" && (
                     <>
-                        <PCard className={Labels.margin.mb3} loading={loader == "project" || loader == "inputPS"}>
+                        <PCard className={Labels.margin.mb3}>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTypography
@@ -1510,7 +1536,7 @@ const ProjectEnquiry = () => {
                             <Divider sx={{ mb: 2 }} />
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} showPagination={false} />
+                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} showPagination={false} loading={tableLoading.savingReason}/>
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
@@ -1520,25 +1546,25 @@ const ProjectEnquiry = () => {
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} showPagination={false} />
+                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} showPagination={false} loading={tableLoading.projectSavings}/>
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} showPagination={false} />
+                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} showPagination={false} loading={tableLoading.projectSavings}/>
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={6} ></PGrid>
                                 <PGrid item xs={12} sm={6} md={6} >
-                                    <PTable columns={formDataList.savingsCalculation} rows={savingsCalculation} showHeader={false} showPagination={false} />
+                                    <PTable columns={formDataList.savingsCalculation} rows={savingsCalculation} showHeader={false} showPagination={false} loading={tableLoading.projectSavings} />
                                 </PGrid>
                             </PGrid>
                         </PCard>
 
                         {formData.calculateProject && (
                             <>
-                                <PCard className={Labels.margin.mb3}>
+                                <PCard className={Labels.margin.mb3} loading={tableLoading.projectSavings}>
                                     <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                                         <PGrid item xs={12} sm={6} md={6}>
                                             <PTypography
@@ -1611,8 +1637,9 @@ const ProjectEnquiry = () => {
                                         </PGrid>
                                     ))}
                                 </PCard>
+
                                 {[2, 3, 4, 5].includes(formData.statusId) && (
-                                    <PCard className={Labels.margin.mb3} readOnly={formData.statusId == 3}>
+                                    <PCard className={Labels.margin.mb3} readOnly={formData.statusId == 3} loading={tableLoading.submitQuotation}>
                                         <PGrid container className="d-flex align-items-center justify-content-between mb-2">
                                             <PGrid item xs={12} sm={6} md={6}>
                                                 <PTypography
@@ -1683,7 +1710,7 @@ const ProjectEnquiry = () => {
                                 )}
 
                                 {[3, 4, 5].includes(formData.statusId) && (
-                                    <PCard className={Labels.margin.mb3} loading={loading}>
+                                    <PCard className={Labels.margin.mb3} loading={tableLoading.approveQuotation}>
                                         <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                                             <PGrid item xs={12} sm={6} md={6}>
                                                 <PTypography
@@ -1721,7 +1748,7 @@ const ProjectEnquiry = () => {
 
 
                 {formData.activeTab === "SLA" && (
-                    <PCard className={Labels.margin.mb3} loading={loader == "sla"}>
+                    <PCard className={Labels.margin.mb3}>
                         <Box sx={{ px: 1, py: 1 }}>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={6}>
@@ -1738,7 +1765,7 @@ const ProjectEnquiry = () => {
                             </PGrid>
                             <Divider sx={{ mb: 2 }} />
                             <PSlaTemplate sla={formDataList?.enquiryDetails?.slaId} enquiryId={id} getLabel={getLabel} quoteStartDate={formDataList?.enquiryDetails?.quotestartdate} disabled={!formData.sla}
-                                onChange={handleSlaChange}
+                                onChange={handleSlaChange} response={formDataList?.enquiryDetails}
                             />
                         </Box>
                     </PCard>

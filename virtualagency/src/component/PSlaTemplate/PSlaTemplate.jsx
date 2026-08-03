@@ -7,7 +7,7 @@ import { Labels } from "../../utils/constants/labels";
 import { EnquiryDetails_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 
-function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChange, getLabel }) {
+function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChange, getLabel , response}) {
     const keys = ["quote", "proof", "production", "filecopies", "invoice"];
     const today = formatDate(new Date());
     const [loading, setLoading] = useState(false);
@@ -39,12 +39,21 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                     count++;
                 }
             }
+            const key = keys[i];
+
             updated[i] = {
                 ...updated[i],
-                startDate: formatDate(tempStart),
-                endDate: formatDate(endDate)
+                startDate: response?.[`${key}startdate`] || formatDate(tempStart),
+                endDate: response?.[`${key}enddate`] || formatDate(endDate),
             };
-            startDate = new Date(endDate);
+
+            startDate = new Date(updated[i].endDate);
+            // updated[i] = {
+            //     ...updated[i],
+            //     startDate: formatDate(tempStart),
+            //     endDate: formatDate(endDate)
+            // };
+            // startDate = new Date(endDate);
         }
         setPhaseDates(updated);
         const dynamicData = updated.reduce((acc, item, i) => {
@@ -138,6 +147,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                             value={phase.mdays}
                             disabled={disabled}
                             onChange={(e) => handleModifiedDays(index, e.target.value)}
+                            sx ={{mb : 2}}
                         />
                     </PGrid>
 
@@ -171,6 +181,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                         <PTextField
                             value={phase.endDate}
                             disabled
+                            sx ={{mb : 2}}
                         />
                     </PGrid>
                 </PGrid>

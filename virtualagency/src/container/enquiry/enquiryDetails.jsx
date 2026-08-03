@@ -419,7 +419,7 @@ const EnquiryDetails = () => {
 
                             <PSlaTemplate sla={formData.slaTemplate} enquiryId={id} getLabel={getLabel}
                                 quoteStartDate={formDataList?.enquiryDetails?.quotestartdate}
-                                onChange={handleSlaChange}
+                                onChange={handleSlaChange} response = {formDataList?.enquiryDetails}
                             />
 
                             <hr className="my-4" />
