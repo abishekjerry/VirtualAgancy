@@ -84,6 +84,7 @@ const ProjectEnquiry = () => {
         marginFlag: false,
         project: false,
         inputPS: false,
+        psFlag : false,
         isCalculate: true,
         historyTool: false,
         rfqFlag: true,
@@ -173,6 +174,7 @@ const ProjectEnquiry = () => {
     const showProjectSaving = formDataList.projectSavings?.length > 0;
     const deliveryFlag = formData.statusId >= 6;
     const createOrderFlag = formDataList.deliveryOrder?.length > 0;
+    
     const tabs = [
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
@@ -293,6 +295,7 @@ const ProjectEnquiry = () => {
                 rfqFlag: projectResponse.calculationDetails?.length === 0,
                 marginFlag: projectResponse.calculationDetails?.length > 0,
                 calculateProject: projectResponse.savingsResponseDto.details.length > 0,
+                psFlag: !projectResponse.savingsResponseDto.details[0]?.previousSupplier?.trim(),
                 statusId: response.statusId
             }));
 
@@ -302,7 +305,7 @@ const ProjectEnquiry = () => {
         } finally {
             setLoading(false);
 
-             //loader
+            //loader
             handleLoading("rfq", false);
             handleLoading("savingReason", false);
             handleLoading("projectSavings", false);
@@ -1134,6 +1137,17 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 )}
 
+                {showProjectSaving && formData.psFlag && (
+                    <PGrid container className={Labels.margin.mb3}>
+                        <PGrid item xs={12} md={12} sm={8}>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
+                                <Alert severity="error">Please choose the savings reason and input project savings.</Alert>
+                            </Box>
+                        </PGrid>
+                    </PGrid>
+                )}
+
+
                 <PGrid container className={Labels.margin.mb1}>
                     <PGrid item xs={12} sm={6} md={12}>
                         <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap", mb: 3 }}>
@@ -1183,7 +1197,7 @@ const ProjectEnquiry = () => {
                                         return (
                                             <PGrid item xs={12} md={6} xl={3} key={i}>
                                                 {
-                                                    formData.job && item.label === getLabel("lbl35") ? (
+                                                    formData.statusId < 6 && formData.job && item.label === getLabel("lbl35") ? (
                                                         <PDropdown
                                                             name={Labels.clientInfo.clientContact}
                                                             label={item.label}
@@ -1202,6 +1216,7 @@ const ProjectEnquiry = () => {
                                                                         value={formData.poNo}
                                                                         onChange={handleChange}
                                                                         disabled={!createOrderFlag}
+                                                                        sx
                                                                     />
                                                                 </PGrid>
                                                                 {[6].includes(formData.statusId) && (
@@ -1536,7 +1551,7 @@ const ProjectEnquiry = () => {
                             <Divider sx={{ mb: 2 }} />
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} showPagination={false} loading={tableLoading.savingReason}/>
+                                    <PTable columns={savingsReasons} rows={formDataList.savingsReasons} showPagination={false} loading={tableLoading.savingReason} />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
@@ -1546,12 +1561,12 @@ const ProjectEnquiry = () => {
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} showPagination={false} loading={tableLoading.projectSavings}/>
+                                    <PTable columns={projectSavings} rows={formDataList.projectSavings} showPagination={false} loading={tableLoading.projectSavings} />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>
                                 <PGrid item xs={12} sm={6} md={12}>
-                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} showPagination={false} loading={tableLoading.projectSavings}/>
+                                    <PTable columns={formDataList.savingsSummaryColumns} rows={formDataList.savingsSummary} showPagination={false} loading={tableLoading.projectSavings} />
                                 </PGrid>
                             </PGrid>
                             <PGrid container className={Labels.margin.mb3}>

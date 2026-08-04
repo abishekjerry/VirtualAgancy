@@ -729,7 +729,7 @@ const LineItems = () => {
             LineItemsMaster(category);
             SavingsReasonMaster(formDataList.lineItems[0].savingstype, true);
         }
-    }, [hybird, lineItems.length, category, formDataList]);
+    }, [hybird, lineItems.length, category]);
 
     return (
         <>
