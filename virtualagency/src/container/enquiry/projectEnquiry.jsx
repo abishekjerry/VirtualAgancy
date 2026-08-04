@@ -84,7 +84,7 @@ const ProjectEnquiry = () => {
         marginFlag: false,
         project: false,
         inputPS: false,
-        psFlag : false,
+        psFlag: false,
         isCalculate: true,
         historyTool: false,
         rfqFlag: true,
@@ -174,7 +174,7 @@ const ProjectEnquiry = () => {
     const showProjectSaving = formDataList.projectSavings?.length > 0;
     const deliveryFlag = formData.statusId >= 6;
     const createOrderFlag = formDataList.deliveryOrder?.length > 0;
-    
+
     const tabs = [
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
@@ -1216,7 +1216,7 @@ const ProjectEnquiry = () => {
                                                                         value={formData.poNo}
                                                                         onChange={handleChange}
                                                                         disabled={!createOrderFlag}
-                                                                        sx
+                                                                        sx={{ mb: 3 }}
                                                                     />
                                                                 </PGrid>
                                                                 {[6].includes(formData.statusId) && (
