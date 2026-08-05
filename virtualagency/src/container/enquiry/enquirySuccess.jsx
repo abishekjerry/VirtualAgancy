@@ -79,8 +79,6 @@ const EnquirySuccess = () => {
     };
 
     return (
-
-
         <PCard>
             <PGrid container className={Labels.margin.mb3}>
                 <PTypography

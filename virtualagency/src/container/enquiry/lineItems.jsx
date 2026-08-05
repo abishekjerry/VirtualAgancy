@@ -384,62 +384,66 @@ const LineItems = () => {
         [Labels.lineItems.competitiveBiddingWinningSupplierCost]: { type: "decimal" }
     };
 
-
     const handleChange = (e) => {
         const { name, value, files, label } = e.target;
-        const config = fieldConfig[name];
-        const formattedValue = config?.type === "number"
-            ? allowOnlyNumbers(value) : config?.type === "decimal" ? allowDecimal(value) : value;
+        const type = fieldConfig[name]?.type;
 
-        // Restrict No. of Materials to 1-5
-        if (name === Labels.lineItems.noOfMaterials && formattedValue !== ""
-            && (Number(formattedValue) < 1 || Number(formattedValue) > 5)
-        ) {
+        const formattedValue = type === "number" ? allowOnlyNumbers(value)
+            : type === "decimal" ? allowDecimal(value) : value;
+
+        // Restrict No. of Materials (1-5)
+        if (name === Labels.lineItems.noOfMaterials && formattedValue &&
+            (+formattedValue < 1 || +formattedValue > 5)) {
             return;
         }
 
-        // Handle special field logic
-        if (name === Labels.lineItems.category) {
-            LineItemsMaster(label);
-        }
-
-        if (name === Labels.lineItems.savingsType) {
-            SavingsReasonMaster(label);
-        }
-
-        // Prepare updated form data
         let data = {
-            [name]: files ? files : formattedValue
+            [name]: files || formattedValue,
         };
 
-        if (name === Labels.lineItems.typeOfJob) {
-            const isType4 = formattedValue == 4;
-            data = {
-                ...data,
-                competitiveBiddingCompliant: isType4 ? 3 : "",
-                competitiveBiddingExceptionFormSigned: isType4 ? 3 : "",
-                competitiveBiddingMandatory: isType4 ? 3 : "",
-                exceptionsReasonCode: isType4 ? 8 : "",
-            };
-        }
-        if (name === Labels.lineItems.globalOrderWindowCatalogueName) {
-            const isType4 = formattedValue == 1;
-            data = {
-                ...data,
-                harmonizedOrder: isType4 ? 2 : 1,
-            };
+        switch (name) {
+            case Labels.lineItems.category:
+                LineItemsMaster(label);
+                break;
+
+            case Labels.lineItems.savingsType:
+                SavingsReasonMaster(label);
+                break;
+
+            case Labels.lineItems.typeOfJob:
+                if (formattedValue == 4) {
+                    Object.assign(data, {
+                        competitiveBiddingCompliant: 3,
+                        competitiveBiddingExceptionFormSigned: 3,
+                        competitiveBiddingMandatory: 3,
+                        exceptionsReasonCode: 8,
+                    });
+                } else {
+                    Object.assign(data, {
+                        competitiveBiddingCompliant: "",
+                        competitiveBiddingExceptionFormSigned: "",
+                        competitiveBiddingMandatory: "",
+                        exceptionsReasonCode: "",
+                    });
+                }
+                break;
+
+            case Labels.lineItems.globalOrderWindowCatalogueName:
+                data.harmonizedOrder = formattedValue == 1 ? 2 : 1;
+                break;
+
+            default:
+                break;
         }
 
-
-        // Update states
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            ...data
+            ...data,
         }));
 
-        setErrors(prev => ({
+        setErrors((prev) => ({
             ...prev,
-            [name]: ""
+            [name]: "",
         }));
     };
 
@@ -507,7 +511,7 @@ const LineItems = () => {
                     savingsreason: getOptionLabel(formDataList.savingsReason, formData.savingsReason),
                     OWlink: getOptionLabel(formDataList.yesNoNa, formData.owWithLink),
                     CompetetiveWinningSupplier: formData.competitiveBiddingWinningSupplierCost,
-                    HarmonizedOrder : getOptionLabel(formDataList.yesOrNo, formData.harmonizedOrder), 
+                    HarmonizedOrder: getOptionLabel(formDataList.yesOrNo, formData.harmonizedOrder),
                     // Specifications
                     Version: formData.noOfVersion,
                     SpecNote: formData.specifications,
@@ -554,7 +558,7 @@ const LineItems = () => {
     };
 
     const handleBack = () => {
-        if (window.history.length > 1) {  
+        if (window.history.length > 1) {
             navigate(labelRoutes.enquiryDetails, {
                 state: { id: id }
             });
@@ -601,7 +605,7 @@ const LineItems = () => {
             Labels.lineItems.eAuction,
             Labels.lineItems.printingMethod,
             Labels.lineItems.typeOfItem,
-            Labels.lineItems.noOfMaterials,
+            ...(formData.typeOfJob == 4 ?  [] : [Labels.lineItems.noOfMaterials]),
             Labels.lineItems.harmonizedOrder,
             Labels.lineItems.digitalInnovation,
             Labels.lineItems.innovation,
@@ -1234,7 +1238,8 @@ const LineItems = () => {
                                         name={Labels.lineItems.harmonizedOrder}
                                         options={formDataList.yesOrNo}
                                         disabled={true}
-                                        readOnly={formData.harmonizedOrder == 1 ? true : false}
+                                        //readOnly={formData.harmonizedOrder == 1 ? true : false}
+                                        readOnly={true}
                                     />
                                 </PGrid>
 
