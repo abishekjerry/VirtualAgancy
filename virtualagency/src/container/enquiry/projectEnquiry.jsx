@@ -93,6 +93,7 @@ const ProjectEnquiry = () => {
         search: "",
         files: [],
         calculateProject: false,
+        email: false,
         //editable state
         clientContact: "",
         projectNo: "",
@@ -1127,6 +1128,31 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 </PGrid>
 
+                {[24].includes(formData.statusId) && (
+                    <PGrid container className={Labels.margin.mb3}>
+                        <PGrid item xs={12} md={12} sm={8}>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
+                                <PTypography
+                                    labelText={<>
+                                        {"Please click here to send Survey notification email to client".split("here")[0]}
+                                        <span style={{ color: CommonColors.blue.main }} onClick={() => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                email: true
+                                            }))
+                                        }}>
+                                            here
+                                        </span>
+                                        {"Please click here to send Survey notification email to client".split("here")[1]}
+                                    </>}
+                                    color={CommonColors.grey.main}
+                                    weight={FontWeight.bold}
+                                />
+                            </Box>
+                        </PGrid>
+                    </PGrid>
+                )}
+
                 {[7, 8].includes(formData.statusId) && !formData.actualDeliveryDate && (
                     <PGrid container className={Labels.margin.mb3}>
                         <PGrid item xs={12} md={12} sm={8}>
@@ -1882,6 +1908,7 @@ const ProjectEnquiry = () => {
                 )}
             </Box >
 
+            {/* Status dialog */}
             <PDialog
                 open={formData.statusFlag}
                 onClose={() => setFormData((prev) => ({
@@ -1920,6 +1947,53 @@ const ProjectEnquiry = () => {
                     <PGrid item xs={12} sm={6} md={12}>
                         <PTypography
                             labelText={`${"Are you sure you want to change the project status"} ${Labels.symbols.optional}`}
+                            flag={Labels.fontFlags.errorLbl}
+                            color={CommonColors.grey.main}
+                            weight={FontWeight.light}
+                        />
+                    </PGrid>
+                </PGrid>
+            </PDialog>
+
+            {/* Survay dialog */}
+            <PDialog
+                open={formData.email}
+                onClose={() => setFormData((prev) => ({
+                    ...prev,
+                    email: false,
+                }))}
+                title={"Email Notification"}
+                showCloseIcon={true}
+                maxWidth="sm"
+                actions={
+                    < PGrid className="d-flex align-items-center justify-content-end gap-2" >
+                        <PButton
+                            fullWidth
+                            label={"No"}
+                            variant="outlined"
+                            onClick={() => setFormData((prev) => ({
+                                ...prev,
+                                email: false
+                            }))}
+                            color={CommonColors.grey.main}
+                            width={120}
+                        />
+                        <PButton
+                            fullWidth
+                            label={"Yes"}
+                            variant={Labels.contained}
+                            onClick={(e) => handleSubmit(e, "email")}
+                            color={CommonColors.green.main}
+                            width={120}
+                        />
+                    </PGrid >
+                }
+
+            >
+                <PGrid container className={Labels.margin.mb4}>
+                    <PGrid item xs={12} sm={6} md={12}>
+                        <PTypography
+                            labelText={`${"Are you sure you want to send survey notification email to client"} ${Labels.symbols.optional}`}
                             flag={Labels.fontFlags.errorLbl}
                             color={CommonColors.grey.main}
                             weight={FontWeight.light}

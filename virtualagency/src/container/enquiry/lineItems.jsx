@@ -225,7 +225,6 @@ const LineItems = () => {
                 ...prev,
                 category: response.typeofJob,
             }));
-
             if (id !== 0) {
                 const data = await PostApi(Dashboard_API.GetDetails, {
                     Enquiryid: id,
@@ -503,7 +502,7 @@ const LineItems = () => {
                     Eauction: getOptionLabel(formDataList.yesOrNo, formData.eAuction),
                     printingmethod: getOptionLabel(formDataList.printingMethod, formData.printingMethod),
                     typeofitem: formData.typeOfItem == "" ? "N/A" : getOptionLabel(formDataList.typeOfItem, formData.typeOfItem),
-                    Noofmaterials: formData.noOfMaterials,
+                    Noofmaterials: formData.noOfMaterials == "" ? null : formData.noOfMaterials,
                     DigitalInnovation: getOptionLabel(formDataList.yesNoNa, formData.digitalInnovation),
                     Innovation: getOptionLabel(formDataList.yesNoNa, formData.innovation),
                     Sourcinglocation: getOptionLabel(formDataList.sourcingLocation, formData.sourcingLocation),
@@ -605,7 +604,7 @@ const LineItems = () => {
             Labels.lineItems.eAuction,
             Labels.lineItems.printingMethod,
             Labels.lineItems.typeOfItem,
-            ...(formData.typeOfJob == 4 ?  [] : [Labels.lineItems.noOfMaterials]),
+            ...(formData.typeOfJob == 4 ? [] : [Labels.lineItems.noOfMaterials]),
             Labels.lineItems.harmonizedOrder,
             Labels.lineItems.digitalInnovation,
             Labels.lineItems.innovation,
@@ -729,10 +728,13 @@ const LineItems = () => {
         : getOptionLabel(formDataList.category, formData.category);
 
     useEffect(() => {
-        if (hybird && lineItems.length > 0) {
-            LineItemsMaster(category);
-            SavingsReasonMaster(formDataList.lineItems[0].savingstype, true);
-        }
+        const loadMasters = async () => {
+            if (hybird && lineItems.length > 0) {
+                await LineItemsMaster(category);
+                await SavingsReasonMaster(formDataList.lineItems[0].savingstype, true);
+            }
+        };
+        loadMasters();
     }, [hybird, lineItems.length, category]);
 
     return (

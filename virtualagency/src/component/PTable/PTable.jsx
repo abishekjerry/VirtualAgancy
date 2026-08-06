@@ -57,7 +57,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
 
   const renderText = (value) => {
     const text = value == null || value === 0 ? "" : typeof value === "number" ? value.toFixed(2) : String(value);
-    return <Tooltip title={text}><span>{text.length > 30 ? `${text.slice(0, 30)}...` : text}</span></Tooltip>;
+    return text.length > 30 ? <Tooltip title={text}><span>{text.length > 30 ? `${text.slice(0, 30)}...` : text}</span></Tooltip>: <span>{text}</span>;
   };
 
   const renderCell = (col, data, rowIndex, meta = {}) => {
