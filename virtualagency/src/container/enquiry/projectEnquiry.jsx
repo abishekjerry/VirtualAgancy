@@ -150,7 +150,7 @@ const ProjectEnquiry = () => {
 
         savingsSummaryColumns: [{ field: "saving", header: "Savings (Inc. Fee)" }, { field: "savingPercent", header: "Savings % (Inc. Fee)" },
         { field: "savingDisplay", header: "Savings (Excl. Fee)" }, { field: "savingPercentDisplay", header: "Savings % (Excl. Fee)" }],
-        savingsCalculation: [{ field: "label" }, { field: "value" }],
+        savingsCalculation: [{ field: "label" }, { field: "value", align: "right" }],
         savingsResponseDto: { totalPreviousPrice: 0, totalSellPrice: 0, totalSaving: 0, totalSavingPercent: 0 },
         savingsReasons: [],
         yesOrNo: [{ label: "Yes", value: 1 }, { label: "No", value: 2, selected: true }],
@@ -254,17 +254,6 @@ const ProjectEnquiry = () => {
                     items: projectResponse.savingsResponseDto.itemWiseSummary.filter(y => y.itemNumber === x.itemNumber)
                 }));
 
-            //Calculation Details for RFQ
-            const total = projectResponse.calculationDetails.reduce((a, b) => ({
-                cost: a.cost + b.cost,
-                sell: a.sell + b.sell,
-                margin: a.margin + b.margin
-            }), { cost: 0, sell: 0, margin: 0 });
-
-            total.markupPercent = +(total.margin / total.cost * 100).toFixed(2);
-            total.marginPercent = +(total.margin / total.sell * 100).toFixed(2);
-            const calculationDetails = [total];
-
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -280,7 +269,7 @@ const ProjectEnquiry = () => {
                 historySearches: projectResponse.historySearches,
                 revisedQuotes: revisedQuotes,
                 requestQuotes: requestQuotes,
-                calculationDetails: calculationDetails,
+                calculationDetails: projectResponse.calculationDetails,
                 calculationSupplierlogs: projectResponse.calculationSupplierlogs,
                 projectSavings: projectSavings,
                 savingsSummary: savingsSummary,
@@ -622,6 +611,7 @@ const ProjectEnquiry = () => {
         {
             label: "Savings Reference Price",
             value: savings.totalPreviousPrice.toFixed(2)
+            
         },
         {
             label: "Total PMG Sell Price (inc.fee)",
@@ -646,17 +636,17 @@ const ProjectEnquiry = () => {
         },
         {
             field: "baselineQuantity", header: "Baseline Quantity",
-            ...(formData.inputPS && renderProjectEditableField("baselineQuantity"))
+            ...(formData.inputPS && renderProjectEditableField("baselineQuantity")), align: "right"
         },
         {
             field: "previousPrice", header: "Savings Reference Price ($)",
-            ...(formData.inputPS && renderProjectEditableField("previousPrice"))
+            ...(formData.inputPS && renderProjectEditableField("previousPrice")), align: "right"
         },
         {
-            field: "negItemSellPrice", header: "Current PMG Sell Price (Excl. Fee)"
+            field: "negItemSellPrice", header: "Current PMG Sell Price (Excl. Fee)", align: "right"
         },
         {
-            field: "itemSellPrice", header: "Current PMG Sell Price (Incl. Fee)"
+            field: "itemSellPrice", header: "Current PMG Sell Price (Incl. Fee)", align: "right"
         }
     ];
 
@@ -682,7 +672,7 @@ const ProjectEnquiry = () => {
             details: [
                 {
                     label: "Total PMG Sell Price",
-                    value: totals.totalSellPrice.toFixed(2)
+                    value: totals.totalSellPrice.toFixed(2) 
                 },
                 {
                     label: "Tax (%)",
@@ -789,7 +779,7 @@ const ProjectEnquiry = () => {
             ...(isUnit && renderEditableField("negUnitPrice")),
         },
         {
-            field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)"
+            field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)" 
         },
         { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
@@ -871,6 +861,7 @@ const ProjectEnquiry = () => {
                 color={CommonColors.grey.main}
                 onClick={() => handleEdit(null, flag)}
                 width={flag == "inputPS" ? 250 : 120}
+                disabled={formData.statusId === 6 && (flag === "inputPS" || flag === "project")}
             />
         )
     );

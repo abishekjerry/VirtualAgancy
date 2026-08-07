@@ -15,7 +15,7 @@ import {
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 
-const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true, bgColor = false , loading = false }) => {
+const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true, bgColor = false, loading = false }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const isPageLoad = useRef(false);
@@ -57,7 +57,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
 
   const renderText = (value) => {
     const text = value == null || value === 0 ? "" : typeof value === "number" ? value.toFixed(2) : String(value);
-    return text.length > 30 ? <Tooltip title={text}><span>{text.length > 30 ? `${text.slice(0, 30)}...` : text}</span></Tooltip>: <span>{text}</span>;
+    return text.length > 30 ? <Tooltip title={text}><span>{text.length > 30 ? `${text.slice(0, 30)}...` : text}</span></Tooltip> : <span>{text}</span>;
   };
 
   const renderCell = (col, data, rowIndex, meta = {}) => {
@@ -95,6 +95,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
     >
       {columns.map((col, i) => (
         <TableCell
+          align={col.align || "left"}
           key={i}
           sx={{
             fontSize: Labels.fontSize.xs,
@@ -133,15 +134,13 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
           sx={{
             cursor: onClick ? "pointer" : "default",
             backgroundColor: item.isCalculateId && item.supplierId === item.isCalculateId ? "#BCCDDE" : i % 2 ? "#f9fafb" : "#fff",
-            // "&:hover": {
-            //   backgroundColor: `${item.supplierId === item.isCalculateId ? "#BCCDDE" : "#f1f5f9" } !important`,
-            // },
           }}
         >
           {columns.map((col, cIndex) => {
             if (col.rowSpan && i !== 0) return null;
             return (
               <TableCell key={cIndex} rowSpan={col.rowSpan ? group.items.length : 1}
+                align={col.align || "left"}
                 sx={{
                   fontSize: Labels.fontSize.xs, py: 1.8,
                   verticalAlign: "middle", borderLeft: col.rowSpan ? "1px solid #e5e7eb" : "",
