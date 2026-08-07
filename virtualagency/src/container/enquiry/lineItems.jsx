@@ -723,7 +723,8 @@ const LineItems = () => {
 
 
     //hybird functionality
-    const hybird = formDataList?.enquiryDetails?.hybridModel === "No" && lineItems?.length > 0;
+   
+    const hybird = formDataList?.enquiryDetails?.hybridModel === "No";
     const category = hybird && lineItems?.length > 0 ? formDataList.lineItems[0].printornonprint
         : getOptionLabel(formDataList.category, formData.category);
 
