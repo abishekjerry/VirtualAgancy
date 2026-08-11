@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Box,
     Typography,
@@ -55,6 +55,8 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PDeliveryOrder from "../../component/PDeliveryOrder/PDeliveryOrder";
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import { useSelector } from "react-redux";
+import PQuotation from "../../component/PQuotation/Pquotation";
+import Logo from "../../utils/assets/images/valogo.png";
 
 const ProjectEnquiry = () => {
     const { state } = useLocation();
@@ -62,7 +64,7 @@ const ProjectEnquiry = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
-    const { country, userName, userID, fkID, currency } = useSelector((state) => state.userDetails.user);
+    const { country, userName, userID, fkID, currency, email } = useSelector((state) => state.userDetails.user);
 
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
@@ -72,7 +74,7 @@ const ProjectEnquiry = () => {
     const [formData, setFormData] = useState({
         activeTab: "Job Summary",
         status: "",
-        statusFlag: false,
+        quote: "",
         statusId: 0,
         sla: false,
         rfq: false,
@@ -86,14 +88,18 @@ const ProjectEnquiry = () => {
         inputPS: false,
         psFlag: false,
         isCalculate: true,
-        historyTool: false,
         rfqFlag: true,
-        historySearchTool: "",
-        quote: "",
-        search: "",
         files: [],
         calculateProject: false,
+
+        //dialog state
+        preview: false,
         email: false,
+        historyTool: false,
+        historySearchTool: "",
+        search: "",
+        statusFlag: false,
+
         //editable state
         clientContact: "",
         projectNo: "",
@@ -171,6 +177,14 @@ const ProjectEnquiry = () => {
         //Delivery Order
         deliveryOrder: [],
 
+        //Perview Quotes Suppliers
+        perviewQuotes: [{ field: "supplierA", header: "Supplier A" }, { field: "supplierAInitialAmount", header: "Supplier A Init. Amount" },
+        { field: "supplierANegotiatedAmount", header: "Supplier A Neg. Amount" }, { field: "supplierB", header: "Supplier B" },
+        { field: "supplierBInitialAmount", header: "Supplier B Init. Amount" }, { field: "supplierBNegotiatedAmount", header: "Supplier B Neg. Amount" },
+        { field: "supplierC", header: "Supplier C" }, { field: "supplierCInitialAmount", header: "Supplier C Init. Amount" },
+        { field: "supplierCNegotiatedAmount", header: "Supplier C Neg. Amount" }],
+        perviewSupplierQuotes: []
+
     });
     const showProjectSaving = formDataList.projectSavings?.length > 0;
     const deliveryFlag = formData.statusId >= 6;
@@ -234,11 +248,15 @@ const ProjectEnquiry = () => {
                 }));
 
             const requestQuotes = [...new Map(projectResponse.requestQuotes.map(x => [x.itemNumber, x])).values()]
-                .map(x => ({
-                    isSubTitle: true,
-                    subTitle: x.itemName,
-                    items: projectResponse.requestQuotes.filter(y => y.itemNumber === x.itemNumber)
-                }));
+                .map(x => {
+                    const items = projectResponse.requestQuotes.filter(y => y.itemNumber === x.itemNumber).filter(Boolean);
+                    return {
+                        isSubTitle: true,
+                        subTitle: x.itemName,
+                        supplierLink: items.length >= 2 && response.statusId >= 4,
+                        items
+                    };
+                });
 
             const projectSavings = [...new Map(projectResponse.savingsResponseDto.details.map(x => [x.itemNumber, x])).values()]
                 .map(x => ({
@@ -398,7 +416,6 @@ const ProjectEnquiry = () => {
     const sections = getSummarySections({ lineItems, getLabel });
 
     //Edit & cancel section function
-
     const handleSlaChange = useCallback((data) => {
         setDynamicData(prev => {
             if (JSON.stringify(prev) === JSON.stringify(data)) {
@@ -611,7 +628,7 @@ const ProjectEnquiry = () => {
         {
             label: "Savings Reference Price",
             value: savings.totalPreviousPrice.toFixed(2)
-            
+
         },
         {
             label: "Total PMG Sell Price (inc.fee)",
@@ -672,7 +689,7 @@ const ProjectEnquiry = () => {
             details: [
                 {
                     label: "Total PMG Sell Price",
-                    value: totals.totalSellPrice.toFixed(2) 
+                    value: totals.totalSellPrice.toFixed(2)
                 },
                 {
                     label: "Tax (%)",
@@ -693,7 +710,7 @@ const ProjectEnquiry = () => {
     const handleQuotation = async (e, flag) => {
         if (flag) {
             try {
-                handleLoading([3, 6].includes(flag) ? "approveQuotation" : "submitQuotation", true);
+                handleLoading([3, 4].includes(flag) ? "approveQuotation" : "submitQuotation", true);
                 const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
                     enqId: id,
                     modifiedBy: fkID,
@@ -706,11 +723,11 @@ const ProjectEnquiry = () => {
             } catch (error) {
                 toast(Labels.status.failure, Labels.message.somethingWentWrong);
             } finally {
-                handleLoading([3, 6].includes(flag) ? "approveQuotation" : "submitQuotation", false);
+                handleLoading([3, 4].includes(flag) ? "approveQuotation" : "submitQuotation", false);
             }
         }
         else {
-
+            handleDownloadQuotation();
         }
     };
 
@@ -779,7 +796,7 @@ const ProjectEnquiry = () => {
             ...(isUnit && renderEditableField("negUnitPrice")),
         },
         {
-            field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)" 
+            field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)"
         },
         { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
     ];
@@ -789,11 +806,10 @@ const ProjectEnquiry = () => {
     useEffect(() => {
         if (!formData.project) return;
         const load = async () => {
-            await Promise.all(
-                formDataList.savingsReasons.filter(row => row.savingsType).map(row =>
-                    SavingsReasonMaster(row.savingsType, row.id)
-                )
-            );
+            const rows = formDataList.savingsReasons.filter(row => row.savingsType);
+            for (const row of rows) {
+                await SavingsReasonMaster(row.savingsType, row.id);
+            }
         };
         load();
     }, [formData.project]);
@@ -1064,6 +1080,78 @@ const ProjectEnquiry = () => {
             setLoading(false);
         }
     };
+
+    //Preview Quotation 
+    const quotationRef = useRef(null);
+
+    const handleDownloadQuotation = () => {
+        quotationRef.current?.handleDownload();
+    };
+
+    const quotationData = (() => {
+        const items = formDataList.lineItems.map((item) => ({
+            id: item.itemNumber,
+            description: item.itemDescription,
+            unit: Number(item.quoteQtyOrSize) || 0,
+            pricePerUnit: Number(item.itemSellPrice) || 0,
+            amount: Number(item.quoteQtyOrSize || 0) * Number(item.itemSellPrice || 0),
+            numberOfVersion: Number(item.version) || 0,
+            specifications: item.specNote || "",
+            notes: item.sNote || "",
+        }));
+
+        const subTotal = Number(
+            items.reduce((sum, item) => sum + Number(item.amount || 0), 0).toFixed(2)
+        );
+        const tax = Number((subTotal * 0.09).toFixed(2));
+        const total = Number((subTotal + tax).toFixed(2));
+
+        return {
+            customer: {
+                name: "Nestle Singapore (Pte) Ltd",
+                attention: "John",
+                addressLine1: "15A Changi Business Park Central 1",
+                addressLine2: "#05-02/03, Eightrium @ Changi Business Park",
+                postalCode: "486035",
+                country: "Singapore",
+            },
+
+            company: {
+                logo: Logo,
+                name: "Nestle Singapore (Pte) Ltd",
+                address: "15A Changi Business Park",
+                phone: "1001-0934-2019",
+                email: "nestle@gmail.com"
+            },
+
+            quotationNo: formDataList.clientInfo?.enqUId,
+            quotationDate: formDataList.clientInfo?.createdDate,
+            projectName: formData.projectDescription,
+            projectNumber: formData.projectNo,
+            paymentTerms: "90 days",
+
+            items,
+
+            subTotal,
+            tax,
+            total,
+
+            notes: [
+                "Quotation exclusive of material handling, distribution and freight charges, and will be invoiced separately according to the shipping arrangements.",
+                "All prices quoted are in SGD unless otherwise stated, & are excluding of Goods and Services Tax (GST).",
+                "Above quote is based on specifications provided, however if there is a need for the client to change the specifications or to work within the client’s budget, we shall revise the quote and specifications accordingly.",
+                "Costs & deliverables are quoted based upon 5 working man days per week, with 8 working hrs per man day.",
+                "Above quote is valid for one (1) month after the date of this quotation.",
+                "Every item stated in the above quotation will allow only two (2) amendments (text and graphics only) in each of the mentioned item.",
+                "Any amendments not within the specified specification of this contract will not be valid unless agreeable by both parties.",
+                "All artwork and design elements will remain the property of PMG ASIA PACIFIC PTE LTD.",
+                "PMG ASIA PACIFIC PTE LTD shall not be held responsible for any delays caused by the client.",
+            ],
+
+            preparedBy: userName,
+            preparedEmail: email,
+        };
+    })();
 
     return (
         <>
@@ -1470,25 +1558,61 @@ const ProjectEnquiry = () => {
                                 />
                             </PGrid>
                         </PGrid>
-                        <PGrid container className="d-flex align-items-center justify-content-between mb-3">
-                            <PGrid item xs={12} sm={6} md={6}>
-                                <PTypography
-                                    labelText={getLabel("lbl170")}
-                                    flag={Labels.fontFlags.subHeader}
-                                    color={CommonColors.black.main}
-                                    weight={FontWeight.bold}
-                                />
-                                <PTypography
-                                    labelText={getLabel("lbl171")}
-                                    flag={Labels.fontFlags.smallText}
-                                    color={CommonColors.grey.main}
-                                    weight={FontWeight.bold}
-                                />
+                        {/* RFQ Section */}
+                        {[1, 2, 3].includes(formData.statusId) && (
+                            <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PTypography
+                                        labelText={getLabel("lbl170")}
+                                        flag={Labels.fontFlags.subHeader}
+                                        color={CommonColors.black.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                    <PTypography
+                                        labelText={getLabel("lbl171")}
+                                        flag={Labels.fontFlags.smallText}
+                                        color={CommonColors.grey.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
+                                    {formData.marginFlag ? <></> : renderActionButtons("rfq")}
+                                </PGrid>
                             </PGrid>
-                            <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                {formData.marginFlag ? <></> : renderActionButtons("rfq")}
+                        )}
+
+                        {/* Award Jobs Section */}
+                        {formData.statusId >= 4 && (
+                            <PGrid container className="d-flex align-items-center justify-content-between mb-3">
+                                <PGrid item xs={12} sm={6} md={6}>
+                                    <PTypography
+                                        labelText={"Award jobs"}
+                                        flag={Labels.fontFlags.subHeader}
+                                        color={CommonColors.black.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                    <PTypography
+                                        labelText={"Your preferred supplier for each item."}
+                                        flag={Labels.fontFlags.smallText}
+                                        color={CommonColors.grey.main}
+                                        weight={FontWeight.bold}
+                                    />
+                                </PGrid>
+                                <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
+                                    <PButton
+                                        label={"Preview Supplier Quotes"}
+                                        variant="contained"
+                                        color={CommonColors.grey.main}
+                                        onClick={() => setFormData((prev) => ({
+                                            ...prev,
+                                            preview: true,
+                                        }))}
+                                        width={250}
+                                    />
+                                </PGrid>
                             </PGrid>
-                        </PGrid>
+                        )}
+
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
@@ -1899,6 +2023,12 @@ const ProjectEnquiry = () => {
                 )}
             </Box >
 
+
+            {/* Preview Quotation */}
+            <PGrid className="d-none d-print-block">
+                <PQuotation data={quotationData} ref={quotationRef} />
+            </PGrid>
+
             {/* Status dialog */}
             <PDialog
                 open={formData.statusFlag}
@@ -1993,7 +2123,7 @@ const ProjectEnquiry = () => {
                 </PGrid>
             </PDialog>
 
-
+            {/* Suppliers dialog */}
             <PDialog
                 open={formData.suppliers}
                 onClose={() => setFormData((prev) => ({
@@ -2043,6 +2173,7 @@ const ProjectEnquiry = () => {
                 </PGrid>
             </PDialog>
 
+            {/* History Tool dialog */}
             <PDialog
                 open={formData.historyTool}
                 onClose={() => setFormData((prev) => ({
@@ -2090,6 +2221,24 @@ const ProjectEnquiry = () => {
                 </PGrid>
                 <PGrid item xs={12} sm={6} md={12}>
                     <PTable columns={formDataList.historySearchesCloumns} rows={historyToolData} showCheckbox={true} onValidationChange={handleHistory} selectedRows={formDataList.selectedHistroyRows} />
+                </PGrid>
+            </PDialog>
+
+            {/* Preview Supplier Quotes dialog */}
+            <PDialog
+                open={formData.preview}
+                onClose={() => setFormData((prev) => ({
+                    ...prev,
+                    preview: false,
+                }))}
+                title={"Preview Supplier Quotes"}
+                showCloseIcon={true}
+                maxWidth="lg"
+            >
+                <PGrid container className={Labels.margin.mb4}>
+                    <PGrid item xs={12} sm={6} md={12}>
+                        <PTable columns={formDataList.perviewQuotes} rows={formDataList.perviewSupplierQuotes} showPagination={false} />
+                    </PGrid>
                 </PGrid>
             </PDialog>
         </>
