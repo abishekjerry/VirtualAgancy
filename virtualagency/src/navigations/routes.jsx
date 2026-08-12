@@ -1,9 +1,10 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, Navigate , Outlet } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import PageLayout from "../container/layout/pageLayout";
 import { labelRoutes } from "./labelRoutes";
 import PageNotFound from "../container/pageNotFound/pageNotFound";
 import { useSelector } from "react-redux";
+import PScroll from "../component/PScroll/PScroll";
 
 const UserRoute = () => {
   const verifiedUser = useSelector((state) => state.userDetails.user);
@@ -24,36 +25,40 @@ const EnquirySuccess = lazy(() => import("../container/enquiry/enquirySuccess"))
 const ProjectEnquiry = lazy(() => import("../container/enquiry/projectEnquiry"))
 function AppRoutes() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Routes>
+    <>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
 
-        {/* Login */}
-        <Route path={labelRoutes.home} element={<LoginPage />} />
+          {/* Login */}
+          <Route path={labelRoutes.home} element={<LoginPage />} />
 
-        {/* Layout Pages */}
-        <Route element={<UserRoute />}>
-          <Route element={<PageLayout />}>
-            <Route path={labelRoutes.dashboard} element={<Dashboard />} />
-            <Route path={labelRoutes.eqDashboard} element={<EqDashboard />} />
-            <Route path={labelRoutes.report} element={<Report />} />
-            <Route path={labelRoutes.clientInfo} element={<ClientInfo />} />
-            <Route path={labelRoutes.enquiryDetails} element={<EnquiryDetails />} />
-            <Route path={labelRoutes.lineItems} element={<LineItems />} />
-            <Route path={labelRoutes.suppliers} element={<Suppliers />} />
-            <Route path={labelRoutes.review} element={<Review />} />
-            <Route path={labelRoutes.enquirySuceess} element={<EnquirySuccess />} />
-            <Route path={labelRoutes.projectEnquiry} element={<ProjectEnquiry />} />
+          {/* Layout Pages */}
+          <Route element={<UserRoute />}>
+            <Route element={<PageLayout />}>
+              <Route path={labelRoutes.dashboard} element={<Dashboard />} />
+              <Route path={labelRoutes.eqDashboard} element={<EqDashboard />} />
+              <Route path={labelRoutes.report} element={<Report />} />
+              <Route path={labelRoutes.clientInfo} element={<ClientInfo />} />
+              <Route path={labelRoutes.enquiryDetails} element={<EnquiryDetails />} />
+              <Route path={labelRoutes.lineItems} element={<LineItems />} />
+              <Route path={labelRoutes.suppliers} element={<Suppliers />} />
+              <Route path={labelRoutes.review} element={<Review />} />
+              <Route path={labelRoutes.enquirySuceess} element={<EnquirySuccess />} />
+              <Route path={labelRoutes.projectEnquiry} element={<ProjectEnquiry />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Page Not Found */}
-        <Route path={labelRoutes.PageNotFound} element={<PageNotFound />} />
+          {/* Page Not Found */}
+          <Route path={labelRoutes.PageNotFound} element={<PageNotFound />} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to={labelRoutes.home} replace />} />
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to={labelRoutes.home} replace />} />
 
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+
+      <PScroll></PScroll>
+    </>
   );
 }
 
