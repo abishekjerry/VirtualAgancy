@@ -19,6 +19,12 @@ export const Labels = {
     resetUsername: "resetUsername"
   },
 
+  userType : {
+    agency : "agency",
+    client : "client",
+    supplier : "supplier"
+  },
+
   dashboard: {
     startDate: "startDate",
     endDate: "endDate",

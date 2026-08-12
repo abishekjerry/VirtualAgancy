@@ -64,7 +64,7 @@ const ProjectEnquiry = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
-    const { country, userName, userID, fkID, currency, email } = useSelector((state) => state.userDetails.user);
+    const { country, userName, userID, fkID, currency, email, userType } = useSelector((state) => state.userDetails.user);
 
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
@@ -183,24 +183,40 @@ const ProjectEnquiry = () => {
         { field: "supplierBInitialAmount", header: "Supplier B Init. Amount" }, { field: "supplierBNegotiatedAmount", header: "Supplier B Neg. Amount" },
         { field: "supplierC", header: "Supplier C" }, { field: "supplierCInitialAmount", header: "Supplier C Init. Amount" },
         { field: "supplierCNegotiatedAmount", header: "Supplier C Neg. Amount" }],
-        perviewSupplierQuotes: []
+        perviewSupplierQuotes: [],
 
+        //Project Quotations
+        projectQuotes: [{ field: "itemName", header: "Item Name" }, { field: "quantity", header: "Quantity" },
+        { field: "unitPrice", header: "Unit Price($)" }, { field: "unitPrice", header: "Unit Price(₣)" },
+        { field: "totalPrice", header: "Total Price($)" }, { field: "totalPrice", header: "Total Price(₣)" }],
+        projectClientQuotes: [],
+
+        clientQuote: [{ field: "label" }, { field: "value", align: "right" }],
+        clientQuotes: [],
+
+        //Supplier Quotations
+        supplierQuotes: [{ field: "itemName", header: "Item Name" }, { field: "initialQuote", header: "Initial Quote($)" }, { field: "unitPrice", header: "Unit Price ($)" },],
+        projectSupplierQuotes: [],
     });
     const showProjectSaving = formDataList.projectSavings?.length > 0;
     const deliveryFlag = formData.statusId >= 6;
     const createOrderFlag = formDataList.deliveryOrder?.length > 0;
-
+    const flag = userType?.toLowerCase() === Labels.userType.agency
     const tabs = [
         { label: "Job Summary", icon: <WorkOutlineIcon /> },
         { label: "Line Items", icon: <Inventory2Icon /> },
-        { label: "SPOT", icon: <BoltIcon /> },
-        ...(deliveryFlag ? [{ label: "Delivery Order", icon: <LocalShippingIcon /> }] : []),
-        { label: "RFQ", icon: <RequestQuoteIcon /> },
-        ...(showProjectSaving ? [{ label: "Project Savings", icon: <SavingsIcon /> }] : []),
-        { label: "SLA", icon: <HandshakeIcon /> },
-        { label: "Revised Quotes", icon: <PriceChangeIcon /> },
-        { label: "Logs", icon: <HistoryIcon /> },
-        { label: "Attachment", icon: <AttachmentIcon /> }
+        ...(!flag ? [{
+            label: userType?.toLowerCase() === Labels.userType.supplier ? "Your Quote Submissions"
+                : "Project Quotation" , icon: <SavingsIcon />
+        }] : []),
+        ...(flag ? [{ label: "SPOT", icon: <BoltIcon /> }] : []),
+        ...(deliveryFlag && flag ? [{ label: "Delivery Order", icon: <LocalShippingIcon /> }] : []),
+        ...(flag ? [{ label: "RFQ", icon: <RequestQuoteIcon /> }] : []),
+        ...(showProjectSaving && flag ? [{ label: "Project Savings", icon: <SavingsIcon /> }] : []),
+        ...(flag ? [{ label: "SLA", icon: <HandshakeIcon /> }] : []),
+        ...(flag ? [{ label: "Revised Quotes", icon: <PriceChangeIcon /> }] : []),
+        ...(flag ? [{ label: "Logs", icon: <HistoryIcon /> }] : []),
+        ...(flag || userType?.toLowerCase() === Labels.userType.supplier ? [{ label: "Attachment", icon: <AttachmentIcon /> }] : [])
     ]
 
 
@@ -1153,6 +1169,23 @@ const ProjectEnquiry = () => {
         };
     })();
 
+    //Project Quotation
+    const clientQuote = formDataList.clientQuotes
+    const clientQuotes = [
+        {
+            label: "Item Subtotal",
+            value: 0.00
+        },
+        {
+            label: "Tax Amount",
+            value: 0.00
+        },
+        {
+            label: "Total",
+            value: 0.00
+        },
+    ];
+
     return (
         <>
             <Box sx={{ px: 1, py: 1 }}>
@@ -1179,35 +1212,36 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 </PGrid>
 
-                <PGrid container className={Labels.margin.mb3}>
-                    <PGrid item xs={12} md={12} sm={12}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
-                            <PDropdown
-                                name={Labels.commonLabel.status}
-                                value={formData.status}
-                                label={getLabel("lbl166")}
-                                onChange={handleChange}
-                                options={formDataList.status}
-                                width={27}
-                                helperText={""}
-                            />
-                            <PButton
-                                label={getLabel("lbl40")}
-                                variant="contained"
-                                color={CommonColors.green.main}
-                                onClick={() => setFormData((prev) => ({
-                                    ...prev,
-                                    statusFlag: true
-                                }))}
-                                width={150}
-                                height={45}
-                                disabled={!formData.status || !formData.actualDeliveryDate}
-                            />
-                        </Box>
+                {flag && (
+                    <PGrid container className={Labels.margin.mb3}>
+                        <PGrid item xs={12} md={12} sm={12}>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
+                                <PDropdown
+                                    name={Labels.commonLabel.status}
+                                    value={formData.status}
+                                    label={getLabel("lbl166")}
+                                    onChange={handleChange}
+                                    options={formDataList.status}
+                                    width={27}
+                                    helperText={""}
+                                />
+                                <PButton
+                                    label={getLabel("lbl40")}
+                                    variant="contained"
+                                    color={CommonColors.green.main}
+                                    onClick={() => setFormData((prev) => ({
+                                        ...prev,
+                                        statusFlag: true
+                                    }))}
+                                    width={150}
+                                    height={45}
+                                    disabled={!formData.status || !formData.actualDeliveryDate}
+                                />
+                            </Box>
+                        </PGrid>
                     </PGrid>
-                </PGrid>
-
-                {[24].includes(formData.statusId) && (
+                )}
+                {[24].includes(formData.statusId) && flag && (
                     <PGrid container className={Labels.margin.mb3}>
                         <PGrid item xs={12} md={12} sm={8}>
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
@@ -1232,7 +1266,7 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 )}
 
-                {[7, 8].includes(formData.statusId) && !formData.actualDeliveryDate && (
+                {[7, 8].includes(formData.statusId) && !formData.actualDeliveryDate && flag && (
                     <PGrid container className={Labels.margin.mb3}>
                         <PGrid item xs={12} md={12} sm={8}>
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
@@ -1242,7 +1276,7 @@ const ProjectEnquiry = () => {
                     </PGrid>
                 )}
 
-                {showProjectSaving && formData.psFlag && (
+                {showProjectSaving && formData.psFlag && flag && (
                     <PGrid container className={Labels.margin.mb3}>
                         <PGrid item xs={12} md={12} sm={8}>
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
@@ -1251,7 +1285,6 @@ const ProjectEnquiry = () => {
                         </PGrid>
                     </PGrid>
                 )}
-
 
                 <PGrid container className={Labels.margin.mb1}>
                     <PGrid item xs={12} sm={6} md={12}>
@@ -1288,7 +1321,7 @@ const ProjectEnquiry = () => {
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                {renderActionButtons("job")}
+                                {flag && renderActionButtons("job")}
                             </PGrid>
                         </PGrid>
                         <Divider sx={{ mb: 2 }} />
@@ -1902,7 +1935,6 @@ const ProjectEnquiry = () => {
                     </>
                 )}
 
-
                 {formData.activeTab === "SLA" && (
                     <PCard className={Labels.margin.mb3}>
                         <Box sx={{ px: 1, py: 1 }}>
@@ -2021,8 +2053,81 @@ const ProjectEnquiry = () => {
                         </PGrid>
                     </PCard>
                 )}
-            </Box >
 
+                {formData.activeTab === "Project Quotation" && (
+                    <PCard className={Labels.margin.mb3}>
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={6}>
+                                <PTypography
+                                    labelText={"Project Quotations"}
+                                    flag={Labels.fontFlags.subHeader}
+                                    color={CommonColors.blue.main}
+                                    weight={FontWeight.bold}
+                                />
+                                <PTypography
+                                    labelText={"Below are the prices recommended by PMG"}
+                                    flag={Labels.fontFlags.smallText}
+                                    color={CommonColors.grey.main}
+                                    weight={FontWeight.bold}
+                                />
+                            </PGrid>
+                        </PGrid>
+                        <Divider sx={{ mb: 2 }} />
+
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={formDataList.projectQuotes} rows={formDataList.projectClientQuotes} showPagination={false} />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb3}>
+                            <PGrid item xs={12} sm={6} md={6} ></PGrid>
+                            <PGrid item xs={12} sm={6} md={6} >
+                                <PTable columns={formDataList.clientQuote} rows={clientQuotes} showHeader={false} showPagination={false} />
+                            </PGrid>
+                        </PGrid>
+                    </PCard>
+                )}
+
+                {formData.activeTab === "Your Quote Submissions" && (
+                    <PCard className={Labels.margin.mb3}>
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={6}>
+                                <PTypography
+                                    labelText={"Your Quote Submissions"}
+                                    flag={Labels.fontFlags.subHeader}
+                                    color={CommonColors.blue.main}
+                                    weight={FontWeight.bold}
+                                />
+                            </PGrid>
+                        </PGrid>
+                        <Divider sx={{ mb: 2 }} />
+
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={6} md={12}>
+                                <PTable columns={formDataList.supplierQuotes} rows={formDataList.projectSupplierQuotes} showPagination={false} />
+                            </PGrid>
+                        </PGrid>
+                        <PGrid container className={Labels.margin.mb4}>
+                            <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
+                                <PButton
+                                    label={"Calculate"}
+                                    variant="contained"
+                                    color={CommonColors.grey.main}
+                                    onClick={(e) => handleQuotation(e, 6)}
+                                    width={250}
+                                />
+                                <PButton
+                                    label={"Submit Quote"}
+                                    variant="contained"
+                                    color={CommonColors.green.main}
+                                    onClick={(e) => handleQuotation(e, 4)}
+                                    width={250}
+                                />
+                            </PGrid>
+                        </PGrid>
+                    </PCard>
+                )}
+            </Box >
 
             {/* Preview Quotation */}
             <PGrid className="d-none d-print-block">
