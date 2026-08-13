@@ -8,30 +8,40 @@ const PScroll = () => {
         const [showUp, setShowUp] = useState(false);
         const [showDown, setShowDown] = useState(false);
         useEffect(() => {
-                const container = document.querySelector(".main-content");
+                let container;
+                let timer;
 
-                if (!container) return;
+                const setupScroll = () => {
+                        container = document.querySelector(".main-content");
 
-                const handleScroll = () => {
-                        const scrollTop = container.scrollTop;
-                        const clientHeight = container.clientHeight;
-                        const scrollHeight = container.scrollHeight;
+                        if (!container) {
+                                timer = setTimeout(setupScroll, 100);
+                                return;
+                        }
 
-                        setShowUp(scrollTop > 100);
+                        const handleScroll = () => {
+                                setShowUp(container.scrollTop > 10);
 
-                        setShowDown(
-                                scrollTop + clientHeight < scrollHeight - 100
-                        );
+                                setShowDown(
+                                        container.scrollTop + container.clientHeight <
+                                        container.scrollHeight - 10
+                                );
+                        };
+
+                        handleScroll();
+                        container.addEventListener("scroll", handleScroll);
+
+                        return () => {
+                                container?.removeEventListener("scroll", handleScroll);
+                        };
                 };
 
-                handleScroll();
-
-                container.addEventListener("scroll", handleScroll);
-                window.addEventListener("resize", handleScroll);
-
+                const cleanup = setupScroll();
                 return () => {
-                        container.removeEventListener("scroll", handleScroll);
-                        window.removeEventListener("resize", handleScroll);
+                        clearTimeout(timer);
+                        if (typeof cleanup === "function") {
+                                cleanup();
+                        }
                 };
         }, []);
 
@@ -101,5 +111,4 @@ const PScroll = () => {
                 </Box>
         );
 };
-
 export default PScroll;
