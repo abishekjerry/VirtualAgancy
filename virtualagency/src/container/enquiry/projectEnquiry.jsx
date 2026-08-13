@@ -143,7 +143,7 @@ const ProjectEnquiry = () => {
             , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }],
         historyLogs: [],
         lineItemLogsCloumns: [{ field: "modifiedDate", header: "Modified Date" }, { field: "userName", header: "User ID" }, { field: "field", header: "Field" }
-            , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }, { field: "itemNumber", header: "Item Number" }],
+            , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }, { field: "itemNumber", header: "Item Number" , render: (row) => Number.parseInt(row.itemNumber, 10) }],
         lineItemLogs: [],
         calculateSupplierlogsRows: [{ field: "supplierName", header: "Supplier Name" }, { field: "itemName", header: "Item Name" }, { field: "supplierType", header: "Supplier type" }, { field: "smetaAccredited", header: "SMETA accredited" }
             , { field: "gmpAccredited", header: "GMP accredited" }, { field: "natureofsupplier", header: "Nature of supplier" },
@@ -893,7 +893,7 @@ const ProjectEnquiry = () => {
                 color={CommonColors.grey.main}
                 onClick={() => handleEdit(null, flag)}
                 width={flag == "inputPS" ? 250 : 120}
-                disabled={formData.statusId === 6 && (flag === "inputPS" || flag === "project")}
+                disabled={formData.statusId >= 6 && (flag === "inputPS" || flag === "project")}
             />
         )
     );
@@ -1667,7 +1667,7 @@ const ProjectEnquiry = () => {
                                     />
                                 </PGrid>
                             }
-                            {formData.calculateFlag ? (
+                            {formData.calculateFlag && formData.statusId <= 5 ? (
                                 <PGrid item xs={12} sm={12} md={formData.marginFlag ? 12 : 6} className="d-flex justify-content-end gap-2">
                                     <PButton
                                         label={getLabel("lbl173")}
@@ -1972,7 +1972,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={formDataList.revisedQuotesCloumns} rows={formDataList.revisedQuotes} />
+                                <PTable columns={formDataList.revisedQuotesCloumns} rows={formDataList.revisedQuotes} showPagination = {false}/>
                             </PGrid>
                         </PGrid>
                     </PCard>
