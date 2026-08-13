@@ -143,7 +143,7 @@ const ProjectEnquiry = () => {
             , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }],
         historyLogs: [],
         lineItemLogsCloumns: [{ field: "modifiedDate", header: "Modified Date" }, { field: "userName", header: "User ID" }, { field: "field", header: "Field" }
-            , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }, { field: "itemNumber", header: "Item Number" , render: (row) => Number.parseInt(row.itemNumber, 10) }],
+            , { field: "oldValue", header: "Old Value" }, { field: "newValue", header: "New Value" }, { field: "itemNumber", header: "Item Number", render: (row) => Number.parseInt(row.itemNumber, 10) }],
         lineItemLogs: [],
         calculateSupplierlogsRows: [{ field: "supplierName", header: "Supplier Name" }, { field: "itemName", header: "Item Name" }, { field: "supplierType", header: "Supplier type" }, { field: "smetaAccredited", header: "SMETA accredited" }
             , { field: "gmpAccredited", header: "GMP accredited" }, { field: "natureofsupplier", header: "Nature of supplier" },
@@ -207,7 +207,7 @@ const ProjectEnquiry = () => {
         { label: "Line Items", icon: <Inventory2Icon /> },
         ...(!flag ? [{
             label: userType?.toLowerCase() === Labels.userType.supplier ? "Your Quote Submissions"
-                : "Project Quotation" , icon: <SavingsIcon />
+                : "Project Quotation", icon: <SavingsIcon />
         }] : []),
         ...(flag ? [{ label: "SPOT", icon: <BoltIcon /> }] : []),
         ...(deliveryFlag && flag ? [{ label: "Delivery Order", icon: <LocalShippingIcon /> }] : []),
@@ -616,27 +616,34 @@ const ProjectEnquiry = () => {
         }));
     }
     const renderProjectEditableField = (field) => ({
-        render: (row) => (
-            <PTextField
-                name={field}
-                value={row[field] || ""}
-                onChange={(e) => handleProjectInputChange(e.target.value, row.id, row.enquiryId, field)}
-                width={170}
-                sx={{
-                    "& .MuiInputBase-root": {
-                        height: 50,
-                    }
-                }}
-            //placeHolder={field == "previousSupplier" ? "Previous Po No" : "0"}
-            // onKeyPress={() =>
-            //     setFormData(prev => ({
-            //         ...prev,
-            //         historyTool: true
-            //     }))
-            // }
-            //disabled={field == "previousSupplier" ? false : true}
-            />
-        )
+        render: (row) => {
+            const isCostReduction = row?.savingType === "Cost Reduction";
+            if ((field === "baselineQuantity" || field === "previousSupplier") && !isCostReduction) {
+                return row[field] || "";
+            }
+
+            return (
+                <PTextField
+                    name={field}
+                    value={row[field] || ""}
+                    onChange={(e) => handleProjectInputChange(e.target.value, row.id, row.enquiryId, field)}
+                    width={100}
+                    sx={{
+                        "& .MuiInputBase-root": {
+                            height: 40,
+                        }
+                    }}
+                //placeHolder={field == "previousSupplier" ? "Previous Po No" : "0"}
+                // onKeyPress={() =>
+                //     setFormData(prev => ({
+                //         ...prev,
+                //         historyTool: true
+                //     }))
+                // }
+                //disabled={field == "previousSupplier" ? false : true}
+                />
+            )
+        }
     });
 
     const savings = formDataList.savingsResponseDto;
@@ -659,6 +666,7 @@ const ProjectEnquiry = () => {
             value: `${savings.totalSavingPercent.toFixed(2)} %`
         }
     ];
+
     const projectSavings = [
         {
             field: "previousSupplier", header: "Previous PO Number",
@@ -1972,7 +1980,7 @@ const ProjectEnquiry = () => {
                         <Divider sx={{ mb: 2 }} />
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={12}>
-                                <PTable columns={formDataList.revisedQuotesCloumns} rows={formDataList.revisedQuotes} showPagination = {false}/>
+                                <PTable columns={formDataList.revisedQuotesCloumns} rows={formDataList.revisedQuotes} showPagination={false} />
                             </PGrid>
                         </PGrid>
                     </PCard>
