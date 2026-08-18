@@ -189,8 +189,10 @@ const EqDashboard = () => {
           iconColor: Labels.primary,
           icon: <TaskAltIcon />,
           statusId: 24
-        },]
-      : []),
+        },
+        {
+          fileName: true,
+        }]: []),
 
     ...(userType?.toLowerCase() === Labels.userType.supplier
       ? [

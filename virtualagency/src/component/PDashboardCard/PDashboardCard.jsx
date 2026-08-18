@@ -1,15 +1,29 @@
-import React from "react";
+import React, { useRef , useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import DownloadIcon from "@mui/icons-material/Download";
+import { Tooltip } from "@mui/material";
+import PGrid from "../PGrid/PGrid";
+import { Labels } from "../../utils/constants/labels";
+import { CommonColors } from "../../utils/constants/colors";
+import PButton from "../PButton/PButton";
+import CloseIcon from "@mui/icons-material/Close";
 const PDashboardCard = ({
   title,
   value,
   icon,
   subtitle,
   route,
-  onClick, 
+  onClick,
   showNavIcon = false,
+
+  // File card
+  fileName,
+  onFileUpload,
+  onFileDownload,
+
   iconBoxSize = 45,
   iconSize = 22,
   titleSize = 14,
@@ -18,18 +32,18 @@ const PDashboardCard = ({
   iconColor = "#ffffff",
   bgColor = "#ffffff",
 }) => {
-
   const navigate = useNavigate();
-
+  const fileInputRef = useRef(null);
+  const [uploadedFileName, setUploadedFileName] = useState("");
   const handleOnClick = () => {
-  if (onClick) {
-    onClick(); // 👉 filter function
-  }
+    if (onClick && !fileName) {
+      onClick();
+    }
 
-  if (route) {
-    navigate(route); // 👉 navigation
-  }
-};
+    if (route) {
+      navigate(route);
+    }
+  };
 
   return (
     <>
@@ -89,7 +103,10 @@ const PDashboardCard = ({
       <div
         className="dashboard-card"
         onClick={handleOnClick}
-        style={{ cursor: route ? "pointer" : "default", background: bgColor }}
+        style={{
+          cursor: route ? "pointer" : "default",
+          background: bgColor,
+        }}
       >
         {showNavIcon && route && (
           <div className="nav-icon">
@@ -98,31 +115,149 @@ const PDashboardCard = ({
         )}
 
         <div className="card-top">
-          <div
-            className="icon-box"
-            style={{
-              width: iconBoxSize,
-              height: iconBoxSize,
-              background: iconBg,
-              color: iconColor,
-              //fontSize: iconSize
-            }}
-          >
-            {React.cloneElement(icon, { size : 300})}
-          </div>
+          {!fileName && (
+            <div
+              className="icon-box"
+              style={{
+                width: iconBoxSize,
+                height: iconBoxSize,
+                background: iconBg,
+                color: iconColor,
+              }}
+            >
+              {icon &&
+                React.cloneElement(icon, {
+                  size: 300,
+                })}
+            </div>
+          )}
 
           <div>
-            <p className="card-title" style={{ fontSize: titleSize }}>
+            <p
+              className="card-title"
+              style={{
+                fontSize: titleSize,
+              }}
+            >
               {title}
             </p>
-            <h3 className="card-value" style={{ fontSize: valueSize }}>
+
+            <h3
+              className="card-value"
+              style={{
+                fontSize: valueSize,
+              }}
+            >
               {value}
             </h3>
           </div>
         </div>
 
-        {subtitle && <p className="card-subtext">{subtitle}</p>}
-      </div>
+        {subtitle && (
+          <p className="card-subtext">
+            {subtitle}
+          </p>
+        )}
+
+        {fileName && (
+          <>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                height: 95
+              }}
+            >
+              <PButton
+                label="Download"
+                variant="contained"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFileDownload?.(fileName);
+                }}
+                width={200}
+                startIcon={<DownloadIcon />}
+                style={{ cursor: "pointer" }}
+                color={CommonColors.grey.main}
+              />
+
+              <PButton
+                label="Upload"
+                variant="contained"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                width={200}
+                startIcon={<CloudUploadIcon />}
+                style={{ cursor: "pointer" }}
+                color={CommonColors.green.main}
+                disabled = {uploadedFileName}
+              />
+            </div>
+            {/* Filename at bottom */}
+            {uploadedFileName && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  left: "14px",
+                  right: "14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "7px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "13px",
+                    color: "#718096",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                  title={uploadedFileName}
+                >
+                  {uploadedFileName}
+                </span>
+
+                <Tooltip title="Cancel">
+                  <CloseIcon
+                    fontSize="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUploadedFileName("");
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                    }}
+                    style={{
+                      cursor: "pointer",
+                      color: "#94a3b8",
+                      flexShrink: 0,
+                    }}
+                  />
+                </Tooltip>
+              </div >
+            )}
+            {/* Hidden file chooser */}
+            <input ref={fileInputRef}
+              type="file"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setUploadedFileName(file.name);
+                  onFileUpload?.(file);
+                }
+              }}
+            />
+          </>
+        )}
+      </div >
     </>
   );
 };

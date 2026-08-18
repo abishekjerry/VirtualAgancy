@@ -21,6 +21,9 @@ import PDialog from "../PDialog/PDialog";
 import { useLanguage } from "../../utils/constants/language";
 import PTypography from "../PTypography/PTypography";
 import { FontWeight } from "../../utils/constants/fonts";
+import { PostApi } from "../../utils/api/networking";
+import { ProjectEnquiry_API } from "../../utils/api/apiUrl";
+import { isSuccess, toast } from "../../utils/commonFunction/common";
 
 const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = false, onValidationChange, selectedRows = [], disabled = false, showHeader = true, showPagination = true, bgColor = false, loading = false }) => {
   const [page, setPage] = useState(0);
@@ -33,7 +36,8 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
     supplierB: "",
     supplierC: "",
     suppliers: [],
-    selectedSuppliers: {}
+    selectedSuppliers: {},
+    item: [],
   });
 
 
@@ -86,6 +90,34 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       [name]: value
     }));
   }
+
+  const handleSubmit = async (e) => {
+    const items = formData.item || [];
+    const supplierB = items.find((x) => x.supplierId === formData?.supplierB);
+    const supplierC = items.find((x) => x.supplierId === formData?.supplierC);
+
+    const payload = {
+      Id: items?.[0]?.enquiryDetailsId,
+      SupplierB: supplierB?.supplierName || "",
+      SupplierBNegAmount: supplierB?.negQuote?.toString() || "",
+      SupplierBInitAmount: supplierB?.initialQuote?.toString() || "",
+      SupplierC: supplierC?.supplierName || "",
+      SupplierCNegAmount: supplierC?.negQuote?.toString() || "",
+      SupplierCInitAmount: supplierC?.initialQuote?.toString() || "",
+    };
+    try {
+      const response = await PostApi(ProjectEnquiry_API.UpdatePreviewQuotes, payload);
+      if (isSuccess(response)) {
+        toast(Labels.status.success, response.data);
+        setFormData((prev) => ({
+          ...prev,
+          open: false,
+        }));
+      }
+    } catch (error) {
+      toast(Labels.status.failure, Labels.message.somethingWentWrong);
+    }
+  }
   const handleSupplierBC = (group) => {
     const itemNumber = group.items?.[0]?.itemNumber;
     if (!itemNumber) return;
@@ -108,6 +140,9 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
     ].filter(Boolean);
 
     const availableSuppliers = allSuppliers.filter((supplier) => !excludedSupplierIds.includes(supplier.value));
+    const availableSupplierIds = availableSuppliers.map((supplier) => supplier.value);
+    const availableItems = items.filter((item) => availableSupplierIds.includes(item.supplierId));
+
     setFormData((prev) => ({
       ...prev,
       open: true,
@@ -115,6 +150,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
       supplierB: "",
       supplierC: "",
       suppliers: availableSuppliers,
+      item: availableItems,
     }));
   };
 

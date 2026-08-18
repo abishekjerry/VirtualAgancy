@@ -178,12 +178,12 @@ const ProjectEnquiry = () => {
         deliveryOrder: [],
 
         //Perview Quotes Suppliers
-        perviewQuotes: [{ field: "supplierA", header: "Supplier A" }, { field: "supplierAInitialAmount", header: "Supplier A Init. Amount" },
-        { field: "supplierANegotiatedAmount", header: "Supplier A Neg. Amount" }, { field: "supplierB", header: "Supplier B" },
-        { field: "supplierBInitialAmount", header: "Supplier B Init. Amount" }, { field: "supplierBNegotiatedAmount", header: "Supplier B Neg. Amount" },
-        { field: "supplierC", header: "Supplier C" }, { field: "supplierCInitialAmount", header: "Supplier C Init. Amount" },
-        { field: "supplierCNegotiatedAmount", header: "Supplier C Neg. Amount" }],
-        perviewSupplierQuotes: [],
+        previewQuotes: [{ field: "supplierA", header: "Supplier A" }, { field: "supplierAInitAmount", header: "Supplier A Init. Amount" },
+        { field: "supplierANegAmount", header: "Supplier A Neg. Amount" }, { field: "supplierB", header: "Supplier B" },
+        { field: "supplierBInitAmount", header: "Supplier B Init. Amount" }, { field: "supplierBNegAmount", header: "Supplier B Neg. Amount" },
+        { field: "supplierC", header: "Supplier C" }, { field: "supplierCInitAmount", header: "Supplier C Init. Amount" },
+        { field: "supplierCNegAmount", header: "Supplier C Neg. Amount" }],
+        previewSupplierQuotes: [],
 
         //Project Quotations
         projectQuotes: [{ field: "itemName", header: "Item Name" }, { field: "quantity", header: "Quantity" },
@@ -288,6 +288,13 @@ const ProjectEnquiry = () => {
                     items: projectResponse.savingsResponseDto.itemWiseSummary.filter(y => y.itemNumber === x.itemNumber)
                 }));
 
+            const previewQuotes = [...new Map(projectResponse.previewQuotes.map(x => [x.itemNumber, x])).values()]
+                .map(x => ({
+                    isSubTitle: true,
+                    subTitle: x.itemName,
+                    items: projectResponse.previewQuotes.filter(y => y.itemNumber === x.itemNumber)
+                }));
+
             setFormDataList(prev => ({
                 ...prev,
                 lineItems: response.enqlineItems,
@@ -310,6 +317,7 @@ const ProjectEnquiry = () => {
                 savingsResponseDto: projectResponse.savingsResponseDto,
                 deliveryOrder: projectResponse.deliveryOrder,
                 status: projectResponse.projectStatus,
+                previewSupplierQuotes : previewQuotes
             }));
 
             setFormData(prev => ({
@@ -325,6 +333,7 @@ const ProjectEnquiry = () => {
 
             await clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
+            console.log(error);
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);
@@ -2350,7 +2359,7 @@ const ProjectEnquiry = () => {
             >
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={6} md={12}>
-                        <PTable columns={formDataList.perviewQuotes} rows={formDataList.perviewSupplierQuotes} showPagination={false} />
+                        <PTable columns={formDataList.previewQuotes} rows={formDataList.previewSupplierQuotes} showPagination={false} />
                     </PGrid>
                 </PGrid>
             </PDialog>
