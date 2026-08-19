@@ -438,7 +438,7 @@ const ProjectEnquiry = () => {
         items: item.items,
     }));
 
-    const sections = getSummarySections({ lineItems, getLabel });
+    const sections = getSummarySections({ menuId, lineItems, getLabel });
 
     //Edit & cancel section function
     const handleSlaChange = useCallback((data) => {

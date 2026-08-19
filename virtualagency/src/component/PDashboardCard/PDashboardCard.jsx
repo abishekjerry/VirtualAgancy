@@ -176,7 +176,7 @@ const PDashboardCard = ({
                   e.stopPropagation();
                   onFileDownload?.(fileName);
                 }}
-                width={200}
+                width={270}
                 startIcon={<DownloadIcon />}
                 style={{ cursor: "pointer" }}
                 color={CommonColors.grey.main}
@@ -189,7 +189,7 @@ const PDashboardCard = ({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                width={200}
+                width={270}
                 startIcon={<CloudUploadIcon />}
                 style={{ cursor: "pointer" }}
                 color={CommonColors.green.main}

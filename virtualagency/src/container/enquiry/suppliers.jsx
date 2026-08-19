@@ -23,7 +23,8 @@ import { PSummary } from "../../component/PSummary/PSummary";
 import { useSelector } from "react-redux";
 const Suppliers = () => {
     const { getLabel } = useLanguage();
-    const enquirySteps = getEnquirySteps(getLabel);
+    const { country, currency, fkID , menuId} = useSelector((state) => state.userDetails.user);
+    const enquirySteps = getEnquirySteps(getLabel, menuId);
     const navigate = useNavigate();
     const { state } = useLocation();
     const [allowRedirect, setAllowRedirect] = useState(false);
@@ -34,8 +35,7 @@ const Suppliers = () => {
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const { country, currency, fkID } = useSelector((state) => state.userDetails.user);
- 
+    
     const [formDataList, setFormDataList] = useState({
         country: [],
         print: [],
@@ -143,7 +143,7 @@ const Suppliers = () => {
         items: item.items
     }));
     const suppliers = getSuppliers(formDataList.suppliers, formDataList.selectedRows)
-    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, suppliers, getLabel });
+    const sections = getSummarySections({ menuId, clientInfo, enquiryDetails, lineItems, suppliers, getLabel });
 
 
     const handleSubmit = async (e, flag) => {

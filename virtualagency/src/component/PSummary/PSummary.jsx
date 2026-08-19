@@ -28,6 +28,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
     const enquiryID = localStorage.getItem("enquiryID");
     const { userType } = useSelector((state) => state.userDetails.user);
     const flag = userType?.toLowerCase() === Labels.userType.agency
+
     const handleOpen = (data = {}) => {
         setFormData(data);
         setOpen(true);
@@ -50,6 +51,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
             state: { id: state.id }
         });
     };
+    
     const SummaryItem = ({ label, value }) => (
         <PGrid container className={Labels.margin.mb3}>
             {label === "" ? (

@@ -26,12 +26,12 @@ const EnquiryDetails = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
-    const enquirySteps = getEnquirySteps(getLabel);
+    const { countryID, role, fkID, menuId } = useSelector((state) => state.userDetails.user);
+    const enquirySteps = getEnquirySteps(getLabel, menuId);
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
     const [open, setOpen] = useState(false);
-    const { countryID, role, fkID } = useSelector((state) => state.userDetails.user);
     const [formData, setFormData] = useState({
         projectNo: "",
         estdeliveryDate: "",
@@ -43,6 +43,11 @@ const EnquiryDetails = () => {
         hybrid: "",
         projectAttribute: "",
         slaTemplate: "",
+
+        startDate: "",
+        startTime: "",
+        duration: "",
+        endDate: ""
     });
 
     // Single state for all errors
@@ -57,6 +62,10 @@ const EnquiryDetails = () => {
         hybrid: "",
         projectAttribute: "",
         slaTemplate: "",
+
+        startDate: "",
+        startTime: "",
+        duration: "",
     });
 
     const [formDataList, setFormDataList] = useState({
@@ -140,8 +149,8 @@ const EnquiryDetails = () => {
                     hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
                     projectAttribute: getOptionValue(response.projectAttribute, data.enqProjectinfo.attribute),
                     slaTemplate: data?.enqProjectinfo?.slaId,
-                }));   
-                localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId ?? ""); 
+                }));
+                localStorage.setItem("enquiryID", data?.enqClientinfo?.enqUId ?? "");
             }
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -260,7 +269,7 @@ const EnquiryDetails = () => {
     const today = formatDate(new Date());
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails(formData, dynamicData, formDataList, getLabel, getOptionLabel, id ? formDataList.enquiryDetails : null);
-    const sections = getSummarySections({ clientInfo, enquiryDetails, getLabel });
+    const sections = getSummarySections({ menuId, clientInfo, enquiryDetails, getLabel });
     return (
         <>
             <Box sx={{ px: 3, py: 3 }}>
@@ -292,7 +301,7 @@ const EnquiryDetails = () => {
                                         value={formData.projectNo}
                                         onChange={handleChange}
                                         helperText={errors?.projectNo}
-                                        sx ={{mb : 3}}
+                                        sx={{ mb: 3 }}
                                     />
                                     <PDatepicker
                                         name={Labels.enquiryDetails.estdeliveryDate}
@@ -303,6 +312,7 @@ const EnquiryDetails = () => {
                                         width={100}
                                         allowFuture={true}
                                         minDate={today}
+                                        sx={{ mb: 3 }}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={8}>
@@ -328,6 +338,7 @@ const EnquiryDetails = () => {
                                         width={100}
                                         allowFuture={true}
                                         maxDate={formData.estdeliveryDate}
+                                        sx={{ mb: 3 }}
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -374,7 +385,7 @@ const EnquiryDetails = () => {
                                         value={formData.hybrid}
                                         onChange={handleChange}
                                         helperText={errors?.hybrid}
-                                        options={formDataList.hybird}  
+                                        options={formDataList.hybird}
                                         disabled={true}
                                     />
                                 </PGrid>
@@ -391,6 +402,73 @@ const EnquiryDetails = () => {
                                     />
                                 </PGrid> */}
                             </PGrid>
+
+                            {[2].includes(menuId) && (
+                                <>
+                                    <hr className="my-4" />
+                                    <PGrid container className={Labels.margin.mb4}>
+                                        <PTypography
+                                            labelText={"Bid Details"}
+                                            flag={Labels.fontFlags.subHeader}
+                                            color={CommonColors.blue.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                        <PTypography
+                                            labelText={"Enter the bid dates and times required to set up the event."}
+                                            flag={Labels.fontFlags.smallText}
+                                            color={CommonColors.grey.main}
+                                            weight={FontWeight.bold}
+                                        />
+                                    </PGrid>
+                                    <PGrid container className={Labels.margin.mb3}>
+                                        <PGrid item xs={12} sm={6} md={4}>
+                                            <PDatepicker
+                                                name={Labels.enquiryDetails.startDate}
+                                                label={`${"Start Date"} ${Labels.symbols.required}`}
+                                                value={formData.startDate}
+                                                onChange={handleChange}
+                                                helperText={errors?.startDate}
+                                                width={100}
+                                                allowFuture={true}
+                                                minDate={today}
+                                            />
+                                        </PGrid>
+                                        <PGrid item xs={12} sm={6} md={3}>
+                                            <PDropdown
+                                                name={Labels.enquiryDetails.startTime}
+                                                label={`${"Start Time"} ${Labels.symbols.required}`}
+                                                value={formData.startTime}
+                                                onChange={handleChange}
+                                                helperText={errors?.startTime}
+                                                options={formDataList.hybird}
+                                                disabled={true}
+                                            />
+                                        </PGrid>
+                                        <PGrid item xs={12} sm={6} md={3}>
+                                            <PDropdown
+                                                name={Labels.enquiryDetails.duration}
+                                                label={`${"Duration"} ${Labels.symbols.required}`}
+                                                value={formData.duration}
+                                                onChange={handleChange}
+                                                helperText={errors?.duration}
+                                                options={formDataList.hybird}
+                                                disabled={true}
+                                            />
+                                        </PGrid>
+                                        <PGrid item xs={12} sm={6} md={2}>
+                                            <PTypography
+                                                labelText={"End Date and time"}
+                                                weight={FontWeight.bold}
+                                            />
+                                            <PTypography
+                                                labelText={formData.endDate}
+                                                color={CommonColors.grey.main}
+                                                weight={FontWeight.bold}
+                                            />
+                                        </PGrid>
+                                    </PGrid>
+                                </>
+                            )}
 
                             <hr className="my-4" />
                             <PGrid container className={Labels.margin.mb4}>
@@ -419,7 +497,7 @@ const EnquiryDetails = () => {
 
                             <PSlaTemplate sla={formData.slaTemplate} enquiryId={id} getLabel={getLabel}
                                 quoteStartDate={formDataList?.enquiryDetails?.quotestartdate}
-                                onChange={handleSlaChange} response = {formDataList?.enquiryDetails}
+                                onChange={handleSlaChange} response={formDataList?.enquiryDetails}
                             />
 
                             <hr className="my-4" />

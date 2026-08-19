@@ -35,14 +35,14 @@ import PSearch from "../../component/PSearch/PSearch";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
+    const { fkID, menuId } = useSelector((state) => state.userDetails.user);
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
-    const enquirySteps = getEnquirySteps(getLabel);
+    const enquirySteps = getEnquirySteps(getLabel, menuId);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const { fkID } = useSelector((state) => state.userDetails.user);
 
     const [formDataList, setFormDataList] = useState({
         typeOfJob: [{ label: "Strategic", value: 1 }, { label: "Tactical", value: 2 }, { label: "Operational", value: 3 }, { label: "Non-Addressable", value: 4 }],
@@ -93,6 +93,7 @@ const LineItems = () => {
         incoterm: "",
         itemName: "",
         itemNameDescription: "",
+        totalBenchmarkPrice: "",
 
         // Sustainability Information
         fscOrPefcMaterial: "",
@@ -127,6 +128,7 @@ const LineItems = () => {
         noOfVersion: 1,
         specifications: "",
         notesComments: "",
+        customizedSpecifications: "",
 
         // Quantity
         quantityType: "",
@@ -159,6 +161,7 @@ const LineItems = () => {
         incoterm: "",
         itemName: "",
         itemNameDescription: "",
+        totalBenchmarkPrice: "",
 
         // Sustainability Information
         fscOrPefcMaterial: "",
@@ -193,6 +196,7 @@ const LineItems = () => {
         noOfVersion: "",
         specifications: "",
         notesComments: "",
+        customizedSpecifications: "",
 
         // Quantity
         quantityType: "",
@@ -216,7 +220,7 @@ const LineItems = () => {
         items: item.items,
     }));
 
-    const sections = getSummarySections({ clientInfo, enquiryDetails, lineItems, getLabel });
+    const sections = getSummarySections({ menuId, clientInfo, enquiryDetails, lineItems, getLabel });
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -723,7 +727,7 @@ const LineItems = () => {
 
 
     //hybird functionality
-   
+
     const hybird = formDataList?.enquiryDetails?.hybridModel === "No" && lineItems.length > 0 && Array.isArray(lineItems);
     const category = hybird && lineItems?.length > 0 ? formDataList.lineItems[0].printornonprint
         : getOptionLabel(formDataList.category, formData.category);
@@ -966,6 +970,22 @@ const LineItems = () => {
                                 </PGrid>
                             </PGrid>
 
+                            {[2].includes(menuId) && (
+                                <PGrid container className={Labels.margin.mb4}>
+                                    <PGrid item xs={12} sm={6} md={4}>
+                                        <PTextField
+                                            label={`${"Total Benchmark Price"} ${Labels.symbols.required}`}
+                                            value={formData.totalBenchmarkPrice}
+                                            onChange={handleChange}
+                                            helperText={errors?.totalBenchmarkPrice}
+                                            name={Labels.lineItems.totalBenchmarkPrice}
+                                            sx={{ mb: 1 }}
+                                        />
+                                    </PGrid>
+                                </PGrid>
+                            )}
+
+
                             {/* Sustainability Information */}
                             <hr className="my-4" />
                             <PGrid container className={Labels.margin.mb4}>
@@ -1056,9 +1076,6 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-
-
-
                             </PGrid>
                             <PGrid container className={Labels.margin.mb4}>
                                 <PGrid item xs={12} sm={6} md={4}>
@@ -1379,6 +1396,19 @@ const LineItems = () => {
                                         rows={4.5}
                                     />
                                 </PGrid>
+                                {[3].includes(menuId) && (
+                                    <PGrid item xs={12} sm={6} md={6} className={Labels.margin.mb3}>
+                                        <PTextField
+                                            label={`${"Customized Specification"} ${Labels.symbols.required}`}
+                                            value={formData.customizedSpecifications}
+                                            onChange={handleChange}
+                                            helperText={errors?.customizedSpecifications}
+                                            name={Labels.lineItems.customizedSpecifications}
+                                            multiline={true}
+                                            rows={4.5}
+                                        />
+                                    </PGrid>
+                                )}
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTextField
                                         label={`${getLabel("lbl86")}`}

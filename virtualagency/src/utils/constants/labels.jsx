@@ -19,10 +19,10 @@ export const Labels = {
     resetUsername: "resetUsername"
   },
 
-  userType : {
-    agency : "agency",
-    client : "client",
-    supplier : "supplier"
+  userType: {
+    agency: "agency",
+    client: "client",
+    supplier: "supplier"
   },
 
   dashboard: {
@@ -62,7 +62,11 @@ export const Labels = {
     managementFeeType: "managementFeeType",
     hybrid: "hybrid",
     projectAttribute: "projectAttribute",
-    slaTemplate: "slaTemplate"
+    slaTemplate: "slaTemplate",
+
+    startDate: "startDate",
+    startTime: "startTime",
+    duration: "duration",
   },
 
   lineItems: {
@@ -83,6 +87,7 @@ export const Labels = {
     incoterm: "incoterm",
     itemName: "itemName",
     itemNameDescription: "itemNameDescription",
+    totalBenchmarkPrice: "totalBenchmarkPrice",
 
     // Sustainability Information
     fscOrPefcMaterial: "fscOrPefcMaterial",
@@ -117,7 +122,8 @@ export const Labels = {
     noOfVersion: "noOfVersion",
     specifications: "specifications",
     notesComments: "notesComments",
-
+    customizedSpecifications: "customizedSpecifications",
+    
     // Quantity
     quantityType: "quantityType",
     quantity: "quantity",
@@ -145,7 +151,7 @@ export const Labels = {
     dashboard: "Dashboard",
     logo: "logo",
     required: "Required",
-    status : "status"
+    status: "status"
   },
 
   status: {

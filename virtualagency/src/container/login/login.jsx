@@ -153,6 +153,7 @@ function Login(props) {
             country: user?.country,
             countryID: user?.countryId,
             userType : user?.usertype,
+            menuId : 0
           });
           navigate(labelRoutes.dashboard);
         } else {
@@ -356,7 +357,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   saveUserDetails: (user) =>
-    dispatch({ type: userDetails, payload: user }),
+  dispatch({ type: userDetails, payload: user }),
   clearUserData: () => dispatch({ type: clearUserDetails }),
 });
 

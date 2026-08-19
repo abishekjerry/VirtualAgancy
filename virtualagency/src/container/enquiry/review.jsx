@@ -33,15 +33,15 @@ import { useSelector } from "react-redux";
 
 const Review = () => {
     const { getLabel } = useLanguage();
-    const enquirySteps = getEnquirySteps(getLabel);
+    const { userID , menuId} = useSelector((state) => state.userDetails.user);
+    const enquirySteps = getEnquirySteps(getLabel, menuId);
     const { state } = useLocation();
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(0); // first item open by default
     const [openDraft, setOpenDraft] = useState();
-    const { userID } = useSelector((state) => state.userDetails.user);
-
+    
     const [formDataList, setFormDataList] = useState({
         clientInfo: [],
         enquiryDetails: [],

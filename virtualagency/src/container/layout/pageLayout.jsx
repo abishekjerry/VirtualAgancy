@@ -1,7 +1,4 @@
-import {
-  FaHome,
-  FaBuilding, FaFileInvoice
-} from "react-icons/fa";
+import { FaHome, FaBuilding, FaFileInvoice, FaGavel, FaBook } from "react-icons/fa";
 import React, { useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import "../../App.css";
@@ -16,14 +13,15 @@ import { labelRoutes } from "../../navigations/labelRoutes";
 import { FontWeight } from "../../utils/constants/fonts";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "../../utils/constants/language";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+
 function PageLayout() {
   const navigate = useNavigate();
   const { getLabel } = useLanguage();
   const [openMenu, setOpenMenu] = useState(null);
   const [isDashborad, setIsDashborad] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { userName, userType } = useSelector((state) => state.userDetails.user);
+  const { userName, userType, menuId } = useSelector((state) => state.userDetails.user);
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -33,11 +31,25 @@ function PageLayout() {
       icon: <FaHome size={20} />,
       name: getLabel("lbl149"),
       route: labelRoutes.dashboard,
+      menuId: 0,
     },
     {
       icon: <FaBuilding size={20} />,
       name: getLabel("lbl11"),
       route: labelRoutes.eqDashboard,
+      menuId: 1,
+    },
+    {
+      icon: <FaGavel size={20} />,
+      name: "E-Bidding",
+      route: labelRoutes.eqDashboard,
+      menuId: 2,
+    },
+    {
+      icon: <FaBook size={20} />,
+      name: "E-Catalogue",
+      route: labelRoutes.eqDashboard,
+      menuId: 3,
     },
     ...(userType?.toLowerCase() === Labels.userType.agency
       ? [
@@ -45,27 +57,27 @@ function PageLayout() {
           icon: <FaFileInvoice size={20} />,
           name: getLabel("lbl150"),
           route: labelRoutes.report,
-        }
+          menuId: 4,
+        },
       ]
-    : [])
+      : []),
   ];
 
   const location = useLocation();
 
-  const findTitle = (items, pathname) => {
+  const findTitle = (items, menuId) => {
     for (let item of items) {
-      if (item.route === pathname) return item.name;
-
+      if (item.menuId === menuId) return item.name;
       if (item.children) {
         for (let child of item.children) {
-          if (child.route === pathname) return child.name;
+          if (child.menuId === menuId) return child.name;
         }
       }
     }
     return "";
   };
 
-  const title = findTitle(menuItems, location.pathname);
+  const title = findTitle(menuItems, menuId);
   const user = {
     name: userName,
     avatar: "",
@@ -94,6 +106,7 @@ function PageLayout() {
           setOpenMenu={setOpenMenu}
           setIsDashborad={setIsDashborad}
           Logo={Logo}
+          menuId={menuId}
         />
 
         <div className="main-content">

@@ -26,8 +26,9 @@ import { useSelector } from "react-redux";
 const ClientInfo = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
+    const { countryID, userID, fkID, role, menuId } = useSelector((state) => state.userDetails.user);
     const navigate = useNavigate();
-    const enquirySteps = getEnquirySteps(getLabel);
+    const enquirySteps = getEnquirySteps(getLabel, menuId);
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
     const [ccOpenFilter, setCcOpenFilter] = useState(false);
@@ -36,7 +37,6 @@ const ClientInfo = () => {
     const [disible, setDisible] = useState(true);
     const [type, setType] = useState("");
     const [openSummary, setOpenSummary] = useState(true);
-    const { countryID, userID, fkID , role} = useSelector((state) => state.userDetails.user);
     const [formData, setFormData] = useState({
         division: "",
         brand: "",
@@ -109,12 +109,12 @@ const ClientInfo = () => {
         clientInfo: []
     });
 
-    
+
     const flag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const id = state?.id > 0 ? state.id : 0;
 
     const clientInfo = getClientInfo(fields, formData, formDataList, getLabel, getOptionLabel, id ? formDataList.clientInfo : null);
-    const sections = getSummarySections({ clientInfo, getLabel });
+    const sections = getSummarySections({ menuId, clientInfo, getLabel });
 
     const GlobalBuMappingMaster = async (division) => {
         try {
@@ -178,12 +178,12 @@ const ClientInfo = () => {
                         ...prev,
                         clientInfo: data.enqClientinfo
                     }))
-        
+
                     const aboveAtMarket = getOptionValue(formDataList.aboveAtMarket, data.enqClientinfo.aboveorAtmarket)
                     // Update state
                     setFormData(prev => ({
                         ...prev,
-                        division: getOptionValue(response.division,data.enqClientinfo.divisionname),
+                        division: getOptionValue(response.division, data.enqClientinfo.divisionname),
                         globalBUMapping: data.enqClientinfo.divisionid,
                         clientContact: data.enqClientinfo.clientContactId,
                         pmgEntity: data.enqClientinfo.pmgEntity,

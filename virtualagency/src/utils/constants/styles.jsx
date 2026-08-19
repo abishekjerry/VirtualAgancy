@@ -5,25 +5,34 @@ export const FormControlBaseStyle = (width = "100%", mt = 0.4) => ({
   width: width ? `${width}%` : "100%",
   mt,
 
-  // ───── Label ─────────────────────────────
   "& .MuiInputLabel-root": {
     fontFamily: FontFamily.bold,
     fontSize: FontSize.textField.label,
     color: "#9e9e9e",
-    "&.Mui-focused": { color: "#62BCD8" },
-    "&.Mui-error": { color: "#d32f2f" },
-    "&.Mui-disabled": { color: "#bdbdbd" },
+
+    "&.Mui-focused": {
+      color: "#62BCD8",
+    },
+
+    "&.Mui-error": {
+      color: "#d32f2f",
+    },
+
+    "&.Mui-disabled": {
+      color: "#bdbdbd",
+    },
+
+    "&.MuiInputLabel-shrink": {
+      color: "#62BCD8",
+      fontWeight: 600,
+      fontSize: "12px",
+      lineHeight: 1.2,
+      transform: "translate(14px, -6px) scale(1)",
+      backgroundColor: "#fcfbfd",
+      padding: "0 4px",
+    },
   },
 
-  "& .MuiInputLabel-shrink": {
-    color: "#62BCD8",
-    fontWeight: 600,
-    fontSize: "12px",
-    lineHeight: 1.2,
-    transform: "translate(14px, -6px) scale(1)",
-  },
-
-  // ───── Input Root ─────────────────────────
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
     backgroundColor: "#fcfbfd",
@@ -56,10 +65,12 @@ export const FormControlBaseStyle = (width = "100%", mt = 0.4) => ({
 
     "&.Mui-disabled": {
       backgroundColor: "#f9f9f9",
-      "& fieldset": { borderColor: "#e0e0e0" },
+
+      "& fieldset": {
+        borderColor: "#e0e0e0",
+      },
     },
 
-    // Fix for textarea
     "&.MuiInputBase-multiline": {
       height: "auto",
       minHeight: "120px",
@@ -67,21 +78,36 @@ export const FormControlBaseStyle = (width = "100%", mt = 0.4) => ({
     },
   },
 
-  // ───── Input Padding ──────────────────────
   "& .MuiInputBase-input": {
     display: "flex",
     alignItems: "center",
+    boxSizing: "border-box",
+    height: "52px",
     padding: "0 14px",
   },
 
-  // Fix textarea cursor position
+  "& .MuiSelect-select": {
+    display: "flex",
+    alignItems: "center",
+    boxSizing: "border-box",
+    minHeight: "52px",
+    height: "52px",
+    padding: "0 14px !important",
+  },
+
+  "& .MuiSelect-icon": {
+    right: "10px",
+    color: "#757575",
+  },
+
   "& textarea": {
     display: "block",
+    height: "auto !important",
+    minHeight: "95px",
     padding: "12px 14px",
     lineHeight: "1.6",
   },
 
-  // ───── Fix Label Border Gap ───────────────
   "& .MuiOutlinedInput-notchedOutline": {
     top: 0,
   },
@@ -92,7 +118,6 @@ export const FormControlBaseStyle = (width = "100%", mt = 0.4) => ({
     padding: "0 4px",
   },
 
-  // ───── Helper Text ────────────────────────
   "& .MuiFormHelperText-root": {
     fontFamily: FontFamily.bold,
     fontSize: FontSize.textField.error,
@@ -101,27 +126,37 @@ export const FormControlBaseStyle = (width = "100%", mt = 0.4) => ({
     marginTop: "4px",
   },
 
-  // ───── Multi Select Chips ─────────────────
   "& .MuiChip-root": {
     height: "22px",
     fontSize: "11px",
     fontFamily: FontFamily.bold,
     backgroundColor: "#62BCD8",
-    color: "white",
+    color: "#fff",
     borderRadius: "6px",
 
     "& .MuiChip-deleteIcon": {
       color: "rgba(255,255,255,0.7)",
       fontSize: "14px",
-      "&:hover": { color: "white" },
+
+      "&:hover": {
+        color: "#fff",
+      },
     },
   },
 
-  // ───── Responsive ─────────────────────────
   "@media (max-width: 600px)": {
     width: "100% !important",
 
     "& .MuiOutlinedInput-root": {
+      minHeight: "46px",
+      height: "46px",
+    },
+
+    "& .MuiInputBase-input": {
+      height: "46px",
+    },
+
+    "& .MuiSelect-select": {
       minHeight: "46px",
       height: "46px",
     },

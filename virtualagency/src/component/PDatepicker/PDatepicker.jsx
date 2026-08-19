@@ -108,10 +108,10 @@ export default function PDatepicker({
       name={name}
       label={label}
       inputRef={textFieldRef}
-      value={value || ""}
+      value={value}
       disabled={disabled}
       placeholder={placeholder}
-      helperText={helperText || " "}
+      helperText={helperText}
       error={!!helperText}
       variant="outlined"
       sx={baseSx}     
