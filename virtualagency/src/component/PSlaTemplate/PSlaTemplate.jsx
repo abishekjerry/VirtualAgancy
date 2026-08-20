@@ -154,7 +154,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                         {phase.days}
                     </PGrid>
 
-                    <PGrid item md={2}>
+                    <PGrid item md={2} >
                         <PTextField
                             width={50}
                             value={phase.mdays}
@@ -181,6 +181,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                                     handleStartDateChange(index, selectedDate);
                                 }
                             }}
+                            //sx={{ mb: 3 }}
                         />
                     </PGrid>
 
@@ -188,7 +189,7 @@ function PSlaTemplate({ sla, enquiryId, quoteStartDate, disabled = false, onChan
                         <PTextField
                             value={phase.endDate}
                             disabled
-                            sx={{ mb: 2 }}
+                            //sx={{ mb: 2 }}
                         />
                     </PGrid>
                 </PGrid>

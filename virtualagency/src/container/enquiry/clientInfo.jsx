@@ -320,7 +320,8 @@ const ClientInfo = () => {
                     pMGEntity: formData.pmgEntity,
                     aboveorAtmarket: getOptionLabel(formDataList.aboveAtMarket, formData.aboveAtMarket),
                     Action: flag,
-                    Enqid: id
+                    Enqid: id,
+                    menuId: menuId
                 });
                 if (isSuccess(response)) {
                     setAllowRedirect(true);

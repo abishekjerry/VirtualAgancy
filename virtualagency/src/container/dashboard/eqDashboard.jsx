@@ -101,6 +101,7 @@ const EqDashboard = () => {
         jobposition: "",
         client: "",
         username: userName, //localStorage.getItem("user"),
+        menuId : menuId
       });
 
       if (isSuccess(res)) {
@@ -141,7 +142,7 @@ const EqDashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [menuId]);
 
   useEffect(() => {
     if (country.length === 1) {
@@ -714,7 +715,7 @@ const EqDashboard = () => {
         }
       >
         <PGrid>
-          <PGrid item xs={12} sm={6} md={5}>
+          <PGrid item xs={12} sm={6} md={5} className={Labels.margin.mb3}>
             <PDatepicker
               name={Labels.dashboard.startDate}
               label={getLabel("lbl120")}

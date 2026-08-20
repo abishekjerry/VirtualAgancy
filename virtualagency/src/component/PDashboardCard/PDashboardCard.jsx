@@ -1,7 +1,6 @@
-import React, { useRef , useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
-
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Tooltip } from "@mui/material";
@@ -10,37 +9,27 @@ import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
 import PButton from "../PButton/PButton";
 import CloseIcon from "@mui/icons-material/Close";
-const PDashboardCard = ({
-  title,
-  value,
-  icon,
-  subtitle,
-  route,
-  onClick,
-  showNavIcon = false,
-
-  // File card
-  fileName,
-  onFileUpload,
-  onFileDownload,
-
-  iconBoxSize = 45,
-  iconSize = 22,
-  titleSize = 14,
-  valueSize = 22,
-  iconBg = "linear-gradient(135deg, #6a5af9, #9f7aea)",
-  iconColor = "#ffffff",
-  bgColor = "#ffffff",
+import { useDispatch } from "react-redux";
+import { userDetails } from "../../redux/actionType/actionType";
+const PDashboardCard = ({ title, value, icon, subtitle, route, onClick, menuId, showNavIcon = false,
+  fileName, onFileUpload, onFileDownload, iconBoxSize = 45, iconSize = 22, titleSize = 14, valueSize = 22,
+  iconBg = "linear-gradient(135deg, #6a5af9, #9f7aea)", iconColor = "#ffffff", bgColor = "#ffffff",
 }) => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const dispatch = useDispatch();
   const handleOnClick = () => {
     if (onClick && !fileName) {
       onClick();
     }
-
     if (route) {
+      dispatch({
+        type: userDetails,
+        payload: {
+          menuId: menuId,
+        },
+      });
       navigate(route);
     }
   };
@@ -193,7 +182,7 @@ const PDashboardCard = ({
                 startIcon={<CloudUploadIcon />}
                 style={{ cursor: "pointer" }}
                 color={CommonColors.green.main}
-                disabled = {uploadedFileName}
+                disabled={uploadedFileName}
               />
             </div>
             {/* Filename at bottom */}

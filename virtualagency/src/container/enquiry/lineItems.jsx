@@ -620,6 +620,7 @@ const LineItems = () => {
             // Specifications
             Labels.lineItems.noOfVersion,
             Labels.lineItems.specifications,
+            ...(menuId == 3 ? [Labels.lineItems.customizedSpecifications] : []),
 
             // Quantity
             Labels.lineItems.quantityType,

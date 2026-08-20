@@ -9,41 +9,68 @@ import {
 } from "recharts";
 
 const PPieChart = ({ data = [], onSliceClick }) => {
-
   const consolidatedData = useMemo(() => {
     const map = new Map();
+
     data.forEach((item) => {
       const existing = map.get(item.name);
+
       if (existing) {
         existing.value += item.value;
       } else {
-        map.set(item.name, { ...item }); // keeps id
+        map.set(item.name, { ...item });
       }
     });
+
     return Array.from(map.values());
   }, [data]);
 
   const handleSliceClick = (data) => {
     if (!data || !data.payload) return;
+
     if (onSliceClick) {
-      onSliceClick({ ...data.payload }); // send new object reference
+      onSliceClick({ ...data.payload });
     }
   };
 
   const colorMap = [
-    "#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4", "#a855f7", "#60a5fa", "#f87171", "#22d3ee", "#c084fc", "#fb923c",
-    "#4ade80", "#f97316", "#eab308", "#10b981", "#3b82f6", "#8b5cf6", "#14b8a6", "#f472b6", "#fcd34d", "#f43f5e",
+    "#6366f1",
+    "#22c55e",
+    "#f59e0b",
+    "#ef4444",
+    "#06b6d4",
+    "#a855f7",
+    "#60a5fa",
+    "#f87171",
+    "#22d3ee",
+    "#c084fc",
+    "#fb923c",
+    "#4ade80",
+    "#f97316",
+    "#eab308",
+    "#10b981",
+    "#3b82f6",
+    "#8b5cf6",
+    "#14b8a6",
+    "#f472b6",
+    "#fcd34d",
+    "#f43f5e",
   ];
 
-  const total = consolidatedData.reduce((sum, item) => sum + item.value, 0);
+  const total = consolidatedData.reduce(
+    (sum, item) => sum + Number(item.value || 0),
+    0
+  );
+
   const dataWithPercent = consolidatedData.map((item) => ({
     ...item,
-    percent: item.value / total,
+    percent: total > 0 ? Number(item.value || 0) / total : 0,
   }));
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const { name, value, percent } = payload[0].payload;
+
       return (
         <div
           style={{
@@ -55,12 +82,14 @@ const PPieChart = ({ data = [], onSliceClick }) => {
             color: "#111827",
           }}
         >
-          {`${name}: ${value} (${(percent * 100).toFixed(1)}%)`} {/* Single line */}
+          {`${name}: ${value} (${(percent * 100).toFixed(1)}%)`}
         </div>
       );
     }
+
     return null;
   };
+
   return (
     <div
       style={{
@@ -71,10 +100,12 @@ const PPieChart = ({ data = [], onSliceClick }) => {
         borderRadius: "16px",
         boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
         position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Pie Chart */}
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart width={500} height={400}>
+        <PieChart>
           <Pie
             data={dataWithPercent}
             dataKey="value"
@@ -87,23 +118,19 @@ const PPieChart = ({ data = [], onSliceClick }) => {
             endAngle={450}
             labelLine={true}
             onClick={handleSliceClick}
-            // label={({ name, value, percent }) =>
-            //   `${name}: ${value} (${(percent * 100).toFixed(1)}%)` // Name + count + percentage
-            // }
-            fontSize={8}
-
           >
             {dataWithPercent.map((entry, index) => (
               <Cell
-                key={entry.name}
+                key={`${entry.name}-${index}`}
                 fill={colorMap[index % colorMap.length]}
               />
             ))}
           </Pie>
 
-          {/* 4️⃣ Use Custom Tooltip */}
+          {/* Tooltip */}
           <Tooltip content={<CustomTooltip />} />
 
+          {/* Legend */}
           <Legend
             verticalAlign="bottom"
             align="center"
@@ -117,20 +144,29 @@ const PPieChart = ({ data = [], onSliceClick }) => {
         </PieChart>
       </ResponsiveContainer>
 
-      {/* Center total */}
+      {/* Center Total */}
       <div
         style={{
           position: "absolute",
-          top: "36%",
+          top: "42%",
           left: "50%",
           transform: "translate(-50%, -50%)",
           textAlign: "center",
           pointerEvents: "none",
+          zIndex: 10,
+          lineHeight: 1.3,
         }}
       >
-        <div style={{ fontSize: "13px", fontWeight: "bold", color: "#1e293b" }}>
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: "bold",
+            color: "#1e293b",
+          }}
+        >
           {total}
         </div>
+
         <div
           style={{
             fontSize: "11px",

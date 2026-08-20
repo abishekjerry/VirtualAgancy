@@ -51,7 +51,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
             state: { id: state.id }
         });
     };
-    
+
     const SummaryItem = ({ label, value }) => (
         <PGrid container className={Labels.margin.mb3}>
             {label === "" ? (
@@ -65,7 +65,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
             ) : (
                 <>
                     <PGrid item xs={12} sm={12} md={6}>
-                        <PTypography labelText={label} weight={FontWeight.bold} />
+                        <PTypography labelText={label} weight={FontWeight.bold}  />
                     </PGrid>
 
                     <PGrid item xs={12} sm={12} md={6}>
@@ -187,7 +187,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
                                                                 ))}
                                                             </PGrid>
 
-                                                            {section.step && flag &&(
+                                                            {section.step && flag && (
                                                                 <PGrid container>
                                                                     <PGrid item xs={12} className="d-flex justify-content-end gap-2">
                                                                         <PButton

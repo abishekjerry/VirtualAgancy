@@ -64,7 +64,7 @@ const ProjectEnquiry = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
-    const { country, userName, userID, fkID, currency, email, userType } = useSelector((state) => state.userDetails.user);
+    const { country, userName, userID, fkID, currency, email, userType, menuId } = useSelector((state) => state.userDetails.user);
 
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
@@ -333,7 +333,6 @@ const ProjectEnquiry = () => {
 
             await clientInfoMaster(response.enqClientinfo.divisionid);
         } catch (error) {
-            console.log(error);
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
         } finally {
             setLoading(false);

@@ -30,31 +30,37 @@ const Dashboard = () => {
       icon: <DescriptionIcon />,
       iconBg: "#6366f1",
       route: labelRoutes.eqDashboard,
+      menuId: 1,
       showNavIcon: true // override default
     },
     {
       title: getLabel("lbl04"),
       icon: <AccessTimeIcon />,
       iconBg: "#8b5cf6",
-      route: null
+      route: labelRoutes.eqDashboard,
+      menuId: 2,
+      showNavIcon: true
     },
     {
       title: userType?.toLowerCase() === Labels.userType.supplier ? "UPLOAD IMAGES" : getLabel("lbl05"),
       icon: <MenuBookIcon />,
       iconBg: "#6366f1",
-      route: null
+      route: labelRoutes.eqDashboard,
+      menuId: 3,
+      showNavIcon: true
     },
-     ...(userType?.toLowerCase() === Labels.userType.agency
-    ? [
+    ...(userType?.toLowerCase() === Labels.userType.agency
+      ? [
         {
           title: getLabel("lbl06"),
           icon: <BarChartIcon />,
           iconBg: "#4f46e5",
           route: labelRoutes.report,
+          menuId: 4,
           showNavIcon: true
         }
       ]
-    : [])
+      : [])
   ];
 
   // Default props to pass to PDashboardCard
@@ -66,31 +72,31 @@ const Dashboard = () => {
   };
   return (
     <>
-      
-        <Container>
-          <PGrid container className="text-center mt-5">
-            {/* Header */}
-            <PGrid item className={Labels.margin.mb3}>
-              <PTypography
-                labelText= {getLabel("lbl02")}              
-                flag={Labels.fontFlags.header}
-                style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
-                weight={FontWeight.bold}
-              />
+
+      <Container>
+        <PGrid container className="text-center mt-5">
+          {/* Header */}
+          <PGrid item className={Labels.margin.mb3}>
+            <PTypography
+              labelText={getLabel("lbl02")}
+              flag={Labels.fontFlags.header}
+              style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+              weight={FontWeight.bold}
+            />
+          </PGrid>
+        </PGrid>
+        <br /><br /><br />
+        <PGrid container className={`${Labels.margin.mt4}${Labels.margin.mb4} ${"justify-content-center"}`}>
+          {apps.map((app, index) => (
+            <PGrid key={index} item xs={12} sm={3} md={3} lg={3} className="mb-3">
+              <PDashboardCard key={index} {...defaultCardProps} {...app} />
             </PGrid>
-          </PGrid>
-          <br/><br/><br/>
-          <PGrid container className= {`${Labels.margin.mt4}${Labels.margin.mb4} ${"justify-content-center"}`}>
-            {apps.map((app, index) => (
-              <PGrid key={index} item xs={12} sm={3} md={3} lg={3} className="mb-3">
-                <PDashboardCard key={index} {...defaultCardProps} {...app} />
-              </PGrid>
-            ))}
-          </PGrid>
-        </Container>
-        
+          ))}
+        </PGrid>
+      </Container>
+
     </>
-    
+
 
   );
 };

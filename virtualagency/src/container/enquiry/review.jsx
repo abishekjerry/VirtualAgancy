@@ -56,6 +56,7 @@ const Review = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -90,6 +91,7 @@ const Review = () => {
         setFormData(data);
         setOpenUpdateLineItems(true);
     };
+    
     const handleEdit = (step, enquiryId = null) => {
         const data = formDataList.lineItems.find(item => item.enqdetailsId === enquiryId);
         if (step === 3 && data) {
