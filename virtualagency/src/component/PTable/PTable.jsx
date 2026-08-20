@@ -300,7 +300,7 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             <TableBody>
               {paginatedRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} align="center" align="center" sx={{ py: 3, fontSize: Labels.fontSize.xxs, color: CommonColors.pTable.darkGrey }}>
+                  <TableCell colSpan={columns.length} align="center" sx={{ py: 3, fontSize: Labels.fontSize.xxs, color: CommonColors.pTable.darkGrey }}>
                     No data available
                   </TableCell>
                 </TableRow>

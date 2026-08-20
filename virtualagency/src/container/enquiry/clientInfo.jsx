@@ -26,7 +26,7 @@ import { useSelector } from "react-redux";
 const ClientInfo = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
-    const { countryID, userID, fkID, role, menuId } = useSelector((state) => state.userDetails.user);
+    const { countryID, userID, fkID, role, menuId , country} = useSelector((state) => state.userDetails.user);
     const navigate = useNavigate();
     const enquirySteps = getEnquirySteps(getLabel, menuId);
     const [allowRedirect, setAllowRedirect] = useState(false);
@@ -120,7 +120,8 @@ const ClientInfo = () => {
         try {
             setLoading(true);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
-                Divisionid: division
+                Divisionid: division,
+                country: country
             });
             setFormDataList(prev => ({
                 ...prev,
@@ -140,7 +141,8 @@ const ClientInfo = () => {
         try {
             setLoading(true);
             const response = await PostApi(ClientInfo_API.ClientInfoMaster, {
-                Divisionid: globalBUMapping
+                Divisionid: globalBUMapping,
+                country: country
             });
             setFormDataList(prev => ({
                 ...prev,

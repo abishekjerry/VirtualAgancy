@@ -154,8 +154,8 @@ const ProjectEnquiry = () => {
         projectSavings: [],
         savingsSummary: [],
 
-        savingsSummaryColumns: [{ field: "saving", header: "Savings (Inc. Fee)" }, { field: "savingPercent", header: "Savings % (Inc. Fee)" },
-        { field: "savingDisplay", header: "Savings (Excl. Fee)" }, { field: "savingPercentDisplay", header: "Savings % (Excl. Fee)" }],
+        savingsSummaryColumns: [{ field: "savingDisplay", header: "Savings (Inc. Fee)" }, { field: "savingPercentDisplay", header: "Savings % (Inc. Fee)" },
+        { field: "savingExclfeeDisplay", header: "Savings (Excl. Fee)" }, { field: "savingExclfeePercentDisplay", header: "Savings % (Excl. Fee)" }],
         savingsCalculation: [{ field: "label" }, { field: "value", align: "right" }],
         savingsResponseDto: { totalPreviousPrice: 0, totalSellPrice: 0, totalSaving: 0, totalSavingPercent: 0 },
         savingsReasons: [],
