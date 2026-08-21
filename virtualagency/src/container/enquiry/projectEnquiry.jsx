@@ -316,7 +316,7 @@ const ProjectEnquiry = () => {
                 rfqFlag: projectResponse.calculationDetails?.length === 0,
                 marginFlag: projectResponse.calculationDetails?.length > 0,
                 calculateProject: projectResponse.savingsResponseDto.details.length > 0,
-                psFlag: !projectResponse.savingsResponseDto.details[0]?.previousSupplier?.trim(),
+                psFlag: !projectResponse.savingsResponseDto.details[0]?.previousPrice > 0,
                 statusId: response.statusId
             }));
 
