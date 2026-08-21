@@ -1,11 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Box, IconButton, Tooltip, Skeleton } from "@mui/material";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import PDashboardCard from "../../component/PDashboardCard/PDashboardCard";
-import PPieChart from "../../component/PChart/PPieChart";
-import PBarChart from "../../component/PChart/PBarChart";
-import PLineChart from "../../component/PChart/PLineChart";
 import PTable from "../../component/PTable/PTable";
 import { Labels } from "../../utils/constants/labels";
 import PButton from "../../component/PButton/PButton";
@@ -96,7 +93,7 @@ const EqDashboard = () => {
         jobposition: "",
         client: "",
         username: userName, //localStorage.getItem("user"),
-        menuId : menuId
+        menuId: menuId
       });
 
       if (isSuccess(res)) {
@@ -338,10 +335,16 @@ const EqDashboard = () => {
   ];
 
   // Map chartType string to component
+  // const chartComponents = {
+  //   line: PLineChart,
+  //   bar: PBarChart,
+  //   pie: PPieChart
+  // };
+
   const chartComponents = {
-    line: PLineChart,
-    bar: PBarChart,
-    pie: PPieChart
+    line: lazy(() => import("../../component/PChart/PLineChart")),
+    bar: lazy(() => import("../../component/PChart/PBarChart")),
+    pie: lazy(() => import("../../component/PChart/PPieChart")),
   };
 
   const SelectedChart = chartComponents[formData.chartType];
@@ -672,13 +675,15 @@ const EqDashboard = () => {
           <PGrid item xs={12} sm={6} md={4} style={{ display: "flex" }}>
             <PCard style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
               <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {loading ? (
-                  <Skeleton variant="rectangular" height={350} width="100%" sx={{ borderRadius: 2 }} />
-                ) : (
-                  SelectedChart && chartData.length > 0 && (
-                    <SelectedChart data={chartData} onSliceClick={handleOnClick} />
-                  )
-                )}
+                <Suspense>
+                  {loading ? (
+                    <Skeleton variant="rectangular" height={350} width="100%" sx={{ borderRadius: 2 }} />
+                  ) : (
+                    SelectedChart && chartData.length > 0 && (
+                      <SelectedChart data={chartData} onSliceClick={handleOnClick} />
+                    )
+                  )}
+                </Suspense>
               </div>
             </PCard>
           </PGrid>
