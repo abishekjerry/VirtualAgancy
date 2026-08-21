@@ -1,16 +1,9 @@
-import { Box, IconButton } from "@mui/material";
-import {
-    UploadFile as UploadFileIcon,
-    Close as CloseIcon,
-    InsertDriveFile as InsertDriveFileIcon,
-    Visibility,
-    VisibilityOff,
-} from "@mui/icons-material";
+import { Box } from "@mui/material";
 import PTypography from "../../component/PTypography/PTypography";
 import PGrid from "../../component/PGrid/PGrid";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { Labels } from "../../utils/constants/labels";
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FontWeight } from "../../utils/constants/fonts";
 import PCard from "../../component/PCard/PCard";
 import { CommonColors } from "../../utils/constants/colors";
@@ -20,7 +13,7 @@ import PTextField from "../../component/PTextField/PTextField";
 import { allowDecimal, allowOnlyNumbers, getEnquirySteps, getOptionLabel, getOptionValue, isNotEmpty, isSuccess, toast } from "../../utils/commonFunction/common";
 import { useLanguage } from "../../utils/constants/language";
 import { labelRoutes } from "../../navigations/labelRoutes";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Dashboard_API, LineItems_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";
 import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
@@ -526,6 +519,8 @@ const LineItems = () => {
                     FlatSizeLength: formData.length,
                     FlatSizeWidth: formData.width,
                     FlatSizeDandH: formData.depth,
+                    TotalFlatSize : flatSize,
+                    TotalQtySize: totalSize,
                     ModifiedBy: fkID,
                 };
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);

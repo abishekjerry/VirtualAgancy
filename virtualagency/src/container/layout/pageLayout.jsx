@@ -1,19 +1,18 @@
 import { FaHome, FaBuilding, FaFileInvoice, FaGavel, FaBook } from "react-icons/fa";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import "../../App.css";
 import Logo from '../../utils/assets/Navbar/Logo.svg'
 import PTypography from "../../component/PTypography/PTypography";
 import FooterLogo from "../../utils/assets/images/FooterLogo.png";
 import { Labels } from "../../utils/constants/labels";
-import { CommonColors } from "../../utils/constants/colors";
 import PNavbar from "../../component/PNavbar/PNavbar";
 import PSidebar from "../../component/PSidebar/PSidebar";
 import { labelRoutes } from "../../navigations/labelRoutes";
 import { FontWeight } from "../../utils/constants/fonts";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "../../utils/constants/language";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 function PageLayout() {
   const navigate = useNavigate();

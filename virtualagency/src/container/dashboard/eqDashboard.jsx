@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Box, IconButton, Tooltip, Skeleton } from "@mui/material";
-import PNavbar from "../../component/PNavbar/PNavbar";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import PDashboardCard from "../../component/PDashboardCard/PDashboardCard";
@@ -18,16 +17,12 @@ import ShowChartIcon from "@mui/icons-material/ShowChart"
 import BarChartIcon from "@mui/icons-material/BarChart";
 import PieChartIcon from "@mui/icons-material/PieChart";
 import PToggle from "../../component/PToggle/PToggle";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import PendingActionsIcon from "@mui/icons-material/PendingActions";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import PSearch from "../../component/PSearch/PSearch";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleIcon from '@mui/icons-material/TaskAlt';
 import AddTaskRoundedIcon from '@mui/icons-material/AddTaskRounded';
-import { FontFamily, FontWeight } from '../../utils/constants/fonts'
+import { FontWeight } from '../../utils/constants/fonts'
 import { useLanguage } from "../../utils/constants/language";
 import { Account_API, Dashboard_API } from "../../utils/api/apiUrl";
 import { PostApi } from "../../utils/api/networking";

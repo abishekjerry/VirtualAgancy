@@ -72,7 +72,7 @@ export const GetApi = (url, customHeaders = {}, isDashboard = false) => {
       const data = await response.json();
 
       if (!data || data.trim() === "") {
-        return { status: "S", data: null };
+        return { status: Labels.status.failure , data: null };
       }
 
       try {

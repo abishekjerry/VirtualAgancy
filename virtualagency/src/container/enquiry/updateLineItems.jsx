@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import PDialog from "../../component/PDialog/PDialog";
 import { CommonColors } from "../../utils/constants/colors";
 import { Labels } from "../../utils/constants/labels";

@@ -1,23 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Box,
-    Typography,
-    Card,
-    Grid,
-    Button,
     Divider,
-    Avatar, Tooltip,
+    Tooltip,
     IconButton,
     Skeleton,
     Alert
 } from "@mui/material";
 
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DescriptionIcon from "@mui/icons-material/Description";
-import FolderIcon from "@mui/icons-material/Folder";
-import PersonIcon from "@mui/icons-material/Person";
-import PublicIcon from "@mui/icons-material/Public";
-import EventIcon from "@mui/icons-material/Event";
 import PGrid from "../../component/PGrid/PGrid";
 import PCard from "../../component/PCard/PCard";
 import PTypography from "../../component/PTypography/PTypography";
@@ -38,7 +28,6 @@ import PTextField from "../../component/PTextField/PTextField";
 import PDatepicker from "../../component/PDatepicker/PDatepicker";
 import PDialog from "../../component/PDialog/PDialog";
 import PSearch from "../../component/PSearch/PSearch";
-import { PiArrowSquareUpLeftLight } from "react-icons/pi";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
@@ -317,7 +306,7 @@ const ProjectEnquiry = () => {
                 savingsResponseDto: projectResponse.savingsResponseDto,
                 deliveryOrder: projectResponse.deliveryOrder,
                 status: projectResponse.projectStatus,
-                previewSupplierQuotes : previewQuotes
+                previewSupplierQuotes: previewQuotes
             }));
 
             setFormData(prev => ({
@@ -627,28 +616,24 @@ const ProjectEnquiry = () => {
         render: (row) => {
             const isCostReduction = row?.savingType === "Cost Reduction";
             if ((field === "baselineQuantity" || field === "previousSupplier") && !isCostReduction) {
-                return row[field] || "";
+                return row[field];
             }
 
             return (
                 <PTextField
                     name={field}
-                    value={row[field] || ""}
-                    onChange={(e) => handleProjectInputChange(e.target.value, row.id, row.enquiryId, field)}
+                    value={row[field]}
+                    onChange={(e) =>
+                        handleProjectInputChange((field === "baselineQuantity" || field === "previousPrice")
+                            ? e.target.value.replace(/[^0-9.]/g, "") : e.target.value,
+                            row.id, row.enquiryId, field
+                        )}
                     width={100}
                     sx={{
                         "& .MuiInputBase-root": {
                             height: 40,
                         }
                     }}
-                //placeHolder={field == "previousSupplier" ? "Previous Po No" : "0"}
-                // onKeyPress={() =>
-                //     setFormData(prev => ({
-                //         ...prev,
-                //         historyTool: true
-                //     }))
-                // }
-                //disabled={field == "previousSupplier" ? false : true}
                 />
             )
         }
