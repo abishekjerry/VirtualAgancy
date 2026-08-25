@@ -519,8 +519,8 @@ const LineItems = () => {
                     FlatSizeLength: formData.length,
                     FlatSizeWidth: formData.width,
                     FlatSizeDandH: formData.depth,
-                    TotalFlatSize : flatSize,
-                    TotalQtySize: totalSize,
+                    TotalFlatSize : flatSize.toString(),
+                    TotalQtySize: totalSize.toString(),
                     ModifiedBy: fkID,
                 };
                 const response = await PostApi(LineItems_API.AddUpdateLineItems, payload);

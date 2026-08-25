@@ -135,3 +135,54 @@ export const exportToExcel = (data, fileName = Labels.reportName.report) => {
   const today = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(workbook, `${fileName}_${today}.xlsx`);
 };
+
+export const disableBrowserActions = () => {
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+  };
+
+  const handleKeyDown = (event) => {
+    // F12
+    if (event.key === "F12") {
+      event.preventDefault();
+      return;
+    }
+
+    // Ctrl + Shift + I
+    if (
+      event.ctrlKey &&
+      event.shiftKey &&
+      ["I", "i"].includes(event.key)
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    // Ctrl + Shift + J
+    if (
+      event.ctrlKey &&
+      event.shiftKey &&
+      ["J", "j"].includes(event.key)
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    // Ctrl + U
+    if (
+      event.ctrlKey &&
+      ["U", "u"].includes(event.key)
+    ) {
+      event.preventDefault();
+    }
+  };
+
+  document.addEventListener("contextmenu", handleContextMenu);
+  document.addEventListener("keydown", handleKeyDown);
+
+  // Cleanup
+  return () => {
+    document.removeEventListener("contextmenu", handleContextMenu);
+    document.removeEventListener("keydown", handleKeyDown);
+  };
+};
