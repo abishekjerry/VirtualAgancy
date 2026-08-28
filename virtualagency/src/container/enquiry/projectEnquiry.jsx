@@ -79,7 +79,7 @@ const ProjectEnquiry = () => {
         isCalculate: true,
         rfqFlag: true,
         files: [],
-        calculateProject: false,
+        //calculateProject: false,
 
         //dialog state
         preview: false,
@@ -315,7 +315,7 @@ const ProjectEnquiry = () => {
                 calculateFlag: projectResponse.requestQuotes[0].initialQuote > 0,
                 rfqFlag: projectResponse.calculationDetails?.length === 0,
                 marginFlag: projectResponse.calculationDetails?.length > 0,
-                calculateProject: projectResponse.savingsResponseDto.details.length > 0,
+                //calculateProject: projectResponse.savingsResponseDto.details.length > 0,
                 psFlag: !projectResponse.savingsResponseDto.details[0]?.previousPrice > 0,
                 statusId: response.statusId
             }));
@@ -873,7 +873,7 @@ const ProjectEnquiry = () => {
                     label={getLabel("lbl125")}
                     variant="outlined"
                     color={CommonColors.blue.main}
-                    onClick={() => handleCancel(null, flag)}
+                    onClick={(e) => handleCancel(e, flag)}
                     width={120}
                 />
 
@@ -881,7 +881,7 @@ const ProjectEnquiry = () => {
                     label={getLabel("lbl124")}
                     variant="contained"
                     color={CommonColors.green.main}
-                    onClick={() => handleSubmit(null, flag)}
+                    onClick={(e) => handleSubmit(e, flag)}
                     width={120}
                     disabled={formData.validateFlag}
                 />
@@ -892,7 +892,7 @@ const ProjectEnquiry = () => {
                 label={flag == "inputPS" ? getLabel("lbl165") : getLabel("lbl160")}
                 variant="contained"
                 color={CommonColors.grey.main}
-                onClick={() => handleEdit(null, flag)}
+                onClick={(e) => handleEdit(e, flag)}
                 width={flag == "inputPS" ? 250 : 120}
                 disabled={formData.statusId >= 6 && (flag === "inputPS" || flag === "project")}
             />
@@ -1064,10 +1064,6 @@ const ProjectEnquiry = () => {
                 case "inputPS":
                     activeTab = "Project Savings";
                     response = await PostApi(ProjectEnquiry_API.PostRefPrice, projectQuotes);
-                    setFormData(prev => ({
-                        ...prev,
-                        calculateProject,
-                    }))
                     break;
 
                 default:
@@ -1610,7 +1606,7 @@ const ProjectEnquiry = () => {
                                     />
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
-                                    {formData.marginFlag ? <></> : renderActionButtons("rfq")}
+                                    {!formData.marginFlag && (renderActionButtons("rfq"))}
                                 </PGrid>
                             </PGrid>
                         )}
@@ -1654,7 +1650,7 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mb4}>
-                            {formData.marginFlag ? <></> :
+                            {!formData.marginFlag && (
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PButton
                                         label={getLabel("lbl172")}
@@ -1667,8 +1663,8 @@ const ProjectEnquiry = () => {
                                         width={200}
                                     />
                                 </PGrid>
-                            }
-                            {formData.calculateFlag && formData.statusId <= 5 ? (
+                            )}
+                            {formData.calculateFlag && [1, 2, 3, 4, 5].includes(formData.statusId) && ( 
                                 <PGrid item xs={12} sm={12} md={formData.marginFlag ? 12 : 6} className="d-flex justify-content-end gap-2">
                                     <PButton
                                         label={getLabel("lbl173")}
@@ -1686,10 +1682,10 @@ const ProjectEnquiry = () => {
                                         width={250}
                                     />
                                 </PGrid>
-                            ) : <></>}
+                            )}
                         </PGrid>
 
-                        {formData.marginFlag ? (
+                        {formData.marginFlag && (
                             <>
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12} sm={6} md={12}>
@@ -1702,7 +1698,7 @@ const ProjectEnquiry = () => {
                                     </PGrid>
                                 </PGrid>
                             </>
-                        ) : (<></>)}
+                        )}
                     </PCard>
                 )}
 
@@ -1752,7 +1748,7 @@ const ProjectEnquiry = () => {
                             </PGrid>
                         </PCard>
 
-                        {formData.calculateProject && (
+                        {!formData.psFlag && (
                             <>
                                 <PCard className={Labels.margin.mb3} loading={tableLoading.projectSavings}>
                                     <PGrid container className="d-flex align-items-center justify-content-between mb-3">
