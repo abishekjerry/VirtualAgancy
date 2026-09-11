@@ -9,8 +9,7 @@ import {
   Paper,
   TableContainer,
   Box,
-  Checkbox, Tooltip,
-  Skeleton
+  Checkbox, Tooltip, Skeleton
 } from "@mui/material";
 import { Labels } from "../../utils/constants/labels";
 import { CommonColors } from "../../utils/constants/colors";
@@ -76,8 +75,20 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   // Show only selected rows when global checkbox checked
   const filteredRows = isChecked ? rows.filter(row => selectedRows.some(sel => sel.supplierId === row.supplierId)) : (Array.isArray(rows) ? rows : []);
 
-  const renderText = (value) => {
-    const text = value == null || value === 0 ? "" : typeof value === "number" ? value.toFixed(2) : String(value);
+  const renderText = (value, type) => {
+    let text = value == null || value === 0 ? "" : String(value);
+
+    if (type === "rupee" && value != null && value !== 0) {
+      text = Number(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    if (type === "percentage") {
+      text = `${Number(value).toFixed(2)}%`;
+    }
+
     return text.length > 30 ? <Tooltip title={text}><span>{text.length > 30 ? `${text.slice(0, 30)}...` : text}</span></Tooltip> : <span>{text}</span>;
   };
 
@@ -158,9 +169,8 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
     const content = loading ? (
       <Skeleton variant="text" width="80%" height={24} />
     ) : (
-      col.render ? col.render(data, rowIndex) : renderText(data[col.field])
+      col.render ? col.render(data, rowIndex) : renderText(data[col.field], col.type)
     );
-    //const content = col.render ? col.render(data, rowIndex) : renderText(data[col.field]);
     if (showCheckbox && meta.isFirstCol) {
       return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -206,7 +216,6 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
   );
 
   const renderGroup = (group, index) => (
-
     <React.Fragment key={`group-${index}`}>
       <TableRow>
         <TableCell
@@ -385,7 +394,6 @@ const PTable = ({ columns, rows, onClick, isChecked = false, showCheckbox = fals
             />
           </PGrid >
         }
-
       >
         <PGrid container className={Labels.margin.mb4}>
           <PGrid item xs={12} sm={6} md={12}>

@@ -25,10 +25,8 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
     const [activeItemIndex, setActiveItemIndex] = useState({ 3: 0 });
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({});
-    const enquiryID = localStorage.getItem("enquiryID");
-    const { userType } = useSelector((state) => state.userDetails.user);
+    const { userType, enquiryId, fkID} = useSelector((state) => state.userDetails.user);
     const flag = userType?.toLowerCase() === Labels.userType.agency
-
     const handleOpen = (data = {}) => {
         setFormData(data);
         setOpen(true);
@@ -65,7 +63,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
             ) : (
                 <>
                     <PGrid item xs={12} sm={12} md={6}>
-                        <PTypography labelText={label} weight={FontWeight.bold}  />
+                        <PTypography labelText={label} weight={FontWeight.bold} />
                     </PGrid>
 
                     <PGrid item xs={12} sm={12} md={6}>
@@ -85,7 +83,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
             const payload = {
                 EnqdetailsId: data.enquiryId,
                 EnqId: state.id,
-                modifiedBy: parseInt(localStorage.getItem("agancyUserID")),
+                modifiedBy: fkID,
             };
             const response = await PostApi(LineItems_API.GetEnqDuplicate, payload);
             if (isSuccess(response)) {
@@ -110,7 +108,7 @@ export const PSummary = ({ sections = [], currentStep = 1, refreshSummary, dupli
                     <>
                         <PGrid container className="justify-content-center">
                             <PTypography
-                                labelText={`${Labels.clientInfo.summary}${enquiryID && currentStep != 1 ? ` (${enquiryID})` : ""}`}
+                                labelText={`${Labels.clientInfo.summary}${enquiryId && currentStep != 1 ? ` (${enquiryId})` : ""}`}
                                 flag={Labels.fontFlags.subHeader}
                                 weight={FontWeight.bold}
                                 color={CommonColors.blue.main}

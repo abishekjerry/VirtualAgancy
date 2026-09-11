@@ -25,6 +25,11 @@ export const Labels = {
     supplier: "supplier"
   },
 
+  role: {
+    client: "ClientServices",
+    admin: "Administration"
+  },
+
   dashboard: {
     startDate: "startDate",
     endDate: "endDate",
@@ -135,6 +140,15 @@ export const Labels = {
 
   suppliers: {
     required: "Please select at least one supplier to proceed."
+  },
+
+  report : {
+    clientName: "clientName",
+    typeOfReport: "typeOfReport",
+    country: "country",
+    jobStatus: "jobStatus",
+    fromDate: "fromDate",
+    toDate: "toDate"
   },
 
   deliveryOrder: {

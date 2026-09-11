@@ -14,7 +14,7 @@ import { userDetails, clearUserDetails } from "../../redux/actionType/actionType
 import { connect } from "react-redux";
 import { AppNavigation } from "../../navigations/appNavigation";
 import { labelRoutes } from "../../navigations/labelRoutes";
-import Logo from "../../utils/assets/Navbar/Logo.svg";
+import Logo from "../../utils/assets/images/Valogo.png"
 import { PostApi } from "../../utils/api/networking";
 import { Account_API } from "../../utils/api/apiUrl";
 import PGrid from "../../component/PGrid/PGrid";
@@ -50,6 +50,15 @@ function Login(props) {
     userNameRef.current?.focus();
     navigate(labelRoutes.home);
   }, []);
+  const currency = {
+    INR: "₹",
+    IDR: "Rp",
+    MYR: "RM",
+    PHP: "₱",
+    SGD: "$",
+    THB: "฿",
+    VND: "₫"
+  };
 
   const handleOpenRecover = () => {
     setOpenRecover(true);
@@ -127,7 +136,7 @@ function Login(props) {
         ...prev,
         default: true,
       }));
-      return; 
+      return;
     }
 
     if (isValid) {
@@ -147,8 +156,9 @@ function Login(props) {
             currency: user?.currency,
             country: user?.country,
             countryID: user?.countryId,
-            userType : user?.usertype,
-            menuId : 0
+            userType: user?.usertype,
+            menuId: 0,
+            symbol: currency[user?.currency],
           });
           navigate(labelRoutes.dashboard);
         } else {
@@ -217,8 +227,9 @@ function Login(props) {
           {formData.default ? (
             <div className="login-left">
               <div className="login-box">
-                <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
-
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <img src={Logo} alt="Logo" style={{ height: 80, width: 100, margin: 10, }} />
+                </div>
                 <PTextField
                   name={Labels.login.newPassword}
                   label={Labels.loginPage.newPassword}
@@ -253,8 +264,9 @@ function Login(props) {
 
             <div className="login-left">
               <div className="login-box">
-                <img src={Logo} alt="Logo" style={{ height: 80, margin: 10 }} />
-
+                 <div style={{ display: "flex", justifyContent: "center" }}>
+                  <img src={Logo} alt="Logo" style={{ height: 80, width: 100, margin: 10, }} />
+                </div>
                 <PTextField
                   name={Labels.login.userName}
                   label={Labels.loginPage.userName}
@@ -352,7 +364,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   saveUserDetails: (user) =>
-  dispatch({ type: userDetails, payload: user }),
+    dispatch({ type: userDetails, payload: user }),
   clearUserData: () => dispatch({ type: clearUserDetails }),
 });
 

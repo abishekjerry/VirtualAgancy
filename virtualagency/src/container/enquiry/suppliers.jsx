@@ -23,7 +23,7 @@ import { PSummary } from "../../component/PSummary/PSummary";
 import { useSelector } from "react-redux";
 const Suppliers = () => {
     const { getLabel } = useLanguage();
-    const { country, currency, fkID , menuId} = useSelector((state) => state.userDetails.user);
+    const { country, currency, fkID, menuId, userID, countryID, role } = useSelector((state) => state.userDetails.user);
     const enquirySteps = getEnquirySteps(getLabel, menuId);
     const navigate = useNavigate();
     const { state } = useLocation();
@@ -54,7 +54,11 @@ const Suppliers = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await PostApi(Dashboard_API.Master, {});
+            const response = await PostApi(Dashboard_API.Master, {
+                userCountryId: countryID,
+                role: role,
+                userId: userID
+            });
             const supplierResponse = await PostApi(Suppliers_API.GetEnqSupplierMaster, {
                 currency: currency,
                 Country: country

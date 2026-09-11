@@ -21,7 +21,7 @@ import { PDraftDialog } from "../../component/PDialog/PDraftDialog";
 import { PSummary } from "../../component/PSummary/PSummary";
 import { getClientInfo, getEnquiryDetails, getSummarySections } from "../../utils/constants/summary";
 import PSlaTemplate from "../../component/PSlaTemplate/PSlaTemplate";
-import { useSelector , useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { userDetails } from "../../redux/actionType/actionType";
 
 const EnquiryDetails = () => {
@@ -29,7 +29,7 @@ const EnquiryDetails = () => {
     const { getLabel } = useLanguage();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { countryID, role, fkID, menuId } = useSelector((state) => state.userDetails.user);
+    const { countryID, role, fkID, menuId, userID } = useSelector((state) => state.userDetails.user);
     const enquirySteps = getEnquirySteps(getLabel, menuId);
     const [allowRedirect, setAllowRedirect] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -128,6 +128,7 @@ const EnquiryDetails = () => {
         }));
     };
 
+
     useEffect(() => {
         fetchData();
         setDefaultDateTime();
@@ -138,7 +139,8 @@ const EnquiryDetails = () => {
             setLoading(true);
             const response = await PostApi(Dashboard_API.Master, {
                 userCountryId: countryID,
-                role: role
+                role: role,
+                userId: userID
             });
             setFormDataList(prev => ({
                 ...prev,
@@ -156,21 +158,6 @@ const EnquiryDetails = () => {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        if (formDataList?.slaTemplate?.length && !formData.slaTemplate) {
-            const hybrid = formDataList?.enquiryDetails?.hybridModel ? getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) : 2;
-            const managementfeetypeId = formDataList?.enquiryDetails?.managementfeetypeId ? data.enqProjectinfo.managementfeetypeId : 8;
-            const slaId = formDataList?.enquiryDetails?.slaId ?? 24;
-            setFormData(prev => ({
-                ...prev,
-                slaTemplate: slaId,
-                hybrid: hybrid,
-                managementFeeType: managementfeetypeId
-            }));
-            //slaRef.current?.slaTemplate(slaId);
-        }
-    }, [formDataList.slaTemplate, formDataList.enquiryDetails]);
 
     const GetData = async (response) => {
         try {
@@ -200,9 +187,9 @@ const EnquiryDetails = () => {
                 dispatch({
                     type: userDetails,
                     payload: {
-                        enquiryId : data?.enqClientinfo?.enqUId,
+                        enquiryId: data?.enqClientinfo?.enqUId,
                     },
-                }); 
+                });
             }
         } catch (error) {
             toast(Labels.status.failure, Labels.message.somethingWentWrong);
@@ -284,7 +271,7 @@ const EnquiryDetails = () => {
 
             ...(menuId == 2 ? [Labels.enquiryDetails.startDate] : []),
             ...(menuId == 2 ? [Labels.enquiryDetails.startTime] : []),
-            ...(menuId == 2 ? [Labels.enquiryDetails.duration] : []),  
+            ...(menuId == 2 ? [Labels.enquiryDetails.duration] : []),
         ];
 
         let newErrors = {};
@@ -322,6 +309,14 @@ const EnquiryDetails = () => {
         });
     }, []);
 
+    useEffect(() => {
+        const managementfeetypeId = formDataList?.enquiryDetails?.managementfeetypeId ? data.enqProjectinfo.managementfeetypeId : 8;
+        setFormData(prev => ({
+            ...prev,
+            managementFeeType: managementfeetypeId
+        }));
+    }, [formDataList.enquiryDetails]);
+    
     const today = formatDate(new Date());
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
     const enquiryDetails = getEnquiryDetails(formData, dynamicData, formDataList, getLabel, getOptionLabel, id ? formDataList.enquiryDetails : null);
@@ -464,13 +459,13 @@ const EnquiryDetails = () => {
                                     <hr className="my-4" />
                                     <PGrid container className={Labels.margin.mb4}>
                                         <PTypography
-                                            labelText={"Bid Details"}
+                                            labelText={getLabel("lbl225")}
                                             flag={Labels.fontFlags.subHeader}
                                             color={CommonColors.blue.main}
                                             weight={FontWeight.bold}
                                         />
                                         <PTypography
-                                            labelText={"Enter the bid dates and times required to set up the event."}
+                                            labelText={getLabel("lbl226")}
                                             flag={Labels.fontFlags.smallText}
                                             color={CommonColors.grey.main}
                                             weight={FontWeight.bold}
@@ -480,7 +475,7 @@ const EnquiryDetails = () => {
                                         <PGrid item xs={12} sm={6} md={4}>
                                             <PDatepicker
                                                 name={Labels.enquiryDetails.startDate}
-                                                label={`${"Start Date"} ${Labels.symbols.required}`}
+                                                label={`${getLabel("lbl227")} ${Labels.symbols.required}`}
                                                 value={formData.startDate}
                                                 onChange={handleChange}
                                                 helperText={errors?.startDate}
@@ -492,7 +487,7 @@ const EnquiryDetails = () => {
                                         <PGrid item xs={12} sm={6} md={3}>
                                             <PDropdown
                                                 name={Labels.enquiryDetails.startTime}
-                                                label={`${"Start Time"} ${Labels.symbols.required}`}
+                                                label={`${getLabel("lbl228")} ${Labels.symbols.required}`}
                                                 value={formData.startTime}
                                                 onChange={handleChange}
                                                 helperText={errors?.startTime}
@@ -504,7 +499,7 @@ const EnquiryDetails = () => {
                                         <PGrid item xs={12} sm={6} md={3}>
                                             <PDropdown
                                                 name={Labels.enquiryDetails.duration}
-                                                label={`${"Duration"} ${Labels.symbols.required}`}
+                                                label={`${getLabel("lbl229")} ${Labels.symbols.required}`}
                                                 value={formData.duration}
                                                 onChange={handleChange}
                                                 helperText={errors?.duration}
@@ -514,7 +509,7 @@ const EnquiryDetails = () => {
                                         </PGrid>
                                         <PGrid item xs={12} sm={6} md={2}>
                                             <PTypography
-                                                labelText={"End Date and time"}
+                                                labelText={getLabel("lbl230")}
                                                 weight={FontWeight.bold}
                                             />
                                             <PTypography

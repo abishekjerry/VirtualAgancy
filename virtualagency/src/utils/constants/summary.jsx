@@ -134,9 +134,7 @@ export const getLineneItems = (formData = {}, formDataList = {}, getLabel, getOp
     itemTitle: `Item ${item.itemNumber}`,
     itemColor: "warning",
     enquiryId: item.enqdetailsId,
-    items: lineItemMapping.filter(field =>
-      field.key !== "incoterm" || item.printornonprint === "Promo"
-    )
+    items: lineItemMapping.filter(field => field.key !== "incoterm" || item.printornonprint === "Promo")
     .map(field => ({
       label: field.label === "Attachment" ? field.label : getLabel(field.label),
       value: field.key ? item[field.key] ?? "-" : field.value

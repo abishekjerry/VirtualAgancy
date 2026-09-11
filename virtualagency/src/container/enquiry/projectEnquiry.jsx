@@ -1,13 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-    Box,
-    Divider,
-    Tooltip,
-    IconButton,
-    Skeleton,
-    Alert
-} from "@mui/material";
-
+import { Box, Divider, Tooltip, IconButton, Skeleton, Alert } from "@mui/material";
 import PGrid from "../../component/PGrid/PGrid";
 import PCard from "../../component/PCard/PCard";
 import PTypography from "../../component/PTypography/PTypography";
@@ -16,7 +8,7 @@ import { CommonColors } from "../../utils/constants/colors";
 import { FontWeight } from "../../utils/constants/fonts";
 import PButton from "../../component/PButton/PButton";
 import { useLanguage } from "../../utils/constants/language";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import PDropdown from "../../component/PDropdown/PDropdown";
 import { getClientInfo, getEnquiryDetails, getLineneItems, getSummarySections } from "../../utils/constants/summary";
 import { ClientInfo_API, Dashboard_API, EnquiryDetails_API, LineItems_API, Suppliers_API, ProjectEnquiry_API } from "../../utils/api/apiUrl";
@@ -44,17 +36,13 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PDeliveryOrder from "../../component/PDeliveryOrder/PDeliveryOrder";
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import { useSelector } from "react-redux";
-import PQuotation from "../../component/PQuotation/Pquotation";
-import Logo from "../../utils/assets/images/valogo.png";
 
 const ProjectEnquiry = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [dynamicData, setDynamicData] = useState({});
-    const { country, userName, userID, fkID, currency, email, userType, menuId } = useSelector((state) => state.userDetails.user);
-
+    const { country, userID, fkID, currency, userType, menuId, symbol } = useSelector((state) => state.userDetails.user);
     const id = state?.id > 0 ? state.id : 0;
     const actionFlag = isNotEmpty(state?.id) && state?.id !== 0 ? Labels.flag.Update : Labels.flag.Insert;
     const today = formatDate(new Date());
@@ -77,9 +65,9 @@ const ProjectEnquiry = () => {
         inputPS: false,
         psFlag: false,
         isCalculate: true,
+
         rfqFlag: true,
         files: [],
-        //calculateProject: false,
 
         //dialog state
         preview: false,
@@ -124,7 +112,7 @@ const ProjectEnquiry = () => {
         status: [],
 
         //calculations
-        calculateRows: [{ field: "cost", header: "Cost ($)" }, { field: "sell", header: "Sell ($)" }, { field: "margin", header: "Margin ($)" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
+        calculateRows: [{ field: "cost", header: `Cost (${symbol})`, type: "rupee" }, { field: "sell", header: `Sell (${symbol})`, type: "rupee" }, { field: "margin", header: `Margin (${symbol})`, type: "rupee" }, { field: "markupPercent", header: "Markup (%)" }, { field: "marginPercent", header: "Margin (%)" }],
         calculationDetails: [],
 
         //logs
@@ -156,7 +144,7 @@ const ProjectEnquiry = () => {
         historySearches: [],
 
         //RevisedQuotes
-        revisedQuotesCloumns: [{ field: "supplierName", header: "Supplier" }, { field: "supplierPrice", header: "Supplier Price ($)", render: (row) => Number(row.supplierPrice || 0).toFixed(2) },
+        revisedQuotesCloumns: [{ field: "supplierName", header: "Supplier" }, { field: "supplierPrice", header: `Supplier Price (${symbol})`, type: "rupee" },
         { field: "dateOfChange", header: "Date/Time Log" }],
         revisedQuotes: [],
 
@@ -176,15 +164,15 @@ const ProjectEnquiry = () => {
 
         //Project Quotations
         projectQuotes: [{ field: "itemName", header: "Item Name" }, { field: "quantity", header: "Quantity" },
-        { field: "unitPrice", header: "Unit Price($)" }, { field: "unitPrice", header: "Unit Price(₣)" },
-        { field: "totalPrice", header: "Total Price($)" }, { field: "totalPrice", header: "Total Price(₣)" }],
+        { field: "unitPrice", header: `Unit Price (${symbol})` }, { field: "unitPrice", header: `Unit Price (${symbol})` },
+        { field: "totalPrice", header: `Total Price (${symbol})` }, { field: "totalPrice", header: `Total Price (${symbol})` }],
         projectClientQuotes: [],
 
         clientQuote: [{ field: "label" }, { field: "value", align: "right" }],
         clientQuotes: [],
 
         //Supplier Quotations
-        supplierQuotes: [{ field: "itemName", header: "Item Name" }, { field: "initialQuote", header: "Initial Quote($)" }, { field: "unitPrice", header: "Unit Price ($)" },],
+        supplierQuotes: [{ field: "itemName", header: "Item Name" }, { field: "initialQuote", header: `Initial Quote (${symbol})` }, { field: "unitPrice", header: `Unit Price (${symbol})` },],
         projectSupplierQuotes: [],
     });
     const showProjectSaving = formDataList.projectSavings?.length > 0;
@@ -315,7 +303,6 @@ const ProjectEnquiry = () => {
                 calculateFlag: projectResponse.requestQuotes[0].initialQuote > 0,
                 rfqFlag: projectResponse.calculationDetails?.length === 0,
                 marginFlag: projectResponse.calculationDetails?.length > 0,
-                //calculateProject: projectResponse.savingsResponseDto.details.length > 0,
                 psFlag: !projectResponse.savingsResponseDto.details[0]?.previousPrice > 0,
                 statusId: response.statusId
             }));
@@ -335,7 +322,7 @@ const ProjectEnquiry = () => {
 
     //Change Function
     const handleChange = async (e) => {
-        const { name, value, label } = e.target;
+        const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value
@@ -401,7 +388,6 @@ const ProjectEnquiry = () => {
         }
     };
 
-
     const attachments = [
         { field: "enquiryId", header: "File Name" },
         { field: "enquiryId", header: "Type" },
@@ -429,6 +415,7 @@ const ProjectEnquiry = () => {
     const sections = getSummarySections({ menuId, lineItems, getLabel });
 
     //Edit & cancel section function
+
     const handleSlaChange = useCallback((data) => {
         setDynamicData(prev => {
             if (JSON.stringify(prev) === JSON.stringify(data)) {
@@ -570,6 +557,7 @@ const ProjectEnquiry = () => {
             selectedSupplierRows: rows,
         }));
     }
+
     const handleSendChoose = async () => {
         const rows = formDataList.selectedRows || [];
         const supplierIds = rows.map(r => r.supplierId).join(",");
@@ -644,14 +632,13 @@ const ProjectEnquiry = () => {
         {
             label: "Savings Reference Price",
             value: savings.totalPreviousPrice.toFixed(2)
-
         },
         {
             label: "Total PMG Sell Price (inc.fee)",
-            value: savings.totalSellPrice.toFixed(2)
+            value: savings.totalSellPrice
         },
         {
-            label: "Savings ($)",
+            label: `Savings (${symbol})`,
             value: savings.totalSaving.toFixed(2)
         },
         {
@@ -673,14 +660,14 @@ const ProjectEnquiry = () => {
             ...(formData.inputPS && renderProjectEditableField("baselineQuantity")), align: "right"
         },
         {
-            field: "previousPrice", header: "Savings Reference Price ($)",
-            ...(formData.inputPS && renderProjectEditableField("previousPrice")), align: "right"
+            field: "previousPrice", header: `Savings Reference Price (${symbol})`, type: "rupee",
+            ...(formData.inputPS && renderProjectEditableField("previousPrice"))
         },
         {
-            field: "negItemSellPrice", header: "Current PMG Sell Price (Excl. Fee)", align: "right"
+            field: "negItemSellPrice", header: "Current PMG Sell Price (Excl. Fee)", type: "rupee"
         },
         {
-            field: "itemSellPrice", header: "Current PMG Sell Price (Incl. Fee)", align: "right"
+	 field: "itemSellPrice", header: "Current PMG Sell Price (Incl. Fee)",  type: "rupee"
         }
     ];
 
@@ -701,6 +688,7 @@ const ProjectEnquiry = () => {
             totalsellpricewithtax: 0
         }
     );
+
     const calculateProject = [
         {
             details: [
@@ -725,9 +713,11 @@ const ProjectEnquiry = () => {
     ];
 
     const handleQuotation = async (e, flag) => {
-        if (flag) {
-            try {
-                handleLoading([3, 4].includes(flag) ? "approveQuotation" : "submitQuotation", true);
+        const loadingType = [3, 4].includes(flag) ? "approveQuotation" : "submitQuotation";
+
+        try {
+            handleLoading(loadingType, true);
+            if (flag) {
                 const response = await PostApi(ProjectEnquiry_API.UpdateJobStatus, {
                     enqId: id,
                     modifiedBy: fkID,
@@ -737,14 +727,25 @@ const ProjectEnquiry = () => {
                     await fetchData();
                     toast(Labels.status.success, response.data);
                 }
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                handleLoading([3, 4].includes(flag) ? "approveQuotation" : "submitQuotation", false);
             }
-        }
-        else {
-            handleDownloadQuotation();
+            else {
+                const response = await PostApi(ProjectEnquiry_API.GetPreviewQuotes, { enquiryId: id });
+                if (response instanceof Blob) {
+                    const pdfUrl = URL.createObjectURL(response);
+                    const a = document.createElement("a");
+                    a.href = pdfUrl;
+                    const dateTime = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
+                    a.download = `Quotation_${id}_${dateTime}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+                }
+            }
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            handleLoading(loadingType, false);
         }
     };
 
@@ -786,7 +787,6 @@ const ProjectEnquiry = () => {
         }));
     };
 
-
     const isQuote = formData.quote == 1 && formData.rfq;
     const isUnit = formData.quote == 2 && formData.rfq;
 
@@ -794,29 +794,32 @@ const ProjectEnquiry = () => {
         { field: "supplierName", header: "Supplier" },
         {
             field: "initialQuote",
-            header: "Ini.Quote ($)",
+            header: `Ini.Quote (${symbol})`,
+            type: "rupee",
             ...(isQuote && renderEditableField("initialQuote")),
         },
         {
             field: "negQuote",
-            header: "Neg.Quote ($)",
+            header: `Neg.Quote (${symbol})`,
+            type: "rupee",
             ...(isQuote && renderEditableField("negQuote")),
         },
         {
             field: "iniUnitPrice",
-            header: "Ini.unit Price ($)",
+            header: `Ini.unit Price (${symbol})`,
+            type: "rupee",
             ...(isUnit && renderEditableField("iniUnitPrice")),
         },
         {
             field: "negUnitPrice",
-            header: "Neg.unit Price ($)",
+            header: `Neg.unit Price (${symbol})`,
+            type: "rupee",
             ...(isUnit && renderEditableField("negUnitPrice")),
         },
-        {
-            field: "negUnitPriceFee", header: "Neg.unit Price with MFee ($)"
-        },
-        { field: "pmgSellPrice", header: "PMG Sell Price ($)", rowSpan: true }
-    ];
+	
+        { field: "negUnitPriceFee", header: `Neg.unit Price with MFee (${symbol})` , type: "rupee" },
+	{ field: "pmgSellPrice", header: `PMG Sell Price (${symbol})`, rowSpan: true, type: "rupee", align: "center" }
+	];
 
 
     //savings reason functionality
@@ -1071,7 +1074,7 @@ const ProjectEnquiry = () => {
             }
 
             if (isSuccess(response)) {
-                handleCancel(null, flag);
+                handleCancel(e, flag);
                 setFormData(prev => ({
                     ...prev,
                     activeTab,
@@ -1093,78 +1096,6 @@ const ProjectEnquiry = () => {
             setLoading(false);
         }
     };
-
-    //Preview Quotation 
-    const quotationRef = useRef(null);
-
-    const handleDownloadQuotation = () => {
-        quotationRef.current?.handleDownload();
-    };
-
-    const quotationData = (() => {
-        const items = formDataList.lineItems.map((item) => ({
-            id: item.itemNumber,
-            description: item.itemDescription,
-            unit: Number(item.quoteQtyOrSize) || 0,
-            pricePerUnit: Number(item.itemSellPrice) || 0,
-            amount: Number(item.quoteQtyOrSize || 0) * Number(item.itemSellPrice || 0),
-            numberOfVersion: Number(item.version) || 0,
-            specifications: item.specNote || "",
-            notes: item.sNote || "",
-        }));
-
-        const subTotal = Number(
-            items.reduce((sum, item) => sum + Number(item.amount || 0), 0).toFixed(2)
-        );
-        const tax = Number((subTotal * 0.09).toFixed(2));
-        const total = Number((subTotal + tax).toFixed(2));
-
-        return {
-            customer: {
-                name: "Nestle Singapore (Pte) Ltd",
-                attention: "John",
-                addressLine1: "15A Changi Business Park Central 1",
-                addressLine2: "#05-02/03, Eightrium @ Changi Business Park",
-                postalCode: "486035",
-                country: "Singapore",
-            },
-
-            company: {
-                logo: Logo,
-                name: "Nestle Singapore (Pte) Ltd",
-                address: "15A Changi Business Park",
-                phone: "1001-0934-2019",
-                email: "nestle@gmail.com"
-            },
-
-            quotationNo: formDataList.clientInfo?.enqUId,
-            quotationDate: formDataList.clientInfo?.createdDate,
-            projectName: formData.projectDescription,
-            projectNumber: formData.projectNo,
-            paymentTerms: "90 days",
-
-            items,
-
-            subTotal,
-            tax,
-            total,
-
-            notes: [
-                "Quotation exclusive of material handling, distribution and freight charges, and will be invoiced separately according to the shipping arrangements.",
-                "All prices quoted are in SGD unless otherwise stated, & are excluding of Goods and Services Tax (GST).",
-                "Above quote is based on specifications provided, however if there is a need for the client to change the specifications or to work within the client’s budget, we shall revise the quote and specifications accordingly.",
-                "Costs & deliverables are quoted based upon 5 working man days per week, with 8 working hrs per man day.",
-                "Above quote is valid for one (1) month after the date of this quotation.",
-                "Every item stated in the above quotation will allow only two (2) amendments (text and graphics only) in each of the mentioned item.",
-                "Any amendments not within the specified specification of this contract will not be valid unless agreeable by both parties.",
-                "All artwork and design elements will remain the property of PMG ASIA PACIFIC PTE LTD.",
-                "PMG ASIA PACIFIC PTE LTD shall not be held responsible for any delays caused by the client.",
-            ],
-
-            preparedBy: userName,
-            preparedEmail: email,
-        };
-    })();
 
     //Project Quotation
     const clientQuote = formDataList.clientQuotes
@@ -1221,6 +1152,7 @@ const ProjectEnquiry = () => {
                                     options={formDataList.status}
                                     width={27}
                                     helperText={""}
+                                    flag={Labels.flag.auto}
                                 />
                                 <PButton
                                     label={getLabel("lbl40")}
@@ -1238,6 +1170,7 @@ const ProjectEnquiry = () => {
                         </PGrid>
                     </PGrid>
                 )}
+
                 {[24].includes(formData.statusId) && flag && (
                     <PGrid container className={Labels.margin.mb3}>
                         <PGrid item xs={12} md={12} sm={8}>
@@ -1340,6 +1273,7 @@ const ProjectEnquiry = () => {
                                                             onChange={(e) => handleChange(e)}
                                                             options={formDataList.clientContact}
                                                             width={100}
+                                                            flag={Labels.flag.auto}
                                                         />
                                                     ) : item.label === "D/O No or PO No" && job ? (
                                                         <>
@@ -1616,13 +1550,13 @@ const ProjectEnquiry = () => {
                             <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                                 <PGrid item xs={12} sm={6} md={6}>
                                     <PTypography
-                                        labelText={"Award jobs"}
+                                        labelText={getLabel("lbl235")}
                                         flag={Labels.fontFlags.subHeader}
                                         color={CommonColors.black.main}
                                         weight={FontWeight.bold}
                                     />
                                     <PTypography
-                                        labelText={"Your preferred supplier for each item."}
+                                        labelText={getLabel("lbl236")}
                                         flag={Labels.fontFlags.smallText}
                                         color={CommonColors.grey.main}
                                         weight={FontWeight.bold}
@@ -1630,7 +1564,7 @@ const ProjectEnquiry = () => {
                                 </PGrid>
                                 <PGrid item xs={12} sm={6} md={6} className="d-flex justify-content-end gap-2">
                                     <PButton
-                                        label={"Preview Supplier Quotes"}
+                                        label={getLabel("lbl237")}
                                         variant="contained"
                                         color={CommonColors.grey.main}
                                         onClick={() => setFormData((prev) => ({
@@ -1813,7 +1747,7 @@ const ProjectEnquiry = () => {
                                                 </PGrid>
                                                 <PGrid item xs={12} sm={6} md={9}>
                                                     <PTypography
-                                                        labelText={`$ ${item.total.value}`}
+                                                        labelText={`${symbol} ${item.total.value}`}
                                                         color={CommonColors.grey.main}
                                                         weight={FontWeight.bold}
                                                     />
@@ -1829,13 +1763,13 @@ const ProjectEnquiry = () => {
                                         <PGrid container className="d-flex align-items-center justify-content-between mb-2">
                                             <PGrid item xs={12} sm={6} md={6}>
                                                 <PTypography
-                                                    labelText={"Step 3.Submit to client"}
+                                                    labelText={getLabel("lbl238")}
                                                     flag={Labels.fontFlags.subHeader}
                                                     color={CommonColors.black.main}
                                                     weight={FontWeight.bold}
                                                 />
                                                 <PTypography
-                                                    labelText={"Once all is in order, please preview the quotation before submitting it to your client."}
+                                                    labelText={getLabel("lbl239")}
                                                     flag={Labels.fontFlags.smallText}
                                                     color={CommonColors.grey.main}
                                                     weight={FontWeight.bold}
@@ -1845,7 +1779,7 @@ const ProjectEnquiry = () => {
                                         <PGrid container className={Labels.margin.mb3}>
                                             <PGrid item xs={12} sm={6} md={6}>
                                                 <PTypography
-                                                    labelText={"Please input environmental specification with comparison / no comparison"}
+                                                    labelText={getLabel("lbl240")}
                                                     flag={Labels.fontFlags.smallText}
                                                     color={CommonColors.red.main}
                                                     weight={FontWeight.bold}
@@ -1857,7 +1791,7 @@ const ProjectEnquiry = () => {
                                         <PGrid container className={Labels.margin.mb3}>
                                             <PGrid item xs={12} sm={6} md={2} className={Labels.margin.mt3}>
                                                 <PTypography
-                                                    labelText={`${"Send to SAP"} ${Labels.symbols.optional}`}
+                                                    labelText={`${getLabel("lbl241")} ${Labels.symbols.optional}`}
                                                     flag={Labels.fontFlags.subHeader}
                                                     color={CommonColors.black.main}
                                                     weight={FontWeight.bold}
@@ -1878,14 +1812,14 @@ const ProjectEnquiry = () => {
                                         </PGrid>
                                         <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
                                             <PButton
-                                                label={"Preview quotation"}
+                                                label={getLabel("lbl242")}
                                                 variant="contained"
                                                 color={CommonColors.grey.main}
                                                 onClick={(e) => handleQuotation(e, "")}
                                                 width={250}
                                             />
                                             <PButton
-                                                label={"Submit quotation to client"}
+                                                label={getLabel("lbl243")}
                                                 variant="contained"
                                                 color={CommonColors.green.main}
                                                 onClick={(e) => handleQuotation(e, 3)}
@@ -1900,7 +1834,7 @@ const ProjectEnquiry = () => {
                                         <PGrid container className="d-flex align-items-center justify-content-between mb-3">
                                             <PGrid item xs={12} sm={6} md={6}>
                                                 <PTypography
-                                                    labelText={"Step 4.Client/PM Approval"}
+                                                    labelText={getLabel("lbl244")}
                                                     flag={Labels.fontFlags.subHeader}
                                                     color={CommonColors.black.main}
                                                     weight={FontWeight.bold}
@@ -1910,14 +1844,14 @@ const ProjectEnquiry = () => {
                                         <Divider sx={{ mb: 2 }} />
                                         <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
                                             <PButton
-                                                label={"Approve quotation"}
+                                                label={getLabel("lbl245")}
                                                 variant="contained"
                                                 color={CommonColors.green.main}
                                                 onClick={(e) => handleQuotation(e, 6)}
                                                 width={250}
                                             />
                                             <PButton
-                                                label={"Request adjustment"}
+                                                label={getLabel("lbl246")}
                                                 variant="contained"
                                                 color={CommonColors.red.main}
                                                 onClick={(e) => handleQuotation(e, 4)}
@@ -1931,6 +1865,7 @@ const ProjectEnquiry = () => {
                         )}
                     </>
                 )}
+
 
                 {formData.activeTab === "SLA" && (
                     <PCard className={Labels.margin.mb3}>
@@ -2056,13 +1991,13 @@ const ProjectEnquiry = () => {
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={6}>
                                 <PTypography
-                                    labelText={"Project Quotations"}
+                                    labelText={getLabel("lbl247")}
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
                                 />
                                 <PTypography
-                                    labelText={"Below are the prices recommended by PMG"}
+                                    labelText={getLabel("lbl248")}
                                     flag={Labels.fontFlags.smallText}
                                     color={CommonColors.grey.main}
                                     weight={FontWeight.bold}
@@ -2090,7 +2025,7 @@ const ProjectEnquiry = () => {
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={6} md={6}>
                                 <PTypography
-                                    labelText={"Your Quote Submissions"}
+                                    labelText={getLabel("lbl249")}
                                     flag={Labels.fontFlags.subHeader}
                                     color={CommonColors.blue.main}
                                     weight={FontWeight.bold}
@@ -2107,14 +2042,14 @@ const ProjectEnquiry = () => {
                         <PGrid container className={Labels.margin.mb4}>
                             <PGrid item xs={12} sm={12} md={12} className="d-flex justify-content-end gap-2">
                                 <PButton
-                                    label={"Calculate"}
+                                    label={getLabel("lbl250")}
                                     variant="contained"
                                     color={CommonColors.grey.main}
                                     onClick={(e) => handleQuotation(e, 6)}
                                     width={250}
                                 />
                                 <PButton
-                                    label={"Submit Quote"}
+                                    label={getLabel("lbl251")}
                                     variant="contained"
                                     color={CommonColors.green.main}
                                     onClick={(e) => handleQuotation(e, 4)}
@@ -2126,11 +2061,6 @@ const ProjectEnquiry = () => {
                 )}
             </Box >
 
-            {/* Preview Quotation */}
-            <PGrid className="d-none d-print-block">
-                <PQuotation data={quotationData} ref={quotationRef} />
-            </PGrid>
-
             {/* Status dialog */}
             <PDialog
                 open={formData.statusFlag}
@@ -2138,7 +2068,7 @@ const ProjectEnquiry = () => {
                     ...prev,
                     statusFlag: false,
                 }))}
-                title={"Change Project Status"}
+                title={getLabel("lbl254")}
                 showCloseIcon={true}
                 maxWidth="sm"
                 actions={
@@ -2156,7 +2086,7 @@ const ProjectEnquiry = () => {
                         />
                         <PButton
                             fullWidth
-                            label={"Yes"}
+                            label={getLabel("lbl252")}
                             variant={Labels.contained}
                             onClick={(e) => handleSubmit(e, "status")}
                             color={CommonColors.green.main}
@@ -2169,7 +2099,7 @@ const ProjectEnquiry = () => {
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={6} md={12}>
                         <PTypography
-                            labelText={`${"Are you sure you want to change the project status"} ${Labels.symbols.optional}`}
+                            labelText={`${getLabel("lbl255")} ${Labels.symbols.optional}`}
                             flag={Labels.fontFlags.errorLbl}
                             color={CommonColors.grey.main}
                             weight={FontWeight.light}
@@ -2192,7 +2122,7 @@ const ProjectEnquiry = () => {
                     < PGrid className="d-flex align-items-center justify-content-end gap-2" >
                         <PButton
                             fullWidth
-                            label={"No"}
+                            label={getLabel("lbl253")}
                             variant="outlined"
                             onClick={() => setFormData((prev) => ({
                                 ...prev,
@@ -2203,7 +2133,7 @@ const ProjectEnquiry = () => {
                         />
                         <PButton
                             fullWidth
-                            label={"Yes"}
+                            label={getLabel("lbl252")}
                             variant={Labels.contained}
                             onClick={(e) => handleSubmit(e, "email")}
                             color={CommonColors.green.main}
@@ -2216,7 +2146,7 @@ const ProjectEnquiry = () => {
                 <PGrid container className={Labels.margin.mb4}>
                     <PGrid item xs={12} sm={6} md={12}>
                         <PTypography
-                            labelText={`${"Are you sure you want to send survey notification email to client"} ${Labels.symbols.optional}`}
+                            labelText={`${getLabel("lbl256")} ${Labels.symbols.optional}`}
                             flag={Labels.fontFlags.errorLbl}
                             color={CommonColors.grey.main}
                             weight={FontWeight.light}
@@ -2283,7 +2213,7 @@ const ProjectEnquiry = () => {
                     historyTool: false,
                     historySearchTool: ""
                 }))}
-                title={"Historical Data Search Tool"}
+                title={getLabel("lbl257")}
                 showCloseIcon={true}
                 maxWidth="lg"
                 actions={
@@ -2333,7 +2263,7 @@ const ProjectEnquiry = () => {
                     ...prev,
                     preview: false,
                 }))}
-                title={"Preview Supplier Quotes"}
+                title={getLabel("lbl258")}
                 showCloseIcon={true}
                 maxWidth="lg"
             >

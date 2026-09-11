@@ -12,25 +12,71 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useLanguage } from "../../utils/constants/language";
 import { Divider } from "@mui/material";
+import { PostApi } from "../../utils/api/networking";
+import { Dashboard_API, Report_API } from "../../utils/api/apiUrl";
+import { getOptionLabel, toast } from "../../utils/commonFunction/common";
+import { useSelector } from "react-redux";
 
 const Report = () => {
     const { getLabel } = useLanguage();
+    const { userID, userType, role, countryID } = useSelector((state) => state.userDetails.user);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         clientName: "",
-        typeofReport: "",
+        typeOfReport: "",
         country: "",
-        jobstatus: "",
+        jobStatus: "",
+        fromDate: "",
+        toDate: ""
+    });
+
+    const [errors, setErrors] = useState({
+        clientName: "",
+        typeOfReport: "",
+        country: "",
+        jobStatus: "",
         fromDate: "",
         toDate: ""
     });
 
     const [formDataList, setFormDataList] = useState({
         clientName: [],
-        typeofReport: [{ label: "Enquries", value: 1 }, { label: "Ebidding", value: 2 }, { label: "Ecatalogue", value: 3 }],
+        typeOfReport: [{ label: "All", value: 0, selected: true }, { label: "Enquries", value: 1 }, { label: "Ebidding", value: 2 }, { label: "Ecatalogue", value: 3 }],
         country: [],
-        jobstatus: [],
+        jobStatus: [],
     });
 
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(Dashboard_API.Master, {
+                userCountryId: countryID,
+                role: role,
+                userId: userID
+            });
+            const allowedJobStatus = [2, 3, 7, 18, 24];
+            const jobStatus = [{ value: 0, label: "All", selected: true },
+            ...response.status.filter(status => allowedJobStatus.includes(status.value))];
+            setFormDataList(prev => ({
+                ...prev,
+                country: response.country,
+                jobStatus: jobStatus,
+                clientName: response.client
+            }));
+            setFormData(prev => ({
+                ...prev,
+                country: countryID,
+            }));
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -44,14 +90,84 @@ const Report = () => {
     };
 
     const handleReset = () => {
-        setFormData({
-            clientName: "",
-            typeofReport: "",
-            country: "",
-            jobstatus: "",
+        setFormData((prev) => ({
+            ...prev,
+            typeOfReport: "",
+            jobStatus: "",
             fromDate: "",
             toDate: "",
+        }));
+        setErrors((prev) => ({
+            ...prev,
+            typeOfReport: "",
+            jobStatus: "",
+            fromDate: "",
+            toDate: "",
+        }));
+    }
+
+    const ReportValidation = () => {
+        const requiredFields = [
+            Labels.report.clientName,
+            Labels.report.country,
+            Labels.report.fromDate,
+            Labels.report.toDate,
+        ];
+        const allowZeroFields = [
+            Labels.report.typeOfReport,
+            Labels.report.jobStatus,
+        ];
+        let newErrors = {};
+        requiredFields.forEach((field) => {
+            const value = formData[field];
+            if (allowZeroFields.includes(field)) {
+                if (value === "" || value === null || value === undefined) {
+                    newErrors[field] = Labels.commonLabel.required;
+                }
+            } else {
+                if (!value) {
+                    newErrors[field] = Labels.commonLabel.required;
+                }
+            }
         });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async () => {
+        const isValid = ReportValidation();
+        if (isValid) {
+            try {
+                setLoading(true);
+                const response = await PostApi(Report_API.GetReport, {
+                    startDate: formData.fromDate,
+                    endDate: formData.toDate,
+                    role: role,
+                    userClientId: userID,
+                    countryId: formData.country,
+                    reportType: getOptionLabel(formDataList.typeOfReport, formData.typeOfReport),
+                    clientName: getOptionLabel(formDataList.clientName, formData.clientName),
+                    tco: "",
+                    userType: userType
+                });
+                if (response instanceof Blob) {
+                    const blob = response;
+                    const dateTime = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
+                    const excelUrl = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = excelUrl;
+                    a.download = `Report_${dateTime}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(excelUrl), 1000);
+                }
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        }
     }
 
     return (
@@ -62,71 +178,75 @@ const Report = () => {
                         <PGrid container className={Labels.margin.mt4}>
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
-                                    name={"ClientName"}
-                                    label={`${'ClientName'} ${Labels.symbols.required}`}
+                                    name={Labels.report.clientName}
+                                    label={`${getLabel("lbl28")} ${Labels.symbols.required} `}
                                     value={formData.clientName}
                                     onChange={handleChange}
                                     options={formDataList.clientName}
                                     width={100}
-
+                                    helperText={errors?.clientName}
+                                    flag={Labels.flag.auto}
+                                    readOnly={true}
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
-                                    name={"typeofReport"}
-                                    label={`${"Type Of Report"} ${Labels.symbols.required}`}
-                                    value={formData.typeofReport}
+                                    name={Labels.report.typeOfReport}
+                                    label={`${"Type Of Report"} ${Labels.symbols.required} `}
+                                    value={formData.typeOfReport}
                                     onChange={handleChange}
-                                    options={formDataList.typeofReport}
+                                    options={formDataList.typeOfReport}
                                     width={100}
-                                    //helperText={errors?.globalBUMapping}
+                                    helperText={errors?.typeOfReport}
                                     flag={Labels.flag.auto}
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
-                                    name={"country"}
-                                    label={`${getLabel("lbl09")} ${Labels.symbols.required}`}
+                                    name={Labels.report.country}
+                                    label={`${getLabel("lbl09")} ${Labels.symbols.required} `}
                                     value={formData.country}
                                     onChange={handleChange}
                                     options={formDataList.country}
                                     width={100}
-                                    //helperText={errors?.globalBUMapping}
+                                    helperText={errors?.country}
                                     flag={Labels.flag.auto}
+                                    readOnly={true}
                                 />
                             </PGrid>
                         </PGrid>
                         <PGrid container className={Labels.margin.mt4} >
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDropdown
-                                    name={"jobstatus"}
+                                    name={Labels.report.jobStatus}
                                     label={`${'Job Status'} ${Labels.symbols.required}`}
-                                    value={formData.clientName}
+                                    value={formData.jobStatus}
                                     onChange={handleChange}
-                                    options={formDataList.clientName}
+                                    options={formDataList.jobStatus}
                                     width={100}
-
+                                    helperText={errors?.jobStatus}
+                                    flag={Labels.flag.auto}
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDatepicker
-                                    name={"fromDate"}
-                                    label={"From Date"}
+                                    name={Labels.report.fromDate}
+                                    label={`${"From Date"} ${Labels.symbols.required}`}
                                     value={formData.fromDate}
                                     onChange={handleChange}
                                     width={100}
-                                    //helperText={errors?.startDate}
+                                    helperText={errors?.fromDate}
                                     maxDate={formData.toDate}
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={4}>
                                 <PDatepicker
-                                    name={"toDate"}
-                                    label={"To Date"}
+                                    name={Labels.report.toDate}
+                                    label={`${"To Date"} ${Labels.symbols.required}`}
                                     value={formData.toDate}
                                     onChange={handleChange}
                                     width={100}
-                                    //helperText={errors?.endDate}
+                                    helperText={errors?.toDate}
                                     minDate={formData.fromDate}
                                 />
                             </PGrid>
@@ -144,6 +264,7 @@ const Report = () => {
                                     onClick={(e) => handleReset(e)}
                                     width={180}
                                     startIcon={<RestartAltIcon />}
+                                    disabled={loading}
                                 />
                                 <PButton
                                     label={getLabel("lbl126")}
@@ -152,6 +273,7 @@ const Report = () => {
                                     onClick={(e) => handleSubmit(e, true)}
                                     width={180}
                                     startIcon={<FileDownloadIcon />}
+                                    loading={loading}
                                 />
                             </PGrid>
                         </PGrid>

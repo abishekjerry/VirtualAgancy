@@ -26,7 +26,7 @@ import { useSelector } from "react-redux";
 const ClientInfo = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
-    const { countryID, userID, fkID, role, menuId , country} = useSelector((state) => state.userDetails.user);
+    const { countryID, userID, fkID, role, menuId, country } = useSelector((state) => state.userDetails.user);
     const navigate = useNavigate();
     const enquirySteps = getEnquirySteps(getLabel, menuId);
     const [allowRedirect, setAllowRedirect] = useState(false);
@@ -158,51 +158,57 @@ const ClientInfo = () => {
     };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await PostApi(Dashboard_API.Master, {
-                    userCountryId: countryID,
-                    role: role
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await PostApi(Dashboard_API.Master, {
+               userCountryId: countryID,
+                role: role,
+                userId : userID
+            });
+            setFormDataList(prev => ({
+                ...prev,
+                division: response.division,
+                pmgEntity: response.country,
+                deliveryCountry: response.country,
+            }));
+            setFormData(prev => ({
+                ...prev,
+                pmgEntity: role === Labels.role.admin ? 0 : countryID,
+                deliveryCountry : countryID,
+            }));
+            if (id !== 0) {
+                const data = await PostApi(Dashboard_API.GetDetails, {
+                    Enquiryid: id,
                 });
                 setFormDataList(prev => ({
                     ...prev,
-                    division: response.division,
-                    pmgEntity: (role === "Admin" ? response.country : response.country.filter((c) => c.value === countryID)),
-                    deliveryCountry: response.country,
-                }));
+                    clientInfo: data.enqClientinfo
+                }))
 
-                if (id !== 0) {
-                    const data = await PostApi(Dashboard_API.GetDetails, {
-                        Enquiryid: id,
-                    });
-                    setFormDataList(prev => ({
-                        ...prev,
-                        clientInfo: data.enqClientinfo
-                    }))
-
-                    const aboveAtMarket = getOptionValue(formDataList.aboveAtMarket, data.enqClientinfo.aboveorAtmarket)
-                    // Update state
-                    setFormData(prev => ({
-                        ...prev,
-                        division: getOptionValue(response.division, data.enqClientinfo.divisionname),
+                const aboveAtMarket = getOptionValue(formDataList.aboveAtMarket, data.enqClientinfo.aboveorAtmarket)
+                // Update state
+                setFormData(prev => ({
+                    ...prev,
+                    division: data.enqClientinfo.divisionid, //getOptionValue(response.division, data.enqClientinfo.divisionname),
                         globalBUMapping: data.enqClientinfo.divisionid,
                         clientContact: data.enqClientinfo.clientContactId,
                         pmgEntity: data.enqClientinfo.pmgEntity,
                         deliveryCountry: data.enqClientinfo.deliveryCountryId,
-                        aboveAtMarket: aboveAtMarket,
+                    aboveAtMarket: aboveAtMarket,
                     }));
                 }
 
-            } catch (error) {
-                toast(Labels.status.failure, Labels.message.somethingWentWrong);
-            } finally {
-                setLoading(false);
-            }
-        };
+        } catch (error) {
+            toast(Labels.status.failure, Labels.message.somethingWentWrong);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchData();
-    }, []);
 
     useEffect(() => {
         if (formDataList.brand?.length && formDataList.clientInfo.brand) {
@@ -220,16 +226,6 @@ const ClientInfo = () => {
             handleDivisionSelection(formData.division, divisionLabel);
         }
     }, [formData.division, formDataList.division]);
-
-
-    useEffect(() => {
-        if (formDataList.pmgEntity.length === 1) {
-            setFormData(prev => ({
-                ...prev,
-                pmgEntity: formDataList.pmgEntity[0].value
-            }));
-        }
-    }, [formDataList.pmgEntity]); // separate effect, only does auto-select
 
     const handleChange = async (e) => {
         const { name, value, label } = e.target;
@@ -252,46 +248,50 @@ const ClientInfo = () => {
         if (name == Labels.clientInfo.globalBUMapping) {
             ClientInfoMaster(value);
             setDisible(false);
-        }
-
-        let timeoutId;
+	}
+	
         if (name === Labels.clientInfo.logonID) {
-            clearTimeout(timeoutId);
-            if (!value || value.trim() === "") {
-                setErrors((prev) => ({
-                    ...prev,
-                    logonID: ""
-                }));
-                return;
-            }
-            timeoutId = setTimeout(async () => {
-                try {
-                    setLoading(true);
-
-                    const response = await PostApi(ClientInfo_API.CheckforUsername, {
-                        Username: value,
-                    });
-
-                    if (isSuccess(response)) {
-                        setErrors((prev) => ({
-                            ...prev,
-                            logonID: "",
-                        }));
-                    } else {
-                        setErrors((prev) => ({
-                            ...prev,
-                            logonID: response?.data,
-                        }));
-                    }
-
-                } catch (error) {
-                    toast(Labels.status.failure, Labels.message.somethingWentWrong);
-                } finally {
-                    setLoading(false);
-                }
-            }, 300); // waits 500ms after typing stops
+            await GetCheckUserName(value);
         }
     };
+
+    const GetCheckUserName = async (value) => {
+        let timeoutId;
+        clearTimeout(timeoutId);
+        if (!value || value.trim() === "") {
+            setErrors((prev) => ({
+                ...prev,
+                logonID: ""
+            }));
+            return;
+        }
+        timeoutId = setTimeout(async () => {
+            try {
+                setLoading(true);
+
+                const response = await PostApi(ClientInfo_API.CheckforUsername, {
+                    Username: value,
+                });
+
+                if (isSuccess(response)) {
+                    setErrors((prev) => ({
+                        ...prev,
+                        logonID: "",
+                    }));
+                } else {
+                    setErrors((prev) => ({
+                        ...prev,
+                        logonID: response?.data,
+                    }));
+                }
+
+            } catch (error) {
+                toast(Labels.status.failure, Labels.message.somethingWentWrong);
+            } finally {
+                setLoading(false);
+            }
+        }, 300); // waits 500ms after typing stops
+    }
 
     const handleDivisionSelection = (divisionId, division) => {
         if (!divisionId) return;
@@ -410,7 +410,7 @@ const ClientInfo = () => {
         setCcOpenFilter(false);
         setBrandOpenFilter(false);
         // setSaveDraft(false);
-        setDeleteDraft(false);
+        //setDeleteDraft(false);
         setFormData((prev) => ({
             ...prev,
             firstName: "",
@@ -455,7 +455,6 @@ const ClientInfo = () => {
                         setCcOpenFilter(false);
                         toast(Labels.status.success, response.data);
                         ClientInfoMaster(formData.globalBUMapping);
-                        //ClientInfoMaster(formData.globalBUMapping);
                     } else {
                         setErrors((prev) => ({
                             ...prev,
@@ -483,9 +482,7 @@ const ClientInfo = () => {
                     if (isSuccess(response)) {
                         setBrandOpenFilter(false);
                         toast(Labels.status.success, response.data);
-
-                        //GlobalBuMappingMaster(formData.division);
-                        ClientInfoMaster(formData.globalBUMapping);
+                        ClientInfoMaster(formData.division);
                     } else {
                         setErrors((prev) => ({
                             ...prev,
@@ -689,15 +686,18 @@ const ClientInfo = () => {
                                         helperText={errors?.brand}
                                         flag={Labels.flag.auto}
                                     />
-                                    <div style={{ marginTop: "15px" }}>
-                                        <Tooltip title="Add New Brand" arrow>
-                                            <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, "&:hover": { backgroundColor: "#1976d2" }, }}
-                                                onClick={!disible ? (e) => handleOpenChoose(e, "Brand") : undefined}
-                                            >
-                                                <AddIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </div>
+                                    {[Labels.role.admin].includes(role) && (
+                                        <div style={{ marginTop: "15px" }}>
+                                            <Tooltip title="Add New Brand" arrow>
+                                                <IconButton sx={{ backgroundColor: "#d5d5d5", color: "#fff", width: 30, height: 30, "&:hover": { backgroundColor: "#1976d2" }, }}
+                                                //onClick={!disible ? (e) => handleOpenChoose(e, "Brand") : undefined}
+                                                >
+                                                    <AddIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    )
+                                    }
                                 </PGrid>
 
                                 <PGrid item xs={12} sm={6} md={6}>

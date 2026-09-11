@@ -25,6 +25,13 @@ const request = async (url, options, isDashboard) => {
 
     const contentType = response.headers.get("content-type");
 
+    if (contentType.includes("application/pdf") ||
+      contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") ||
+      contentType.includes("application/vnd.ms-excel")
+    ) {
+      return await response.blob();
+    }
+
     if (!contentType?.includes("application/json")) {
       return {
         status: Labels.status.failure,

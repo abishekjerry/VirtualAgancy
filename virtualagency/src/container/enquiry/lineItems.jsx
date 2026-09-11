@@ -28,7 +28,7 @@ import PSearch from "../../component/PSearch/PSearch";
 const LineItems = () => {
     const { state } = useLocation();
     const { getLabel } = useLanguage();
-    const { fkID, menuId } = useSelector((state) => state.userDetails.user);
+    const { fkID, menuId, role, countryID, userID } = useSelector((state) => state.userDetails.user);
     const navigate = useNavigate();
     const [allowRedirect, setAllowRedirect] = useState(false);
     const enquirySteps = getEnquirySteps(getLabel, menuId);
@@ -217,7 +217,11 @@ const LineItems = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await PostApi(Dashboard_API.Master, {});
+            const response = await PostApi(Dashboard_API.Master, {
+                userCountryId: countryID,
+                role: role,
+                userId: userID
+            });
             setFormDataList(prev => ({
                 ...prev,
                 category: response.typeofJob,
@@ -273,74 +277,12 @@ const LineItems = () => {
     }, []);
 
     useEffect(() => {
-        const filtered = formDataList.yesOrNoNot?.filter(option => option.value !== 2) || [];
-        setFormDataList(prev => {
-            // prevent infinite loop
-            if (JSON.stringify(prev.competitiveBiddingExceptionFormSigned) === JSON.stringify(filtered)) {
-                return prev;
-            }
-            return {
-                ...prev,
-                competitiveBiddingExceptionFormSigned: filtered
-            };
-        });
-
+        setFormDataList(prev => ({
+            ...prev,
+            competitiveBiddingExceptionFormSigned:
+                prev.yesOrNoNot?.filter(option => option.value !== 2) || []
+        }));
     }, [formDataList.yesOrNoNot]);
-
-    const getSelectedValue = (arr) => arr?.find(option => option.selected)?.value ?? "";
-    const selectedValues = useMemo(() => ({
-        yesOrNo: getSelectedValue(formDataList.yesOrNo),
-        soYesNoNa: getSelectedValue(formDataList.soYesNoNa),
-        yesNoNa: getSelectedValue(formDataList.yesNoNa),
-        incoterm: getSelectedValue(formDataList.incoterm),
-        globalOrder: getSelectedValue(formDataList.globalOrder),
-        localCatalog: getSelectedValue(formDataList.localCatalog),
-        regionalOrder: getSelectedValue(formDataList.regionalOrder),
-        typeOfItem: getSelectedValue(formDataList.typeOfItem),
-        printingMethod: getSelectedValue(formDataList.printingMethod),
-    }), [formDataList.yesOrNo, formDataList.soYesNoNa, formDataList.yesNoNa, formDataList.incoterm, formDataList.globalOrder,
-    formDataList.localCatalog, formDataList.regionalOrder, formDataList.typeOfItem, formDataList.printingMethod]);
-
-    useEffect(() => {
-        const { yesOrNo, soYesNoNa, yesNoNa, incoterm, globalOrder, localCatalog, regionalOrder, typeOfItem, printingMethod } = selectedValues;
-        setFormData(prev => {
-            if (prev.incoterm === incoterm && prev.globalOrderWindowCatalogueName === globalOrder && prev.localCatalogueName === localCatalog &&
-                prev.regionalOrderWindowCatalogue === regionalOrder && prev.typeOfItem === typeOfItem //, prev.printingMethod === printingMethod
-            ) {
-                return prev;
-            }
-
-            return {
-                ...prev,
-                ...(yesNoNa && soYesNoNa && {
-                    fscOrPefcMaterial: yesNoNa,
-                    recyclable: yesNoNa,
-                    sustainabilityOption: soYesNoNa,
-                    recycledMaterial: yesNoNa,
-                    designedToBeReused: yesNoNa,
-                    containsPlastic: yesNoNa,
-                    containsRecycledPlastic: yesNoNa,
-                    digitalInnovation: yesNoNa,
-                    innovation: yesNoNa,
-                    taxCertification: yesNoNa,
-                }),
-                ...(yesOrNo && {
-                    eAuction: yesOrNo,
-                    owWithLink: yesOrNo,
-                    dictatedJob: yesOrNo,
-                    rateCard: yesOrNo,
-                    harmonizedOrder: yesOrNo
-                }),
-                ...(incoterm && { incoterm: incoterm }),
-                ...(globalOrder && { globalOrderWindowCatalogueName: globalOrder }),
-                ...(regionalOrder && { regionalOrderWindowCatalogue: regionalOrder }),
-                ...(localCatalog && { localCatalogueName: localCatalog }),
-                ...(typeOfItem && { typeOfItem: typeOfItem }),
-                ...(printingMethod && { printingMethod: printingMethod })
-            };
-        });
-
-    }, [selectedValues]);
 
     const LineItemsMaster = async (data) => {
         try {
@@ -519,7 +461,7 @@ const LineItems = () => {
                     FlatSizeLength: formData.length,
                     FlatSizeWidth: formData.width,
                     FlatSizeDandH: formData.depth,
-                    TotalFlatSize : flatSize.toString(),
+                    TotalFlatSize: flatSize.toString(),
                     TotalQtySize: totalSize.toString(),
                     ModifiedBy: fkID,
                 };
@@ -579,7 +521,7 @@ const LineItems = () => {
             //Labels.lineItems.simplex,
             Labels.lineItems.tcoApprovalRequired,
             Labels.lineItems.tcoApproved,
-            Labels.lineItems.dictatedJob,
+            //Labels.lineItems.dictatedJob,
             Labels.lineItems.itemType,
             Labels.lineItems.itemName,
             Labels.lineItems.itemNameDescription,
@@ -631,14 +573,18 @@ const LineItems = () => {
 
         let newErrors = {};
 
+        const allowZeroFields = [
+            Labels.lineItems.typeOfItem
+        ];
+
         requiredFields.forEach((field) => {
-            if (field === Labels.lineItems.typeOfItem) {
-                const value = getSelectedValue(formDataList.typeOfItem, formData.typeOfItem);
-                if (value === undefined) {
+            const value = formData[field];
+            if (allowZeroFields.includes(field)) {
+                if (value === "" || value === null || value === undefined) {
                     newErrors[field] = Labels.commonLabel.required;
                 }
             } else {
-                if (!formData[field]) {
+                if (!value) {
                     newErrors[field] = Labels.commonLabel.required;
                 }
             }
@@ -650,7 +596,7 @@ const LineItems = () => {
                 newErrors[field] = Labels.commonLabel.required;
             }
         });
-
+        console.log(newErrors);
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -961,7 +907,7 @@ const LineItems = () => {
                                         helperText={errors?.itemNameDescription}
                                         name={Labels.lineItems.itemNameDescription}
                                         multiline={true}
-                                        rows={4.5}
+                                        rows={3.5}
                                     />
                                 </PGrid>
                             </PGrid>
@@ -970,7 +916,7 @@ const LineItems = () => {
                                 <PGrid container className={Labels.margin.mb4}>
                                     <PGrid item xs={12} sm={6} md={4}>
                                         <PTextField
-                                            label={`${"Total Benchmark Price"} ${Labels.symbols.required}`}
+                                            label={`${getLabel("lbl232")} ${Labels.symbols.required}`}
                                             value={formData.totalBenchmarkPrice}
                                             onChange={handleChange}
                                             helperText={errors?.totalBenchmarkPrice}
@@ -1270,10 +1216,7 @@ const LineItems = () => {
                                         disabled={true}
                                     />
                                 </PGrid>
-                                {/* </PGrid> */}
-                                {/* <PGrid container > */}
-
-                                <PGrid item xs={12} sm={6} md={4} >
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl115")} ${Labels.symbols.required}`}
                                         value={formData.innovation}
@@ -1310,9 +1253,7 @@ const LineItems = () => {
                                         readOnly={hybird}
                                     />
                                 </PGrid>
-                                {/* </PGrid> */}
-                                {/* <PGrid container > */}
-                                <PGrid item xs={12} sm={6} md={4} >
+                                <PGrid item xs={12} sm={6} md={4}>
                                     <PDropdown
                                         label={`${getLabel("lbl118")} ${Labels.symbols.required}`}
                                         value={formData.savingsReason}
@@ -1351,18 +1292,20 @@ const LineItems = () => {
                                     weight={FontWeight.bold}
                                 />
                                 <PTypography
-                                    labelText={<>
-                                        {getLabel("lbl84").split("populate from an existing item")[0]}
-                                        <span style={{ color: CommonColors.blue.main }} onClick={() => {
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                specification: formData.itemCategory
-                                            }))
-                                        }}>
-                                            populate from an existing item
-                                        </span>
-                                        {getLabel("lbl84").split("populate from an existing item")[1]}
-                                    </>}
+                                    labelText={
+                                        <>
+                                            {getLabel("lbl84").split("populate from an existing item")[0]}
+                                            <span style={{ color: CommonColors.blue.main }} onClick={() => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    specification: formData.itemCategory
+                                                }))
+                                            }}>
+                                                populate from an existing item
+                                            </span>
+                                            {getLabel("lbl84").split("populate from an existing item")[1]}
+                                        </>
+                                    }
                                     flag={Labels.fontFlags.smallText}
                                     color={CommonColors.grey.main}
                                     weight={FontWeight.bold}
@@ -1395,7 +1338,7 @@ const LineItems = () => {
                                 {[3].includes(menuId) && (
                                     <PGrid item xs={12} sm={6} md={6} className={Labels.margin.mb3}>
                                         <PTextField
-                                            label={`${"Customized Specification"} ${Labels.symbols.required}`}
+                                            label={`${getLabel("lbl233")} ${Labels.symbols.required}`}
                                             value={formData.customizedSpecifications}
                                             onChange={handleChange}
                                             helperText={errors?.customizedSpecifications}
@@ -1602,13 +1545,7 @@ const LineItems = () => {
                                         width={180}
                                     />
                                 </PGrid>
-                                <PGrid
-                                    item
-                                    xs={12}
-                                    sm={6}
-                                    md={4}
-                                    className="d-flex justify-content-end gap-2"
-                                >
+                                <PGrid item xs={12} sm={6} md={4} className="d-flex justify-content-end gap-2">
                                     <PButton
                                         label={getLabel("lbl38")}
                                         variant="contained"
@@ -1647,7 +1584,7 @@ const LineItems = () => {
                     specification: false,
                     search: ""
                 }))}
-                title={"Specifications"}
+                title={getLabel("lbl83")}
                 showCloseIcon={true}
                 maxWidth="md"
             //actions={}
