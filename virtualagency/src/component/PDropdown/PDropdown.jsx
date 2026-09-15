@@ -1,8 +1,9 @@
-import { useEffect, useMemo , useRef} from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { FormControl, InputLabel, Select, MenuItem, FormHelperText, Autocomplete, TextField } from "@mui/material";
 import { Labels } from "../../utils/constants/labels";
 import { FontFamily, FontSize } from "../../utils/constants/fonts";
 import { CommonColors } from "../../utils/constants/colors";
+import { FormControlBaseStyle } from "../../utils/constants/styles";
 
 const PDropdown = ({ name = "", label, value = "", onChange, options = [], required = false, helperText = "",
   width = "", mt = 0.4, flag = "", disabled = false, readOnly = false, sx = {} }) => {
@@ -47,62 +48,7 @@ const PDropdown = ({ name = "", label, value = "", onChange, options = [], requi
     [options, internalValue]
   );
 
-  const baseSx = {
-    width: width ? `${width}%` : Labels.fontSize.xxxxl,
-    mt,
-
-    "& .MuiInputLabel-root": {
-      fontFamily: FontFamily.bold,
-      fontSize: FontSize.textField.label,
-      color: "#9e9e9e",
-      top: "0px",
-
-      "&.Mui-focused": { color: "#62BCD8" },
-      "&.Mui-error": { color: "#d32f2f" },
-      "&.Mui-disabled": { color: "#bdbdbd" },
-    },
-
-    "& .MuiInputLabel-shrink": {
-      color: "#62BCD8",
-      fontWeight: 600,
-      fontSize: "12px",
-      transform: "translate(14px, -6px) scale(1)"
-    },
-
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px",
-      backgroundColor: "#fcfbfd",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-      fontFamily: FontFamily.bold,
-      fontSize: FontSize.textField.input,
-      color: "#424242",
-      minHeight: "52px",
-
-      "& fieldset": {
-        borderColor: helperText ? "#d32f2f" : "#ccc",
-        borderWidth: "1.5px"
-      },
-
-      "&:hover fieldset": {
-        borderColor: "#42A8C8"
-      },
-
-      "&.Mui-focused fieldset": {
-        borderColor: "#ccc",
-        borderWidth: "1.5px",
-        boxShadow: "0 0 0 3px rgba(98,188,216,0.15)"
-      }
-    },
-
-    "& .MuiFormHelperText-root": {
-      fontFamily: FontFamily.bold,
-      fontSize: FontSize.textField.error,
-      color: CommonColors.textError,
-      marginLeft: "2px",
-      marginTop: "4px"
-    },
-    ...sx
-  };
+  const baseSx = FormControlBaseStyle({ width: width ? `${width}%` : "100%", mt, helperText, sx, })
 
   const renderTextField = params => (
     <TextField
