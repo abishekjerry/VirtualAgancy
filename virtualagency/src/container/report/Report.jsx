@@ -186,7 +186,7 @@ const Report = () => {
                                     width={100}
                                     helperText={errors?.clientName}
                                     flag={Labels.flag.auto}
-                                    readOnly={true}
+                                    //readOnly={true}
                                 />
                             </PGrid>
                             <PGrid item xs={12} sm={6} md={4}>

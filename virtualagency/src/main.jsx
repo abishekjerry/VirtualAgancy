@@ -15,7 +15,7 @@ import { LanguageProvider } from "./utils/constants/language";
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
-  // <BrowserRouter basename="/iweb/virtualagency/vatest">
+  //  <BrowserRouter basename="/iweb/virtualagency/VANestle4.0">
    <BrowserRouter> 
     <Provider store={store}>
       <LanguageProvider>
