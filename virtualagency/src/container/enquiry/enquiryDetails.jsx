@@ -179,10 +179,10 @@ const EnquiryDetails = () => {
                     projectDescription: data.enqProjectinfo.projectDesc,
                     projectQuoteType: getOptionValue(formDataList.quoteType, data.enqProjectinfo.projectQuotetype),
                     year: getOptionValue(response.year, data.enqProjectinfo.year),
-                    managementFeeType: data.enqProjectinfo.managementfeetypeId,
-                    hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel),
+                    managementFeeType: data.enqProjectinfo.managementfeetypeId ?? 8,
+                    hybrid: getOptionValue(formDataList.hybird, data.enqProjectinfo.hybridModel) || 2,
                     projectAttribute: getOptionValue(response.projectAttribute, data.enqProjectinfo.attribute),
-                    slaTemplate: data?.enqProjectinfo?.slaId,
+                    slaTemplate: data.enqProjectinfo.slaId ?? 22,
                 }));
                 dispatch({
                     type: userDetails,
@@ -309,13 +309,13 @@ const EnquiryDetails = () => {
         });
     }, []);
 
-    useEffect(() => {
-        const managementfeetypeId = formDataList?.enquiryDetails?.managementfeetypeId ? data.enqProjectinfo.managementfeetypeId : 8;
-        setFormData(prev => ({
-            ...prev,
-            managementFeeType: managementfeetypeId
-        }));
-    }, [formDataList.enquiryDetails]);
+    // useEffect(() => {
+    //     const managementfeetypeId = formDataList?.enquiryDetails?.managementfeetypeId ? data.enqProjectinfo.managementfeetypeId : 8;
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         managementFeeType: managementfeetypeId
+    //     }));
+    // }, [formDataList.enquiryDetails]);
     
     const today = formatDate(new Date());
     const clientInfo = getClientInfo({}, {}, {}, getLabel, getOptionLabel, formDataList.clientInfo);
